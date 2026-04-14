@@ -142,14 +142,16 @@ export async function login(formData: any) {
         case "CredentialsSignin":
           return { error: "Credenciais inválidas" }
         default:
-          console.error("Auth.js error type:", error.type, error);
-          return { error: "Algo correu mal na autenticação" }
+          return { error: "Erro na autenticação" }
       }
     }
     
-    // Log detalhado para o servidor (Coolify) ver por que está falhando
-    console.error("ERRO NO LOGIN (Production Debug):", error);
-    
+    // IMPORTANTE: Permitir que o redireccionamento do Next.js funcione
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
+
+    console.error("ERRO REAL NO LOGIN:", error);
     throw error
   }
 }
