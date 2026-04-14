@@ -151,7 +151,6 @@ export async function login(formData: any) {
       throw error;
     }
 
-    console.error("ERRO REAL NO LOGIN:", error);
     throw error
   }
 }

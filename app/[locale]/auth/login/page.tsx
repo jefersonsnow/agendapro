@@ -34,13 +34,11 @@ export default function LoginPage() {
         setError(result.error)
       }
     } catch (error: any) {
-      // IMPORTANTE: Se for um redirecionamento, PRECISAMOS re-lançar o erro
-      // para que o Next.js faça a navegação para o dashboard.
+      // Deixa o Next.js lidar com redireccionamentos
       if (error?.message === 'NEXT_REDIRECT' || error?.digest?.includes('NEXT_REDIRECT')) {
         throw error;
       }
       
-      console.error("Client login error:", error)
       setError("Erro técnico ao aceder ao painel.")
     } finally {
       setIsLoading(false)

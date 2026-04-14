@@ -12,7 +12,7 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
-  // Obter o token com log de depuração para o servidor (Coolify)
+  // Obter o token
   const token = await getToken({ 
     req, 
     secret: process.env.AUTH_SECRET,
@@ -21,11 +21,6 @@ export async function middleware(req: NextRequest) {
   })
   
   const isAuth = !!token
-
-  // Log de depuração (remover após validar)
-  if (pathname.includes('/dashboard') || pathname.includes('/admin')) {
-    console.log(`[Middleware] Path: ${pathname} | Auth: ${isAuth ? 'YES' : 'NO'}`);
-  }
 
   // Extrair o locale do path (ex: /pt/admin -> 'pt')
   const segments = pathname.split('/')

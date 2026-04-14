@@ -165,3 +165,17 @@ DEBUG: User in DB: teste@teste.com Role: owner
 [Middleware] Path: /dashboard | Auth: YES
 [Middleware] Path: /pt/dashboard | Auth: YES
  GET /pt/dashboard 200 in 136ms (next.js: 72ms, proxy.ts: 5ms, application-code: 59ms)
+✓ Compiled in 70ms
+ GET /pt/dashboard 200 in 328ms (next.js: 170ms, proxy.ts: 6ms, application-code: 152ms)
+✓ Compiled in 126ms
+ GET /pt/dashboard 200 in 283ms (next.js: 163ms, proxy.ts: 15ms, application-code: 105ms)
+ GET /pt/dashboard 200 in 89ms (next.js: 3ms, proxy.ts: 4ms, application-code: 82ms)
+ GET /pt/dashboard 200 in 52ms (next.js: 3ms, proxy.ts: 5ms, application-code: 44ms)
+ GET /pt/dashboard 200 in 50ms (next.js: 3ms, proxy.ts: 4ms, application-code: 44ms)
+ GET /pt/dashboard 200 in 53ms (next.js: 3ms, proxy.ts: 4ms, application-code: 47ms)
+ GET /pt/dashboard 200 in 124ms (next.js: 69ms, proxy.ts: 3ms, application-code: 51ms)
+ GET /pt/dashboard 200 in 58ms (next.js: 3ms, proxy.ts: 4ms, application-code: 50ms)
+ GET /pt/dashboard 200 in 65ms (next.js: 5ms, proxy.ts: 4ms, application-code: 56ms)
+ GET /pt/dashboard 200 in 51ms (next.js: 3ms, proxy.ts: 4ms, application-code: 45ms)
+ GET /pt/dashboard 200 in 58ms (next.js: 3ms, proxy.ts: 5ms, application-code: 51ms)
+✓ Compiled in 55ms
