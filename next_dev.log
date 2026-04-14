@@ -36,3 +36,106 @@
     at async Server.requestListener (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/lib/start-server.js:225:13)
  POST /api/auth/signin/credentials 302 in 866ms (next.js: 843ms, application-code: 23ms)
   Reload env: .env
+ GET /pt 200 in 676ms (next.js: 347ms, proxy.ts: 5ms, application-code: 323ms)
+(node:14702) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+ GET /pt/dashboard 200 in 503ms (next.js: 370ms, proxy.ts: 5ms, application-code: 128ms)
+ POST /pt/dashboard 200 in 56ms (next.js: 29ms, proxy.ts: 8ms, application-code: 19ms)
+  └─ ƒ getActiveAnnouncements() in 4ms lib/actions/admin.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard 200 in 27ms (next.js: 3ms, proxy.ts: 5ms, application-code: 18ms)
+  └─ ƒ getUserRole() in 13ms lib/actions/dashboard.ts
+ POST /pt/dashboard 200 in 18ms (next.js: 3ms, proxy.ts: 8ms, application-code: 7ms)
+  └─ ƒ getActiveAnnouncements() in 1ms lib/actions/admin.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard 200 in 27ms (next.js: 3ms, proxy.ts: 5ms, application-code: 19ms)
+  └─ ƒ getUserRole() in 14ms lib/actions/dashboard.ts
+ GET /pt/dashboard/configuracoes 200 in 2.1s (next.js: 2.0s, proxy.ts: 5ms, application-code: 22ms)
+ POST /pt/dashboard/configuracoes 200 in 71ms (next.js: 46ms, proxy.ts: 6ms, application-code: 19ms)
+  └─ ƒ getSalon() in 12ms lib/actions/dashboard.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard/configuracoes 200 in 28ms (next.js: 4ms, proxy.ts: 5ms, application-code: 19ms)
+  └─ ƒ getUserRole() in 13ms lib/actions/dashboard.ts
+ POST /pt/dashboard/configuracoes 200 in 31ms (next.js: 5ms, proxy.ts: 5ms, application-code: 21ms)
+  └─ ƒ getSalon() in 14ms lib/actions/dashboard.ts
+ GET /pt/dashboard/agenda 200 in 1493ms (next.js: 1471ms, proxy.ts: 4ms, application-code: 19ms)
+ POST /pt/dashboard/agenda 200 in 82ms (next.js: 57ms, proxy.ts: 7ms, application-code: 17ms)
+  └─ ƒ getAgendaInitialData() in 12ms lib/actions/agenda.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard/agenda 200 in 25ms (next.js: 3ms, proxy.ts: 4ms, application-code: 17ms)
+  └─ ƒ getUserRole() in 13ms lib/actions/dashboard.ts
+ POST /pt/dashboard/agenda 200 in 28ms (next.js: 4ms, proxy.ts: 6ms, application-code: 18ms)
+  └─ ƒ getAgendaInitialData() in 13ms lib/actions/agenda.ts
+ POST /pt/dashboard/agenda 200 in 21ms (next.js: 3ms, proxy.ts: 4ms, application-code: 14ms)
+  └─ ƒ getAppointments("2026-04-12T23:00:00.000Z", "2026-04-19T23:00:00.000Z", "all") in 10ms lib/actions/agenda.ts
+ GET /pt/dashboard/clientes 200 in 1264ms (next.js: 1237ms, proxy.ts: 4ms, application-code: 23ms)
+ GET /pt/dashboard/equipa 200 in 1052ms (next.js: 1028ms, proxy.ts: 5ms, application-code: 18ms)
+ POST /pt/dashboard/equipa 200 in 82ms (next.js: 60ms, proxy.ts: 5ms, application-code: 17ms)
+  └─ ƒ getStaff() in 11ms lib/actions/dashboard.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard/equipa 200 in 25ms (next.js: 3ms, proxy.ts: 4ms, application-code: 17ms)
+  └─ ƒ getUserRole() in 12ms lib/actions/dashboard.ts
+ POST /pt/dashboard/equipa 200 in 34ms (next.js: 5ms, proxy.ts: 6ms, application-code: 23ms)
+  └─ ƒ getStaff() in 17ms lib/actions/dashboard.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard/equipa 200 in 26ms (next.js: 3ms, proxy.ts: 5ms, application-code: 18ms)
+  └─ ƒ getUserRole() in 12ms lib/actions/dashboard.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard/equipa 200 in 78ms (next.js: 55ms, proxy.ts: 4ms, application-code: 19ms)
+  └─ ƒ getUserRole() in 13ms lib/actions/dashboard.ts
+ POST /pt/dashboard/equipa 200 in 20ms (next.js: 5ms, proxy.ts: 5ms, application-code: 11ms)
+  └─ ƒ checkStaffLimit() in 7ms lib/actions/plan-guard.ts
+ POST /pt/dashboard/equipa 200 in 20ms (next.js: 3ms, proxy.ts: 5ms, application-code: 12ms)
+  └─ ƒ checkStaffLimit() in 7ms lib/actions/plan-guard.ts
+ GET /pt/auth/login 200 in 436ms (next.js: 398ms, proxy.ts: 2ms, application-code: 36ms)
+ POST /pt/dashboard/equipa 303 in 552ms (next.js: 77ms, proxy.ts: 7ms, application-code: 468ms)
+  └─ ƒ logout() in 11ms lib/actions/logout.ts
+ GET /pt/auth/login 200 in 84ms (next.js: 75ms, proxy.ts: 2ms, application-code: 6ms)
+ GET /pt/auth/login 200 in 21ms (next.js: 3ms, proxy.ts: 2ms, application-code: 15ms)
+ GET /pt/admin 200 in 890ms (next.js: 837ms, proxy.ts: 3ms, application-code: 50ms)
+ POST /pt/auth/login 303 in 1053ms (next.js: 62ms, proxy.ts: 3ms, application-code: 989ms)
+  └─ ƒ login({"email":"jeferson_sjc@hotmail.com","password":"D@vivida13"}) in 73ms lib/actions/auth.ts
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin 200 in 83ms (next.js: 62ms, proxy.ts: 8ms, application-code: 13ms)
+  └─ ƒ getAllSalons() in 7ms lib/actions/admin.ts
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin 200 in 21ms (next.js: 3ms, proxy.ts: 6ms, application-code: 12ms)
+  └─ ƒ getAllSalons() in 6ms lib/actions/admin.ts
+ GET /pt/admin/salons 200 in 865ms (next.js: 839ms, proxy.ts: 4ms, application-code: 22ms)
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/salons 200 in 116ms (next.js: 79ms, proxy.ts: 5ms, application-code: 31ms)
+  └─ ƒ getAllSalons() in 10ms lib/actions/admin.ts
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/salons 200 in 17ms (next.js: 3ms, proxy.ts: 5ms, application-code: 9ms)
+  └─ ƒ getAllSalons() in 5ms lib/actions/admin.ts
+ GET /pt/admin/users 200 in 844ms (next.js: 817ms, proxy.ts: 5ms, application-code: 22ms)
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/users 200 in 92ms (next.js: 69ms, proxy.ts: 7ms, application-code: 16ms)
+  └─ ƒ getAllUsers() in 10ms lib/actions/admin.ts
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/users 200 in 22ms (next.js: 3ms, proxy.ts: 6ms, application-code: 13ms)
+  └─ ƒ getAllUsers() in 7ms lib/actions/admin.ts
+ GET /pt/admin/system 200 in 762ms (next.js: 738ms, proxy.ts: 4ms, application-code: 20ms)
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/system 200 in 87ms (next.js: 70ms, proxy.ts: 5ms, application-code: 11ms)
+  └─ ƒ getGlobalConfig() in 6ms lib/actions/admin.ts
+Admin Check Session: jeferson_sjc@hotmail.com Role: admin
+ POST /pt/admin/system 200 in 20ms (next.js: 4ms, proxy.ts: 4ms, application-code: 11ms)
+  └─ ƒ getGlobalConfig() in 6ms lib/actions/admin.ts
+ GET /pt/auth/login 200 in 100ms (next.js: 67ms, proxy.ts: 1655µs, application-code: 31ms)
+ POST /pt/admin/system 303 in 187ms (next.js: 66ms, proxy.ts: 4ms, application-code: 117ms)
+  └─ ƒ logoutAdmin() in 5ms lib/actions/auth.ts
+ GET /pt/dashboard 200 in 136ms (next.js: 72ms, proxy.ts: 3ms, application-code: 61ms)
+ POST /pt/auth/login 303 in 293ms (next.js: 71ms, proxy.ts: 2ms, application-code: 220ms)
+  └─ ƒ login({"email":"teste@teste.com","password":"123456"}) in 66ms lib/actions/auth.ts
+ POST /pt/dashboard 200 in 14ms (next.js: 3ms, proxy.ts: 5ms, application-code: 7ms)
+  └─ ƒ getActiveAnnouncements() in 3ms lib/actions/admin.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard 200 in 21ms (next.js: 2ms, proxy.ts: 4ms, application-code: 15ms)
+  └─ ƒ getUserRole() in 11ms lib/actions/dashboard.ts
+ POST /pt/dashboard 200 in 17ms (next.js: 4ms, proxy.ts: 7ms, application-code: 6ms)
+  └─ ƒ getActiveAnnouncements() in 1ms lib/actions/admin.ts
+DEBUG: User in DB: teste@teste.com Role: owner
+ POST /pt/dashboard 200 in 29ms (next.js: 3ms, proxy.ts: 4ms, application-code: 22ms)
+  └─ ƒ getUserRole() in 15ms lib/actions/dashboard.ts
+✓ Compiled in 65ms
