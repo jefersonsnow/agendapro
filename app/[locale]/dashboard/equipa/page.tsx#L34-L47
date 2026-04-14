@@ -1,0 +1,14 @@
+  id: string
+  name: string
+  email: string | null
+  phone: string | null
+  role: string
+  bio: string | null
+  commission_rate: number
+  is_active: boolean
+  color: string
+  working_hours: any
+  avatar_url?: string | null
+  user_id?: string | null
+  is_plan_blocked?: boolean
+}
