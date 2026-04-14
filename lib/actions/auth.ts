@@ -142,9 +142,14 @@ export async function login(formData: any) {
         case "CredentialsSignin":
           return { error: "Credenciais inválidas" }
         default:
-          return { error: "Algo correu mal" }
+          console.error("Auth.js error type:", error.type, error);
+          return { error: "Algo correu mal na autenticação" }
       }
     }
+    
+    // Log detalhado para o servidor (Coolify) ver por que está falhando
+    console.error("ERRO NO LOGIN (Production Debug):", error);
+    
     throw error
   }
 }

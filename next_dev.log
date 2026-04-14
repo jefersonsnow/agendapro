@@ -1,0 +1,38 @@
+
+> my-project@0.1.0 dev
+> next dev
+
+▲ Next.js 16.2.0 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.95:3000
+- Environments: .env
+✓ Ready in 209ms
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+- Experiments (use with caution):
+  · serverActions
+
+[31m[auth][error][0m MissingCSRF: CSRF token was missing during an action signin. Read more at https://errors.authjs.dev#missingcsrf
+    at validateCSRF (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/0p~b_@auth_core_06e2gry._.js:1228:11)
+    at AuthInternal (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/0p~b_@auth_core_06e2gry._.js:5153:254)
+    at async Auth (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/0p~b_@auth_core_06e2gry._.js:5370:34)
+    at async AppRouteRouteModule.do (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:40732)
+    at async AppRouteRouteModule.handle (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47861)
+    at async responseGenerator (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/node_modules_next_05fqyxl._.js:18289:38)
+    at async AppRouteRouteModule.handleResponse (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:1:227216)
+    at async handleResponse (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/node_modules_next_05fqyxl._.js:18352:32)
+    at async Module.handler (/home/jeferson/Trabalho/antigravity/agendarpro/.next/dev/server/chunks/node_modules_next_05fqyxl._.js:18406:13)
+    at async DevServer.renderToResponseWithComponentsImpl (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/base-server.js:1454:9)
+    at async DevServer.renderPageComponent (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/base-server.js:1506:24)
+    at async DevServer.renderToResponseImpl (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/base-server.js:1556:32)
+    at async DevServer.pipeImpl (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/base-server.js:1043:25)
+    at async NextNodeServer.handleCatchallRenderRequest (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/next-server.js:338:17)
+    at async DevServer.handleRequestImpl (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/base-server.js:934:17)
+    at async /home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/dev/next-dev-server.js:394:20
+    at async Span.traceAsyncFn (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/trace/trace.js:164:20)
+    at async DevServer.handleRequest (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/dev/next-dev-server.js:390:24)
+    at async invokeRender (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/lib/router-server.js:253:21)
+    at async handleRequest (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/lib/router-server.js:452:24)
+    at async requestHandlerImpl (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/lib/router-server.js:501:13)
+    at async Server.requestListener (/home/jeferson/Trabalho/antigravity/agendarpro/node_modules/next/dist/server/lib/start-server.js:225:13)
+ POST /api/auth/signin/credentials 302 in 866ms (next.js: 843ms, application-code: 23ms)
+  Reload env: .env

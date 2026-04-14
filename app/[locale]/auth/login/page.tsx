@@ -34,7 +34,11 @@ export default function LoginPage() {
         setError(result.error)
       }
     } catch (error: any) {
-      setError("Erro ao autenticar. Verifique os dados.")
+      console.error("Client login error:", error)
+      // Se não for um erro de redireccionamento (que o Next.js lida), mostra erro
+      if (!error?.message?.includes('NEXT_REDIRECT')) {
+        setError("Erro técnico na autenticação. Verifique os logs.")
+      }
     } finally {
       setIsLoading(false)
     }
