@@ -1,11 +1,11 @@
 import nodemailer from "nodemailer";
 
 const smtpConfig = {
-  host: process.env.SMTP_HOST || "agendar.napp.pt",
+  host: process.env.SMTP_HOST || "",
   port: parseInt(process.env.SMTP_PORT || "465", 10),
   secure: process.env.SMTP_SECURE !== "false", // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER || "contato@agendar.napp.pt",
+    user: process.env.SMTP_USER || "",
     pass: process.env.SMTP_PASS || "", 
   },
 };

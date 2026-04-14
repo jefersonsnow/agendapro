@@ -44,7 +44,7 @@ export default async function DashboardPage({
   
   const session = await auth()
   
-  const baseUrl = process.env.NEXTAUTH_URL || "http://localhost:3000"
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || ""
 
   if (!session?.user?.id) {
     redirect("/auth/login")

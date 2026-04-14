@@ -139,3 +139,29 @@ DEBUG: User in DB: teste@teste.com Role: owner
  POST /pt/dashboard 200 in 29ms (next.js: 3ms, proxy.ts: 4ms, application-code: 22ms)
   └─ ƒ getUserRole() in 15ms lib/actions/dashboard.ts
 ✓ Compiled in 65ms
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /pt/dashboard | Auth: YES
+✓ Compiled in 96ms
+ GET /pt/dashboard 200 in 291ms (next.js: 163ms, proxy.ts: 6ms, application-code: 123ms)
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /dashboard | Auth: YES
+✓ Compiled in 63ms
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 140ms (next.js: 73ms, proxy.ts: 8ms, application-code: 59ms)
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 54ms (next.js: 3ms, proxy.ts: 3ms, application-code: 48ms)
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 54ms (next.js: 3ms, proxy.ts: 4ms, application-code: 48ms)
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 67ms (next.js: 3ms, proxy.ts: 6ms, application-code: 58ms)
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 53ms (next.js: 3ms, proxy.ts: 5ms, application-code: 45ms)
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 56ms (next.js: 2ms, proxy.ts: 4ms, application-code: 50ms)
+[Middleware] Path: /dashboard | Auth: YES
+[Middleware] Path: /pt/dashboard | Auth: YES
+ GET /pt/dashboard 200 in 136ms (next.js: 72ms, proxy.ts: 5ms, application-code: 59ms)
