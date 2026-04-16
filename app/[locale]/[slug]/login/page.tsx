@@ -28,7 +28,7 @@ export default function BrandedLoginPage() {
     e.preventDefault()
     setIsRecovering(true)
     try {
-      const result = await recoverPassword(email)
+      const result = await recoverPassword(email, slug as string)
       if (result?.error) {
         toast.error(result.error)
       } else {
@@ -63,7 +63,7 @@ export default function BrandedLoginPage() {
     setIsSubmitting(true)
 
     try {
-      const result = await login({ email, password })
+      const result = await login({ email, password, slug })
       if (result?.error) {
         toast.error(result.error)
         setIsSubmitting(false)

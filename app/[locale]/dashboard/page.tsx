@@ -165,12 +165,12 @@ export default async function DashboardPage({
 
                     <div className="flex items-center gap-2 bg-background border rounded-2xl p-2 pl-4 shadow-inner">
                       <span className="text-sm font-mono truncate flex-1 text-muted-foreground">
-                        {baseUrl}/reservar/{salon.slug}
+                        {baseUrl}/{salon.slug}
                       </span>
                       <div className="flex gap-2">
                         {isFeatureAllowed(salon.plan || "free", "qr_code", null, salon.status) ? (
                           <QRCodeModal 
-                            url={`${baseUrl}/reservar/${salon.slug}`} 
+                            url={`${baseUrl}/${salon.slug}`} 
                             salonName={salon.name} 
                           />
                         ) : (

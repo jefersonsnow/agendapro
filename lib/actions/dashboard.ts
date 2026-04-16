@@ -423,8 +423,8 @@ export async function upsertStaff(id: string | null, data: any) {
     }
     
     if (!userId) {
-       // Verifica se já existe um user com este email
-       const existingUser = await prisma.user.findUnique({ where: { email: data.email } })
+       // Verifica se já existe um user com este email (contexto global ou deste salão)
+       const existingUser = await prisma.user.findFirst({ where: { email: data.email } })
        if (existingUser) {
            // Se já existe, só vinculamos se ele já for deste salão (prevenir roubo de contas)
            const isFromSalon = await prisma.staff.findFirst({ where: { user_id: existingUser.id, salon_id: salonId } })
@@ -453,7 +453,8 @@ export async function upsertStaff(id: string | null, data: any) {
               name: data.name,
               email: data.email,
               password: hashedPassword,
-              role: data.role // Use the role from the form
+              role: data.role, // Use the role from the form
+              salon_id: salonId // VINCULAR AO SALÃO (Multi-Tenancy)
             }
           })
           userId = newUser.id
@@ -642,16 +643,18 @@ export async function getUserRole() {
      let status = "active"
      let plan = "free"
      let trialEndsAt = null
+     let salonSlug = ""
      
      if (salonId) {
         const salon = await (prisma as any).salon.findUnique({
            where: { id: salonId },
-           select: { status: true, plan: true, trial_ends_at: true }
+           select: { status: true, plan: true, trial_ends_at: true, slug: true }
         })
         
         status = salon?.status || "active"
         plan = salon?.plan || "free"
         trialEndsAt = salon?.trial_ends_at
+        salonSlug = (salon as any)?.slug || ""
 
         // VERIFICAÇÃO DE EXPIRAÇÃO DE TRIAL (AUTO-DOWNGRADE)
         if (status === 'trial' && trialEndsAt && isAfter(new Date(), new Date(trialEndsAt))) {
@@ -679,7 +682,8 @@ export async function getUserRole() {
        image: user?.image || session.user.image || null,
        status: status,
        plan: plan,
-       trialEndsAt: trialEndsAt
+       trialEndsAt: trialEndsAt,
+       salonSlug: salonSlug
      }
 
      // Sobrepor papel para o utilizador específico se necessário

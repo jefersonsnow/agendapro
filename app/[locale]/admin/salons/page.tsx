@@ -229,7 +229,7 @@ export default function AdminSalonsPage() {
                     </td>
                     <TableCell className="px-8 py-6 text-right">
                        <div className="flex justify-end gap-3 translate-x-2 opacity-0 group-hover:opacity-100 group-hover:translate-x-0 transition-all duration-300">
-                          <Link href={`/reservar/${salon.slug}`} target="_blank" onClick={(e) => e.stopPropagation()}>
+                          <Link href={`/${salon.slug}`} target="_blank" onClick={(e) => e.stopPropagation()}>
                              <Button variant="outline" size="icon" className="h-10 w-10 rounded-xl shadow-md border-muted/50 hover:bg-primary/5 hover:text-primary">
                                 <ExternalLink className="h-4 w-4" />
                              </Button>

@@ -391,7 +391,7 @@ export default function BookingPage({
       setStep(steps[currentIndex - 1])
     } else {
        // Se estiver no primeiro passo, talvez voltar para a Landing Page (Site)
-       window.location.href = `/reservar/${slug}`
+       window.location.href = `/${slug}`
     }
   }
 
@@ -476,7 +476,7 @@ export default function BookingPage({
           <Button
             className="w-full"
             onClick={() => {
-              window.location.href = `/reservar/${slug}`
+              window.location.href = `/${slug}`
             }}
           >
             Voltar ao Início

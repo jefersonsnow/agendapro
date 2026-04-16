@@ -89,7 +89,7 @@ export default function HelpSupportPage() {
     { q: "Como altero o logótipo do meu salão?", a: "Vá a Configurações > Identidade Visual e faça o upload da sua imagem. Recomendamos o formato PNG ou JPG com fundo transparente." },
     { q: "Posso ter mais do que um profissional?", a: "Sim! Dependendo do seu plano (Basic ou Premium), pode gerir vários profissionais na aba Equipa." },
     { q: "O que acontece quando o período de trial termina?", a: "A sua conta passará automaticamente para o plano Free, a menos que subscreva um dos nossos planos pagos para manter as funcionalidades premium." },
-    { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendarpro.pt/pt/reservar/seu-nome). Pode partilhar este link nas suas redes sociais ou via WhatsApp." }
+    { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendar.napp.pt/pt/seu-nome). Pode partilhar este link nas suas redes sociais ou via WhatsApp." }
   ]
 
   return (

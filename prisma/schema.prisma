@@ -43,6 +43,7 @@ model Salon {
   users_usersalons User[]        @relation("usersalons")
   audit_logs       AuditLog[]
   support_tickets  SupportTicket[]
+  related_users    User[]        @relation("UserToSalon")
 
   @@index([owner_id])
   @@map("salons")
@@ -50,8 +51,9 @@ model Salon {
 
 model User {
   id                String    @id @default(uuid())
+  salon_id          String?
   name              String?
-  email             String?   @unique
+  email             String?
   emailVerified     DateTime?
   password          String?
   image             String?
@@ -64,7 +66,10 @@ model User {
   sessions          Session[]
   salons_usersalons Salon[]   @relation("usersalons")
   audit_logs        AuditLog[]
+  salon             Salon?    @relation("UserToSalon", fields: [salon_id], references: [id], onDelete: Cascade)
 
+  @@unique([email, salon_id])
+  @@index([salon_id])
   @@map("users")
 }
 

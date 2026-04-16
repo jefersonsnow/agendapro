@@ -8,6 +8,7 @@ export default {
       if (user) {
         token.id = user.id
         token.role = user.role
+        token.salon_slug = (user as any).salon_slug
       }
       return token
     },
@@ -15,6 +16,7 @@ export default {
       if (token.id && session.user) {
         session.user.id = token.id as string
         session.user.role = token.role as string
+        (session.user as any).salon_slug = token.salon_slug as string
       }
       return session
     },

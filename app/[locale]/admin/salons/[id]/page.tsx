@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import { useParams, useRouter } from "next/navigation"
-import { getSalonFullDetails, manageStaff, deleteStaff, manageSalonUser, updateSalonSaaS, updateSalonContact } from "@/lib/actions/admin"
+import { getSalonFullDetails, manageStaff, deleteStaff, manageSalonUser, updateSalonSaaS, updateSalonContact, updateSalonSlug } from "@/lib/actions/admin"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
@@ -42,7 +42,8 @@ export default function SalonDetailPage() {
     email: "",
     phone: "",
     address: "",
-    nif: ""
+    nif: "",
+    slug: ""
   })
 
   useEffect(() => {
@@ -59,7 +60,8 @@ export default function SalonDetailPage() {
         email: data.email || "",
         phone: data.phone || "",
         address: data.address || "",
-        nif: data.nif || ""
+        nif: data.nif || "",
+        slug: data.slug || ""
       })
     } catch (error: any) {
       toast.error(error.message || "Erro ao carregar detalhes")
@@ -99,7 +101,13 @@ export default function SalonDetailPage() {
     e.preventDefault()
     try {
       await updateSalonContact(salon.id, editFormData)
-      toast.success("Informações de contacto atualizadas!")
+      
+      // Se o slug mudou, atualizar separadamente
+      if (editFormData.slug !== salon.slug) {
+        await updateSalonSlug(salon.id, editFormData.slug)
+      }
+
+      toast.success("Informações atualizadas com sucesso!")
       setIsEditDialogOpen(false)
       fetchSalon()
     } catch (error: any) {
@@ -200,6 +208,20 @@ export default function SalonDetailPage() {
                       <div className="space-y-2">
                         <Label htmlFor="edit-nif" className="text-[10px] font-black uppercase tracking-widest opacity-50">NIF / Contribuinte</Label>
                         <Input id="edit-nif" value={editFormData.nif} onChange={(e) => setEditFormData({...editFormData, nif: e.target.value})} className="rounded-xl font-mono" />
+                      </div>
+                      <div className="space-y-2 p-4 rounded-2xl bg-primary/5 border border-primary/10">
+                        <Label htmlFor="edit-slug" className="text-[10px] font-black uppercase tracking-widest text-primary">Link Customizado (Slug)</Label>
+                        <div className="flex items-center gap-1 group">
+                          <span className="text-sm opacity-40 font-mono">/</span>
+                          <Input 
+                            id="edit-slug" 
+                            value={editFormData.slug} 
+                            onChange={(e) => setEditFormData({...editFormData, slug: e.target.value})} 
+                            className="rounded-xl bg-transparent border-none p-0 focus-visible:ring-0 font-bold italic h-6" 
+                            placeholder="ex: barbearia-neves"
+                          />
+                        </div>
+                        <p className="text-[9px] text-muted-foreground mt-1 italic">Apenas letras, números e hífen. Evite espaços.</p>
                       </div>
                       <DialogFooter className="pt-4">
                         <Button type="submit" className="w-full rounded-xl font-black uppercase tracking-widest text-xs h-12">Guardar Alterações</Button>
@@ -372,13 +394,13 @@ export default function SalonDetailPage() {
                 title="Página de Reservas" 
                 description="Link público para clientes agendarem serviços online."
                 icon={<Globe className="text-blue-500" />}
-                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/reservar/${salon.slug}`}
+                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${salon.slug}`}
               />
               <LinkCard 
                 title="Painel de Gestão (Login)" 
                 description="Link exclusivo para o proprietário e equipa acederem ao sistema."
                 icon={<Link2 className="text-primary" />}
-                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/login/${salon.slug}`}
+                url={`${typeof window !== 'undefined' ? window.location.origin : ''}/${salon.slug}/login`}
               />
            </div>
 

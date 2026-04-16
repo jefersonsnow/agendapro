@@ -198,7 +198,7 @@ export default function SalonLandingPage({
     <div className={cn("min-h-screen w-full flex flex-col selection:bg-primary/20 overflow-x-hidden", themeStyles.bg)}>
       {/* Header */}
       <header className="sticky top-0 z-[100] bg-inherit/90 backdrop-blur-xl border-b border-inherit px-4 md:px-8 h-16 md:h-20 flex items-center justify-between">
-         <Link href={`/reservar/${slug}`} className="flex items-center gap-2 group">
+         <Link href={`/${slug}`} className="flex items-center gap-2 group">
             {salon.logo_url ? (
                <div className="h-10 w-10 rounded-xl overflow-hidden border shadow-sm">
                   <img src={salon.logo_url} alt={salon.name} className="w-full h-full object-cover" />
@@ -251,7 +251,7 @@ export default function SalonLandingPage({
                   {t("login")}
                </Button>
             )}
-            <Link href={`/reservar/${slug}/agendar`} className="hidden sm:block"> 
+            <Link href={`/${slug}/agendar`} className="hidden sm:block"> 
                <Button size="sm" className={cn("font-black px-6 shadow-lg active:scale-95 transition-all", themeStyles.primary, themeStyles.button)}>{t("schedule")}</Button> 
             </Link>
             <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="lg:hidden p-2 active:scale-90 bg-inherit border rounded-xl"> <Menu className="h-6 w-6" /> </button>
@@ -301,7 +301,7 @@ export default function SalonLandingPage({
                   </div>
                </div>
                
-               <Link href={`/reservar/${slug}/agendar`} onClick={() => setIsMobileMenuOpen(false)}> 
+               <Link href={`/${slug}/agendar`} onClick={() => setIsMobileMenuOpen(false)}> 
                   <Button size="lg" className={cn("mt-4 font-black px-12 h-14 shadow-2xl active:scale-95 transition-all text-xl", themeStyles.primary, themeStyles.button)}>
                      {t("book")}
                   </Button> 
@@ -339,7 +339,7 @@ export default function SalonLandingPage({
            )}>
               {salon.description}
            </p>
-           <Link href={`/reservar/${slug}/agendar`}> 
+           <Link href={`/${slug}/agendar`}> 
               <Button size="lg" className={cn("h-14 md:h-24 px-8 md:px-16 text-lg md:text-2xl font-black shadow-2xl transition-all active:scale-95 group w-full sm:w-auto", themeStyles.primary, themeStyles.button)}>
                  {t("bookNow")} <ChevronRight className="ml-2 h-5 w-5 md:h-6 md:w-6 transition-transform group-hover:translate-x-2" />
               </Button> 
@@ -462,7 +462,7 @@ export default function SalonLandingPage({
                              </span>
                              <span className="text-sm font-black opacity-30 ml-0.5">€</span>
                           </div>
-                          <Link href={`/reservar/${slug}/agendar`} className="flex-1 sm:flex-none">
+                          <Link href={`/${slug}/agendar`} className="flex-1 sm:flex-none">
                              <Button size="sm" className={cn(
                                 "w-full font-black text-[10px] uppercase tracking-widest px-6 h-10 shadow-lg active:scale-95 transition-all",
                                 themeStyles.primary,
@@ -525,7 +525,7 @@ export default function SalonLandingPage({
                             <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {service.duration_minutes}m</span>
                          </div>
                          
-                         <Link href={`/reservar/${slug}/agendar`} className="w-full">
+                         <Link href={`/${slug}/agendar`} className="w-full">
                             <Button className={cn(
                                "w-full h-16 text-xs font-black uppercase tracking-[0.4em] shadow-xl hover:scale-[1.03] active:scale-95 transition-all group overflow-hidden relative",
                                themeStyles.primary,

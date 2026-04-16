@@ -20,8 +20,8 @@ import {
   ChevronRight
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { useRouter } from "next/navigation"
-import { logout } from "@/lib/actions/logout"
+import { useRouter, useParams } from "next/navigation"
+import { signOut } from "next-auth/react"
 import { getUserRole } from "@/lib/actions/dashboard"
 import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
@@ -55,11 +55,14 @@ export default function DashboardLayout({
     image: null as string | null,
     status: "active",
     plan: "free",
-    trialEndsAt: null as string | null
+    trialEndsAt: null as string | null,
+    salonSlug: ""
   })
   const [profileOpen, setProfileOpen] = useState(false)
   const pathname = usePathname()
   const router = useRouter()
+  const params = useParams()
+  const locale = params.locale as string || "pt"
 
   useEffect(() => {
     // Load collapse state from localStorage
@@ -97,8 +100,12 @@ export default function DashboardLayout({
     return false
   })
 
-  const handleLogout = async () => {
-    await logout()
+  const handleLogout = () => {
+    const callbackUrl = user.salonSlug 
+      ? `/${locale}/${user.salonSlug}/login` 
+      : `/${locale}/auth/login`
+    
+    signOut({ callbackUrl })
   }
 
   if (user.status === "suspended") {
@@ -208,8 +215,8 @@ export default function DashboardLayout({
 
           <Button
             variant="ghost"
-            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground h-11 rounded-xl"
             onClick={handleLogout}
+            className="w-full justify-start gap-3 text-muted-foreground hover:text-foreground h-11 rounded-xl"
           >
             <LogOut className="h-5 w-5" />
             {t("logout")}

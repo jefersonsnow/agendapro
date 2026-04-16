@@ -267,7 +267,7 @@ export default function ConfiguracoesPage() {
 
   function copyBookingUrl() {
     if (!salon) return
-    const url = `${window.location.origin}/reservar/${salon.slug}`
+    const url = `${window.location.origin}/${salon.slug}`
     navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -602,7 +602,7 @@ export default function ConfiguracoesPage() {
         <CardContent className="p-6">
            <div className="flex items-center gap-4">
               <code className="flex-1 rounded-xl bg-background px-4 py-3 text-sm font-mono border-2 border-primary/10 truncate">
-                 {typeof window !== "undefined" ? `${window.location.host}/reservar/${salon?.slug}` : "" }
+                 {typeof window !== "undefined" ? `${window.location.host}/${salon?.slug}` : "" }
               </code>
                <Button 
                   title={isFeatureAllowed(salon?.plan || "free", "qr_code", salon?.dynamicPlans, salon?.status) ? "Gerar QR Code para Impressão" : "QR Code não disponível no seu plano"} 
@@ -1067,7 +1067,7 @@ export default function ConfiguracoesPage() {
           <div className="flex flex-col items-center justify-center p-6 space-y-8" id="qr-container">
              <div className="bg-white p-4 rounded-xl shadow-sm border print:border-none print:shadow-none">
                 <img 
-                   src={`https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/reservar/${salon?.slug}` : "")}`} 
+                   src={`https://api.qrserver.com/v1/create-qr-code/?size=1024x1024&data=${encodeURIComponent(typeof window !== "undefined" ? `${window.location.origin}/${salon?.slug}` : "")}`} 
                    alt="QR Code" 
                    className="w-64 h-64 print:w-[80vw] print:h-[80vw]"
                 />

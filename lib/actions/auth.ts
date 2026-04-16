@@ -14,46 +14,56 @@ export async function signUp(formData: any) {
     throw new Error("Dados incompletos")
   }
 
-  // Verificar se o usuário já existe
-  const existingUser = await prisma.user.findUnique({
-    where: { email }
-  })
+    // A regra de email único agora é POR SALÃO. No cadastro inicial, 
+    // verificamos se o email já existe sem salon_id (admin) ou se o salão já existe.
+    
+    const hashedPassword = await bcrypt.hash(password, 10)
 
-  if (existingUser) {
-    throw new Error("Este email já está registado")
-  }
+    const result = await prisma.$transaction(async (tx: any) => {
+      // 1. Gerar o slug primeiro para ter o ID do salão ou criar o salão antes
+      const slugBase = salonName
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9]/g, "-")
+        .replace(/-+/g, "-")
+        .replace(/^-|-$/g, "")
 
-  // Hash da senha
-  const hashedPassword = await bcrypt.hash(password, 10)
+      const existingSlug = await tx.salon.findUnique({ where: { slug: slugBase } })
+      const finalSlug = existingSlug 
+        ? `${slugBase}-${Math.random().toString(36).substring(2, 5)}` 
+        : slugBase
 
-  // Criar usuário e salão em uma transação
-  const result = await prisma.$transaction(async (tx: any) => {
-    const user = await tx.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name: salonName,
-      }
+      // 2. Criar o Usuário Dono (temporariamente sem salon_id para criar o salão)
+      // Ou melhor: Criar o salão com um owner_id temporário e depois atualizar
+      // Mas o Prisma exige owner_id. Vamos criar o User PRIMEIRO com um salon_id nulo??
+      // Não, vamos criar o Salão primeiro com um owner_id vindo de um User que criamos sem salon_id.
+      
+      const user = await tx.user.create({
+        data: {
+          email,
+          password: hashedPassword,
+          name: salonName,
+          role: "owner"
+        }
+      })
+
+      const salon = await tx.salon.create({
+        data: {
+          name: salonName,
+          slug: finalSlug,
+          owner_id: user.id,
+        }
+      })
+
+      // 3. AGORA vinculamos o usuário ao seu salão (Isolamento Total)
+      await tx.user.update({
+        where: { id: user.id },
+        data: { salon_id: salon.id }
+      })
+
+      return { user, salon }
     })
-
-    const slug = salonName
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-0]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "")
-
-    const salon = await tx.salon.create({
-      data: {
-        name: salonName,
-        slug: `${slug}-${Math.random().toString(36).substring(2, 5)}`,
-        owner_id: user.id,
-      }
-    })
-
-    return { user, salon }
-  })
 
   return { success: true }
 }
@@ -65,9 +75,12 @@ export async function signUpFreeTrial(formData: any) {
     throw new Error("Dados obrigatórios em falta")
   }
 
-  // Verificar se o usuário já existe
-  const existingUser = await prisma.user.findUnique({
-    where: { email }
+  // Verificar se o usuário já existe como conta principal (global)
+  const existingUser = await prisma.user.findFirst({
+    where: { 
+      email,
+      salon_id: null
+    }
   })
 
   if (existingUser) {
@@ -91,18 +104,23 @@ export async function signUpFreeTrial(formData: any) {
       }
     })
 
-    const slug = salonName
+    const slugBase = salonName
       .toLowerCase()
       .normalize("NFD")
       .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-0]/g, "-")
+      .replace(/[^a-z0-9]/g, "-")
       .replace(/-+/g, "-")
       .replace(/^-|-$/g, "")
+
+    const existingSlug = await tx.salon.findUnique({ where: { slug: slugBase } })
+    const finalSlug = existingSlug 
+      ? `${slugBase}-${Math.random().toString(36).substring(2, 5)}` 
+      : slugBase
 
     const salon = await tx.salon.create({
       data: {
         name: salonName,
-        slug: `${slug}-${Math.random().toString(36).substring(2, 5)}`,
+        slug: finalSlug,
         owner_id: user.id,
         address: address,
         phone: phone,
@@ -113,6 +131,12 @@ export async function signUpFreeTrial(formData: any) {
       }
     })
 
+    // 3. VINCULAR O UTILIZADOR AO SALÃO (NAPP Deep Isolation)
+    await tx.user.update({
+      where: { id: user.id },
+      data: { salon_id: salon.id }
+    })
+
     return { user, salon }
   })
 
@@ -121,19 +145,43 @@ export async function signUpFreeTrial(formData: any) {
 
 export async function login(formData: any) {
   try {
-    const { email, password } = formData
+    const { email, password, slug } = formData
     
-    // Buscar o usuário para saber o papel (role) sem expor senhas a este nível
-    const user = await prisma.user.findUnique({
-       where: { email },
-       select: { id: true, role: true }
-    })
+    let user;
+    let targetUrl = "/dashboard";
 
-    const targetUrl = user?.role === "admin" ? "/admin" : "/dashboard"
+    if (slug) {
+      // Login em salão específico (/[slug]/login)
+      const salon = await prisma.salon.findUnique({ where: { slug } })
+      if (!salon) throw new Error("Salão não encontrado")
+      
+      user = await prisma.user.findFirst({
+        where: { 
+          email,
+          salon_id: salon.id
+        },
+        select: { id: true, role: true }
+      })
+    } else {
+      // Login Global (Admin)
+      user = await prisma.user.findFirst({
+        where: { 
+          email,
+          salon_id: null // Admins globais não têm salon_id
+        },
+        select: { id: true, role: true }
+      })
+      if (user?.role === "admin") targetUrl = "/admin"
+    }
+
+    if (!user) {
+      return { error: "Credenciais inválidas para este acesso." }
+    }
 
     await signIn("credentials", {
       email,
       password,
+      slug: slug || "", // Passamos o slug para o authorize no auth.ts
       redirectTo: targetUrl,
     })
   } catch (error) {
@@ -154,23 +202,38 @@ export async function login(formData: any) {
     throw error
   }
 }
-export async function logout() {
-  await signOut({ redirectTo: "/auth/login" })
+export async function logout(slug?: string, locale: string = "pt") {
+  if (slug) {
+    await signOut({ redirectTo: `/${locale}/${slug}/login` })
+  } else {
+    await signOut({ redirectTo: `/${locale}/auth/login` })
+  }
 }
 
-export async function logoutAdmin() {
-  await signOut({ redirectTo: "/admin/login" })
+export async function logoutAdmin(arg?: any) {
+  const locale = typeof arg === "string" ? arg : "pt"
+  await signOut({ redirectTo: `/${locale}/admin/login` })
 }
 
-export async function recoverPassword(email: string) {
+export async function recoverPassword(email: string, slug?: string) {
   try {
     if (!email) {
       return { error: "O e-mail é obrigatório." }
     }
 
-    const user = await prisma.user.findUnique({
-      where: { email },
-    })
+    let user;
+    if (slug) {
+      const salon = await prisma.salon.findUnique({ where: { slug } })
+      if (!salon) return { error: "Salão não encontrado." }
+      
+      user = await prisma.user.findFirst({
+        where: { email, salon_id: salon.id },
+      })
+    } else {
+      user = await prisma.user.findFirst({
+        where: { email, salon_id: null },
+      })
+    }
 
     if (!user) {
       return { error: "Não encontrámos uma conta com este e-mail." }
@@ -184,7 +247,7 @@ export async function recoverPassword(email: string) {
 
     // Atualizar no banco de dados
     await prisma.user.update({
-      where: { email },
+      where: { id: user.id },
       data: { password: hashedPassword },
     })
 

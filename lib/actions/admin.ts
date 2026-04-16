@@ -19,7 +19,13 @@ export async function createSalonWithOwner(data: any) {
   const { name, email, password, salonName, slug } = data
 
   // Check if email already exists
-  const existingUser = await prisma.user.findUnique({ where: { email } })
+  // Check if main user (owner) already exists (global context)
+  const existingUser = await prisma.user.findFirst({ 
+    where: { 
+      email,
+      salon_id: null
+    } 
+  })
   if (existingUser) {
     throw new Error("Este utilizador (email) já existe no sistema.")
   }
@@ -50,6 +56,12 @@ export async function createSalonWithOwner(data: any) {
         slug,
         owner_id: user.id,
       }
+    })
+
+    // 3. VINCULAR O UTILIZADOR AO SALÃO (Isolamento Total NAPP)
+    await tx.user.update({
+      where: { id: user.id },
+      data: { salon_id: salon.id }
     })
 
     return { user, salon }
@@ -466,6 +478,56 @@ export async function updateSalonContact(id: string, data: any) {
   })
 
   revalidatePath(`/admin/salons/${id}`)
+}
+
+export async function updateSalonSlug(id: string, newSlug: string) {
+  await checkAdmin()
+
+  // 1. Limpar e validar o slug
+  const cleanSlug = newSlug
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "")
+
+  if (!cleanSlug || cleanSlug.length < 3) {
+    throw new Error("O link deve ter pelo menos 3 caracteres válidos.")
+  }
+
+  // 2. Bloquear palavras reservadas do sistema
+  const reservedWords = [
+    "admin", "dashboard", "login", "auth", "api", "reservar", "home", 
+    "ajuda", "contacto", "privacidade", "termos", "servicos", "equipa", 
+    "relatorios", "clientes", "configuracoes", "agenda"
+  ]
+  if (reservedWords.includes(cleanSlug)) {
+    throw new Error("Este nome não pode ser utilizado como link (palavra reservada).")
+  }
+
+  // 3. Verificar se já existe (em outro salão)
+  const existing = await prisma.salon.findFirst({
+    where: { 
+      slug: cleanSlug,
+      NOT: { id }
+    }
+  })
+
+  if (existing) {
+    throw new Error("Este link já está a ser utilizado por outro salão.")
+  }
+
+  // 4. Atualizar
+  await prisma.salon.update({
+    where: { id },
+    data: { slug: cleanSlug }
+  })
+
+  revalidatePath(`/admin/salons/${id}`)
+  revalidatePath("/admin/salons")
+  
+  return { success: true, slug: cleanSlug }
 }
 
 export async function getSupportTicketsAdmin() {
