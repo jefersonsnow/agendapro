@@ -254,6 +254,35 @@ export async function upsertAppointment(id: string | null, data: any) {
           return { success: false, error: "O horário selecionado coincide com a pausa de almoço (" + dayHours.breakStart + " - " + dayHours.breakEnd + ")." }
         }
       }
+
+      // --- SEC-002.1: Validação de Horários do Profissional (Staff) ---
+      const staffMember = await prisma.staff.findUnique({ where: { id: data.staff_id } })
+      if (staffMember && staffMember.working_hours && typeof staffMember.working_hours === 'string' && staffMember.working_hours.length > 2) {
+          const swh = JSON.parse(staffMember.working_hours)
+          const staffDayConfig = swh[localizedDayString]
+
+          if (!staffDayConfig || staffDayConfig.enabled === false) {
+              return { success: false, error: `O profissional ${staffMember.name} não trabalha neste dia (${localizedDayString}).` }
+          }
+
+          if (staffDayConfig.open && staffDayConfig.close) {
+              const staffOpenM = hourToMinutes(staffDayConfig.open)
+              const staffCloseM = hourToMinutes(staffDayConfig.close)
+
+              if (appointmentsStartM < staffOpenM || appointmentsEndM > staffCloseM) {
+                  return { success: false, error: `O profissional ${staffMember.name} não está disponível neste horário. Expediente: ${staffDayConfig.open} - ${staffDayConfig.close}.` }
+              }
+          }
+
+          if (staffDayConfig.hasBreak && staffDayConfig.breakStart && staffDayConfig.breakEnd) {
+              const bStartM = hourToMinutes(staffDayConfig.breakStart)
+              const bEndM = hourToMinutes(staffDayConfig.breakEnd)
+
+              if (appointmentsStartM < bEndM && appointmentsEndM > bStartM) {
+                  return { success: false, error: `O profissional ${staffMember.name} está em pausa neste horário (${staffDayConfig.breakStart} - ${staffDayConfig.breakEnd}).` }
+              }
+          }
+      }
     }
   }
 

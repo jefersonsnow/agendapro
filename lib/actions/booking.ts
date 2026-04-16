@@ -75,13 +75,21 @@ export async function getSalonBySlug(slug: string, requestedLocale?: string) {
     try { (salon as any).working_hours = JSON.parse(salon.working_hours) } catch(e) {}
   }
 
-  // Converter Decimal para número para o cliente
+  // Converter Decimal para número para o cliente e parsear horários do staff
   const serialized = JSON.parse(JSON.stringify(salon))
   if (serialized.services) {
     serialized.services = serialized.services.map((s: any) => ({
       ...s,
       price: Number(s.price)
     }))
+  }
+  if (serialized.staff) {
+    serialized.staff = serialized.staff.map((s: any) => {
+      if (s.working_hours && typeof s.working_hours === "string") {
+        try { s.working_hours = JSON.parse(s.working_hours) } catch(e) {}
+      }
+      return s
+    })
   }
   return serialized
 }
@@ -164,6 +172,33 @@ export async function createBooking(data: any) {
         return { error: "O salão está em pausa de almoço neste horário." }
       }
     }
+
+    // --- SEC-002.1: Validação de Horários do Profissional (Staff) ---
+    const targetStaff = await prisma.staff.findUnique({ where: { id: staffId } })
+    if (!targetStaff || targetStaff.salon_id !== salonId) {
+       return { error: "Profissional não encontrado ou não pertence a este salão." }
+    }
+
+    if (targetStaff.working_hours && typeof targetStaff.working_hours === 'string' && targetStaff.working_hours.length > 2) {
+       const swh = JSON.parse(targetStaff.working_hours)
+       const staffDayConfig = swh[localizedDayString]
+
+       if (!staffDayConfig || staffDayConfig.enabled === false) {
+          return { error: `O profissional ${targetStaff.name} não trabalha neste dia.` }
+       }
+
+       if (staffDayConfig.open && staffDayConfig.close) {
+          if (timeString < staffDayConfig.open || timeString >= staffDayConfig.close) {
+             return { error: `O profissional ${targetStaff.name} não está disponível às ${timeString}. Horário: ${staffDayConfig.open} - ${staffDayConfig.close}.` }
+          }
+       }
+
+       if (staffDayConfig.hasBreak && staffDayConfig.breakStart && staffDayConfig.breakEnd) {
+          if (timeString >= staffDayConfig.breakStart && timeString < staffDayConfig.breakEnd) {
+             return { error: `O profissional ${targetStaff.name} está em pausa neste horário.` }
+          }
+       }
+    }
     let maxApts = (salon.plan === "premium") ? -1 : 50
 
     try {
@@ -229,10 +264,7 @@ export async function createBooking(data: any) {
 
     // 3. Validação de Isolamento (SEC-001) e Colisão
     // Garantir que Staff e Serviço pertencem ao mesmo salão
-    const [targetStaff, targetService] = await Promise.all([
-      prisma.staff.findUnique({ where: { id: staffId } }),
-      prisma.service.findUnique({ where: { id: serviceId } })
-    ])
+    const targetService = await prisma.service.findUnique({ where: { id: serviceId } })
 
     if (!targetStaff || targetStaff.salon_id !== salonId) {
       return { error: "O profissional selecionado não pertence a este salão." }

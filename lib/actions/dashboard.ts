@@ -304,11 +304,34 @@ export async function getStaff() {
     orderBy: { created_at: "asc" }
   })
 
-  return staff.map((member: any, index: number) => ({
-    ...member,
-    commission_rate: Number(member.commission_rate),
-    is_plan_blocked: limits.staff !== -1 && index >= (limits.staff || 1)
-  }))
+  return staff.map((member: any, index: number) => {
+    let parsedHours = member.working_hours
+    if (typeof parsedHours === "string" && parsedHours.length > 0) {
+      try {
+        parsedHours = JSON.parse(parsedHours)
+        
+        // Limpeza de dados corrompidos (caso uma string tenha sido espalhada em um objeto no passado)
+        if (parsedHours && typeof parsedHours === "object" && parsedHours["0"]) {
+          const validKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+          const cleaned: any = {}
+          validKeys.forEach(k => {
+            if (parsedHours[k]) cleaned[k] = parsedHours[k]
+          })
+          parsedHours = cleaned
+        }
+      } catch (e) {
+        console.error("Erro ao processar working_hours do staff:", e)
+        parsedHours = {}
+      }
+    }
+
+    return {
+      ...member,
+      working_hours: parsedHours,
+      commission_rate: Number(member.commission_rate),
+      is_plan_blocked: limits.staff !== -1 && index >= (limits.staff || 1)
+    }
+  })
 }
 
 export async function upsertStaff(id: string | null, data: any) {
@@ -402,19 +425,29 @@ export async function upsertStaff(id: string | null, data: any) {
     if (!userId) {
        // Verifica se já existe um user com este email
        const existingUser = await prisma.user.findUnique({ where: { email: data.email } })
-       
        if (existingUser) {
-          // Se já existe, só vinculamos se ele já for deste salão (prevenir roubo de contas)
-          const isFromSalon = await prisma.staff.findFirst({ where: { user_id: existingUser.id, salon_id: salonId } })
-          if (isFromSalon) {
-             userId = existingUser.id
-             if (existingUser.role !== "owner") {
-                await prisma.user.update({ where: { id: userId }, data: { role: "professional" } })
-             }
-          } else {
-             throw new Error("Este email já está associado a outra conta no sistema AgendarPro.")
-          }
-       } else {
+           // Se já existe, só vinculamos se ele já for deste salão (prevenir roubo de contas)
+           const isFromSalon = await prisma.staff.findFirst({ where: { user_id: existingUser.id, salon_id: salonId } })
+           if (isFromSalon) {
+              userId = existingUser.id
+              if (existingUser.role !== "owner") {
+                 await prisma.user.update({ where: { id: userId }, data: { role: data.role || "professional" } })
+              }
+           } else {
+              // Se já existe um usuário, mas não está neste salão, vamos verificar se ele é staff em OUTRO lugar
+              const isStaffElsewhere = await prisma.staff.findFirst({ where: { user_id: existingUser.id } })
+              
+              if (isStaffElsewhere) {
+                 throw new Error("Este profissional já está registado num outro salão no sistema AgendarPro.")
+              }
+              
+              // Se não é staff em lugar nenhum (ex: era apenas cliente), podemos vinculá-lo como staff deste salão!
+              userId = existingUser.id
+              if (existingUser.role !== "owner") {
+                 await prisma.user.update({ where: { id: userId }, data: { role: data.role || "professional" } })
+              }
+           }
+        } else {
           const newUser = await prisma.user.create({
             data: {
               name: data.name,

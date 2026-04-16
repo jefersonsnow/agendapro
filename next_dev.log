@@ -179,3 +179,4 @@ DEBUG: User in DB: teste@teste.com Role: owner
  GET /pt/dashboard 200 in 51ms (next.js: 3ms, proxy.ts: 4ms, application-code: 45ms)
  GET /pt/dashboard 200 in 58ms (next.js: 3ms, proxy.ts: 5ms, application-code: 51ms)
 ✓ Compiled in 55ms
+[?25h

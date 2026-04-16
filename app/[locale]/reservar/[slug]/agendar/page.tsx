@@ -164,8 +164,8 @@ export default function BookingPage({
       }
 
       let dayHours = salonHours
-      if (selectedStaff && selectedStaff.working_hours && Object.keys(selectedStaff.working_hours).length > 0) {
-        dayHours = (selectedStaff.working_hours as any)[dayKey] || dayHours
+      if (selectedStaff && selectedStaff.working_hours && Object.keys(selectedStaff.working_hours).length > 2) {
+        dayHours = (selectedStaff.working_hours as any)[dayKey]
       }
       
       if (dayHours && dayHours.open && dayHours.close && dayHours.enabled !== false) {
@@ -227,8 +227,8 @@ export default function BookingPage({
     if (!salonHours || salonHours.enabled === false) return [] // O Salão está fechado
 
     let dayHours = salonHours
-    if (selectedStaff && selectedStaff.working_hours && Object.keys(selectedStaff.working_hours).length > 0) {
-       dayHours = selectedStaff.working_hours[dayKey] || dayHours
+    if (selectedStaff && selectedStaff.working_hours && Object.keys(selectedStaff.working_hours).length > 2) {
+       dayHours = selectedStaff.working_hours[dayKey]
     }
 
     if (!dayHours || dayHours.enabled === false) return [] // Staff fechado

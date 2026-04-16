@@ -31,6 +31,8 @@ import {
   Scissors,
   X,
   Check,
+  AlertTriangle,
+  BellRing,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations, useLocale } from "next-intl"
@@ -187,6 +189,7 @@ export default function AgendaPage() {
     status: "pending",
     quick_name: "", // Campo para novo cliente
   })
+  const [now, setNow] = useState(new Date())
 
   // const supabase = createClient() // Removido
 
@@ -195,6 +198,9 @@ export default function AgendaPage() {
     setCurrentDate(today)
     setSelectedMobileDate(today)
     fetchInitialData()
+
+    const timer = setInterval(() => setNow(new Date()), 60000)
+    return () => clearInterval(timer)
   }, [])
 
   useEffect(() => {
@@ -783,6 +789,27 @@ export default function AgendaPage() {
                                 <span className="text-[9px] xl:text-[11px] font-black opacity-90 truncate uppercase leading-none">
                                   {apt.client?.name || "CLIENTE"}
                                 </span>
+                                
+                                {(() => {
+                                  const isOverdue = (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
+                                  const isUnconfirmedSoon = apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
+                                  
+                                  if (isOverdue) return (
+                                    <div className="flex items-center gap-1 text-[8px] font-black uppercase text-red-600 animate-pulse mt-auto bg-red-100/50 rounded px-1 py-0.5">
+                                      <AlertTriangle className="h-2 w-2" />
+                                      <span>Pendente</span>
+                                    </div>
+                                  )
+                                  
+                                  if (isUnconfirmedSoon) return (
+                                    <div className="flex items-center gap-1 text-[8px] font-black uppercase text-orange-600 animate-bounce mt-auto bg-orange-100/50 rounded px-1 py-0.5">
+                                      <BellRing className="h-2 w-2" />
+                                      <span>Confirmar?</span>
+                                    </div>
+                                  )
+                                  
+                                  return null
+                                })()}
                               </div>
                             </div>
                           )
@@ -893,6 +920,25 @@ export default function AgendaPage() {
                            )}>
                               {start.getUTCHours().toString().padStart(2, "0")}:{start.getUTCMinutes().toString().padStart(2, "0")} {t("to")} {end.getUTCHours().toString().padStart(2, "0")}:{end.getUTCMinutes().toString().padStart(2, "0")}
                            </span>
+                           
+                           {(() => {
+                                const isOverdue = (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
+                                const isUnconfirmedSoon = apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
+                                
+                                if (isOverdue) return (
+                                  <div className="flex items-center bg-red-500 rounded-full p-1 animate-pulse shadow-lg ml-auto shrink-0 z-30">
+                                    <AlertTriangle className="h-3 w-3 text-white" />
+                                  </div>
+                                )
+                                
+                                if (isUnconfirmedSoon) return (
+                                  <div className="flex items-center bg-orange-500 rounded-full p-1 animate-bounce shadow-lg ml-auto shrink-0 z-30">
+                                    <BellRing className="h-3 w-3 text-white" />
+                                  </div>
+                                )
+                                
+                                return null
+                           })()}
                         </div>
                         
                         {/* Linha Indicadora de Duração */}
