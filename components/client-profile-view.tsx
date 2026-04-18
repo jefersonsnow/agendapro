@@ -1,10 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { getClientProfile } from "@/lib/actions/dashboard"
+import { getClientProfile, upsertClient } from "@/lib/actions/dashboard"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { ScrollArea } from "@/components/ui/scroll-area"
+import { Button } from "@/components/ui/button"
+import { Textarea } from "@/components/ui/textarea"
 import { 
   Phone, 
   Mail, 
@@ -14,7 +16,10 @@ import {
   Scissors, 
   MessageCircle, 
   TrendingUp,
-  History
+  History,
+  Pencil,
+  Check,
+  X
 } from "lucide-react"
 import { BarChart, Bar, XAxis, Tooltip, ResponsiveContainer } from "recharts"
 import { format } from "date-fns"
@@ -27,6 +32,9 @@ interface ClientProfileViewProps {
 export default function ClientProfileView({ clientId }: ClientProfileViewProps) {
   const [profile, setProfile] = useState<any>(null)
   const [loading, setLoading] = useState(true)
+  const [isEditingNotes, setIsEditingNotes] = useState(false)
+  const [editedNotes, setEditedNotes] = useState("")
+  const [savingNotes, setSavingNotes] = useState(false)
 
   useEffect(() => {
     async function fetchProfile() {
@@ -35,6 +43,7 @@ export default function ClientProfileView({ clientId }: ClientProfileViewProps) 
       try {
         const data = await getClientProfile(clientId)
         setProfile(data)
+        setEditedNotes(data?.notes || "")
       } catch (error) {
         console.error("Error fetching client profile:", error)
       } finally {
@@ -43,6 +52,29 @@ export default function ClientProfileView({ clientId }: ClientProfileViewProps) 
     }
     fetchProfile()
   }, [clientId])
+
+  async function handleSaveNotes() {
+    if (!profile) return
+    setSavingNotes(true)
+    try {
+      await upsertClient(profile.id, {
+        name: profile.name,
+        email: profile.email,
+        phone: profile.phone,
+        address: profile.address,
+        nif: profile.nif,
+        loyalty_points: profile.loyalty_points,
+        notes: editedNotes
+      })
+      setProfile({ ...profile, notes: editedNotes })
+      setIsEditingNotes(false)
+    } catch (err) {
+      console.error("Error saving notes", err)
+      alert("Erro ao guardar anotações")
+    } finally {
+      setSavingNotes(false)
+    }
+  }
 
   const getChartData = () => {
     if (!profile?.appointments) return []
@@ -110,18 +142,58 @@ export default function ClientProfileView({ clientId }: ClientProfileViewProps) 
         <div className="p-4 space-y-6">
           {/* CRM Notes */}
           <div>
-            <div className="flex items-center gap-2 mb-2">
-              <div className="bg-amber-100 p-1 rounded-md">
-                <MessageCircle className="h-3 w-3 text-amber-700" />
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <div className="bg-amber-100 p-1 rounded-md">
+                  <MessageCircle className="h-3 w-3 text-amber-700" />
+                </div>
+                <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">ANOTAÇÕES</h3>
               </div>
-              <h3 className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">ANOTAÇÕES</h3>
+              {!isEditingNotes && (
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-6 w-6 text-muted-foreground hover:text-amber-700 hover:bg-amber-100/50" 
+                  onClick={() => setIsEditingNotes(true)}
+                >
+                  <Pencil className="h-3 w-3" />
+                </Button>
+              )}
             </div>
-            {profile.notes ? (
-              <div className="bg-amber-50/50 border border-amber-200/60 text-amber-900 p-3 rounded-xl text-[11px] leading-relaxed shadow-inner">
+            
+            {isEditingNotes ? (
+              <div className="space-y-2">
+                <Textarea 
+                  value={editedNotes} 
+                  onChange={(e) => setEditedNotes(e.target.value)} 
+                  className="min-h-[80px] text-[11px] resize-none border-amber-200 focus-visible:ring-amber-500/20"
+                  placeholder="Escreva as suas notas aqui..."
+                  autoFocus
+                />
+                <div className="flex justify-end gap-1">
+                  <Button variant="outline" size="sm" className="h-6 text-[10px] px-2" onClick={() => { setIsEditingNotes(false); setEditedNotes(profile.notes || ""); }} disabled={savingNotes}>
+                    <X className="h-3 w-3 mr-1" /> Cancelar
+                  </Button>
+                  <Button size="sm" className="h-6 text-[10px] px-2 bg-amber-600 hover:bg-amber-700 text-white" onClick={handleSaveNotes} disabled={savingNotes}>
+                    {savingNotes ? <div className="h-3 w-3 border-2 border-white/30 border-t-white rounded-full animate-spin mr-1" /> : <Check className="h-3 w-3 mr-1" />} 
+                    Guardar
+                  </Button>
+                </div>
+              </div>
+            ) : profile.notes ? (
+              <div 
+                className="bg-amber-50/50 border border-amber-200/60 text-amber-900 p-3 rounded-xl text-[11px] leading-relaxed shadow-inner cursor-pointer hover:bg-amber-100/50 transition-colors"
+                onClick={() => setIsEditingNotes(true)}
+              >
                 {profile.notes}
               </div>
             ) : (
-              <p className="text-[10px] text-muted-foreground p-3 border border-dashed rounded-xl text-center">Sem notas.</p>
+              <div 
+                className="text-[10px] text-muted-foreground p-3 border border-dashed rounded-xl text-center cursor-pointer hover:bg-muted/50 transition-colors"
+                onClick={() => setIsEditingNotes(true)}
+              >
+                Sem notas. Clique para adicionar.
+              </div>
             )}
           </div>
 

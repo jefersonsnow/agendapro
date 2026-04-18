@@ -314,7 +314,7 @@ export default function ClientesPage() {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="address">Morada Completa</Label>
+                <Label htmlFor="address">Morada Completa (Opcional)</Label>
                 <Input
                   id="address"
                   value={formData.address}
@@ -322,37 +322,22 @@ export default function ClientesPage() {
                     setFormData({ ...formData, address: e.target.value })
                   }
                   placeholder="Rua, Número, Código Postal, Cidade"
-                  required
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2 text-primary">
-                  <Label htmlFor="nif">NIF / Contribuinte</Label>
-                  <Input
-                    id="nif"
-                    value={formData.nif}
-                    onChange={(e) =>
-                      setFormData({ ...formData, nif: e.target.value })
-                    }
-                    placeholder="999 999 999"
-                    required
-                  />
-                </div>
-                <div className="space-y-2 text-primary">
-                  <Label htmlFor="loyalty_points" className="flex items-center gap-2">
-                    <Star className="h-3 w-3 fill-primary" /> Pontos de Fidelidade
-                  </Label>
-                  <Input
-                    id="loyalty_points"
-                    type="number"
-                    value={formData.loyalty_points}
-                    onChange={(e) =>
-                      setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })
-                    }
-                    className="border-primary/30"
-                  />
-                </div>
+              <div className="space-y-2 text-primary">
+                <Label htmlFor="loyalty_points" className="flex items-center gap-2">
+                  <Star className="h-3 w-3 fill-primary" /> Pontos de Fidelidade
+                </Label>
+                <Input
+                  id="loyalty_points"
+                  type="number"
+                  value={formData.loyalty_points}
+                  onChange={(e) =>
+                    setFormData({ ...formData, loyalty_points: parseInt(e.target.value) || 0 })
+                  }
+                  className="border-primary/30"
+                />
               </div>
 
               <div className="space-y-2">

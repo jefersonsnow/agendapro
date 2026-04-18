@@ -1000,43 +1000,45 @@ export default function AgendaPage() {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="client-id" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("client")}</Label>
-                    <Select
-                      value={formData.client_id}
-                      onValueChange={(value) =>
-                        setFormData({ ...formData, client_id: value, quick_name: "" })
-                      }
-                    >
-                      <SelectTrigger id="client-id" className="h-12 rounded-xl">
-                        <SelectValue placeholder={t("selectClient")} />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {clients.map((client) => (
-                          <SelectItem key={client.id} value={client.id}>
-                            <div className="flex items-center gap-2">
-                              <User className="h-4 w-4" />
-                              {client.name}
-                            </div>
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
+                {!selectedAppointment && (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="client-id" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("client")}</Label>
+                      <Select
+                        value={formData.client_id}
+                        onValueChange={(value) =>
+                          setFormData({ ...formData, client_id: value, quick_name: "" })
+                        }
+                      >
+                        <SelectTrigger id="client-id" className="h-12 rounded-xl">
+                          <SelectValue placeholder={t("selectClient")} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {clients.map((client) => (
+                            <SelectItem key={client.id} value={client.id}>
+                              <div className="flex items-center gap-2">
+                                <User className="h-4 w-4" />
+                                {client.name}
+                              </div>
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
 
-                  <div className="space-y-2">
-                    <Label htmlFor="quick_name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome (Novo Cliente)</Label>
-                    <Input
-                      id="quick_name"
-                      placeholder="Ou digite um nome rápido..."
-                      value={formData.quick_name}
-                      autoComplete="off"
-                      onChange={(e) => setFormData({ ...formData, quick_name: e.target.value, client_id: "" })}
-                      className="h-12 rounded-xl border-dashed"
-                    />
+                    <div className="space-y-2">
+                      <Label htmlFor="quick_name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome (Novo Cliente)</Label>
+                      <Input
+                        id="quick_name"
+                        placeholder="Ou digite um nome rápido..."
+                        value={formData.quick_name}
+                        autoComplete="off"
+                        onChange={(e) => setFormData({ ...formData, quick_name: e.target.value, client_id: "" })}
+                        className="h-12 rounded-xl border-dashed"
+                      />
+                    </div>
                   </div>
-                </div>
+                )}
 
                 <div className="space-y-2">
                   <Label htmlFor="service-id" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("service")}</Label>
