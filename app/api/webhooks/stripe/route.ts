@@ -27,7 +27,7 @@ export async function POST(request: Request) {
     }
 
     const stripe = new Stripe(secretKey, {
-      apiVersion: "2024-06-20", // Utilize a versão mais recente ou a que o seu projeto preferir
+      apiVersion: "2026-03-25.dahlia" as any, 
     })
 
     let event: Stripe.Event

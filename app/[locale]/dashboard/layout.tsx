@@ -71,7 +71,7 @@ export default function DashboardLayout({
 
     async function fetchRole() {
       const data = await getUserRole()
-      setUser(data)
+      setUser(data as any)
     }
     fetchRole()
     window.addEventListener("profileUpdated", fetchRole)

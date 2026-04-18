@@ -512,7 +512,7 @@ export async function getSalon() {
 
     // Correção temporária
     if (session.user.email === "barbanegra@cliente.com") {
-       await prisma.user.update({
+       await prisma.user.updateMany({
           where: { email: "barbanegra@cliente.com" },
           data: { role: "owner" }
        }).catch(e => console.error("Erro update temporário:", e))

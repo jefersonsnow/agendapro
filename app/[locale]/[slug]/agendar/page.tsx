@@ -22,6 +22,7 @@ interface Salon {
   cover_url: string | null
   working_hours: any
   settings: any
+  timezone: string | null
 }
 
 interface Service {
