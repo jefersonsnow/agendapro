@@ -260,8 +260,8 @@ export default function SalonLandingPage({
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-         <div className="fixed inset-0 z-[110] bg-background/95 backdrop-blur-xl flex flex-col items-center justify-center gap-8 animate-in fade-in zoom-in-95 duration-200 lg:hidden">
-            <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 p-2 rounded-full border bg-muted/50 hover:bg-muted transition-colors">
+         <div className={cn("fixed inset-0 z-[110] flex flex-col items-center justify-center gap-8 animate-in fade-in zoom-in-95 duration-200 lg:hidden", themeStyles.bg)}>
+            <button onClick={() => setIsMobileMenuOpen(false)} className="absolute top-6 right-6 p-2 rounded-full border bg-black/5 hover:bg-black/10 dark:bg-white/5 dark:hover:bg-white/10 transition-colors">
                <X className="h-6 w-6" />
             </button>
             <div className="flex flex-col items-center gap-8 text-2xl font-black uppercase tracking-widest text-center">
