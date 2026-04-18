@@ -39,7 +39,8 @@ export default function LoginPage() {
         throw error;
       }
       
-      setError("Erro técnico ao aceder ao painel.")
+      console.error("Login Error:", error)
+      setError(error.message || "Erro técnico ao aceder ao painel.")
     } finally {
       setIsLoading(false)
     }
