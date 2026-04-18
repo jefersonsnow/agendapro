@@ -20,16 +20,26 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         slug: { label: "Slug", type: "text" }
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null
+        console.log("--- AUTH DEBUG START ---")
+        console.log("Email attempting login:", credentials?.email)
+        console.log("Slug provided:", credentials?.slug)
+        
+        if (!credentials?.email || !credentials?.password) {
+          console.log("Auth Error: Missing email or password")
+          return null
+        }
 
         let user;
         const email = credentials.email as string;
         const slug = credentials.slug as string;
 
         if (slug) {
-          // Login isolado por salão
+          console.log("Type: Branded Login (Slug:", slug, ")")
           const salon = await prisma.salon.findUnique({ where: { slug } })
-          if (!salon) return null
+          if (!salon) {
+            console.log("Auth Error: Salon not found for slug:", slug)
+            return null
+          }
 
           user = await prisma.user.findFirst({
             where: { 
@@ -39,7 +49,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
             include: { salon: true }
           })
         } else {
-          // Login global (Admin)
+          console.log("Type: Global/Admin Login")
           user = await prisma.user.findFirst({
             where: { 
               email,
@@ -49,15 +59,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
           })
         }
 
-        if (!user || !user.password) return null
+        if (!user) {
+          console.log("Auth Error: User not found in DB for email:", email)
+          return null
+        }
+        
+        if (!user.password) {
+          console.log("Auth Error: User has no password set")
+          return null
+        }
+
+        console.log("User found ID:", user.id, "Role:", user.role)
 
         const isValid = await bcrypt.compare(
           credentials.password as string,
           user.password
         )
 
+        console.log("Password Valid?", isValid)
+
         if (!isValid) return null
 
+        console.log("Auth Success!")
         return {
           id: user.id,
           name: user.name,
