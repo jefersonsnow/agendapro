@@ -281,3 +281,13 @@ export async function recoverPassword(email: string, slug?: string) {
     return { error: "Ocorreu um erro inesperado." }
   }
 }
+
+export async function testConnection() {
+  try {
+    const count = await prisma.user.count()
+    return { success: true, count }
+  } catch (error: any) {
+    console.error("DB Test Connection Error:", error)
+    return { success: false, error: error.message }
+  }
+}
