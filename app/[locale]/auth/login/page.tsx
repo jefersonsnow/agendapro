@@ -60,20 +60,6 @@ export default function LoginPage() {
               <CardDescription>
                 Aceda ao painel do seu salão
               </CardDescription>
-              {process.env.NODE_ENV === "development" || true && (
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="mt-2 text-[10px] opacity-20 hover:opacity-100"
-                  onClick={async () => {
-                    const { testConnection } = await import("@/lib/actions/auth")
-                    const res = await testConnection()
-                    alert(res.success ? "✅ DB Connected: " + res.count + " users" : "❌ DB Error: " + res.error)
-                  }}
-                >
-                  Debug DB Connection
-                </Button>
-              )}
             </CardHeader>
             <CardContent>
               <form onSubmit={handleLogin}>

@@ -178,15 +178,12 @@ export async function login(formData: any) {
       return { error: "Credenciais inválidas para este acesso." }
     }
 
-    console.log("Login Action: Attempting login for", email, "with slug", slug)
-    
     await signIn("credentials", {
       email,
       password,
       slug: slug || "", // Passamos o slug para o authorize no auth.ts
       redirectTo: targetUrl,
     })
-    console.log("Login Action: signIn called successfully (if no redirect happened)")
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -282,12 +279,3 @@ export async function recoverPassword(email: string, slug?: string) {
   }
 }
 
-export async function testConnection() {
-  try {
-    const count = await prisma.user.count()
-    return { success: true, count }
-  } catch (error: any) {
-    console.error("DB Test Connection Error:", error)
-    return { success: false, error: error.message }
-  }
-}

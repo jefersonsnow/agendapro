@@ -77,7 +77,10 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
 
         console.log("Password Valid?", isValid)
 
-        if (!isValid) return null
+        if (!isValid) {
+          console.log("Auth Error: Password mismatch")
+          return null
+        }
 
         console.log("Auth Success!")
         return {

@@ -117,7 +117,8 @@ export async function getBusySlots(staffId: string, date: Date) {
 
 export async function createBooking(data: any) {
   try {
-    const { salonId, serviceId, staffId, startsAt, endsAt, clientInfo } = data
+    const { serviceId, staffId, startsAt, endsAt, clientInfo } = data
+    const salonId = data.salonId // keeping it if used later, but wait, it is used!
     if (!salonId || !serviceId || !staffId) return { error: "Erro: Dados incompletos." }
     
     const startsAtDateRaw = new Date(startsAt)
