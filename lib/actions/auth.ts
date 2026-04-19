@@ -65,6 +65,56 @@ export async function signUp(formData: any) {
       return { user, salon }
     })
 
+  // === INÍCIO DO ENVIO DE E-MAIL ===
+  try {
+    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
+    const config = configs?.[0];
+    let extraHtml = "";
+    
+    if (config?.welcome_email_config) {
+       try {
+         const we = JSON.parse(config.welcome_email_config);
+         if (we.enableExtraContent && we.extraHtmlContent) {
+           extraHtml = we.extraHtmlContent;
+         }
+       } catch (e) {}
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
+    const loginLink = `${appUrl}/pt/${result.salon.slug}/login`;
+
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #0D9488;">Bem-vindo(a) ao AgendarPro!</h2>
+        <p>Olá,</p>
+        <p>O salão <strong>${salonName}</strong> foi registado com sucesso!</p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
+          <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
+          <p><strong>E-mail:</strong> ${email}</p>
+          <p><strong>Palavra-passe:</strong> ${password}</p>
+        </div>
+        
+        <p style="font-size: 12px; color: #6b7280;">Recomendamos que guarde esta palavra-passe num local seguro ou a altere assim que entrar no sistema.</p>
+        
+        ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
+        
+        <br/>
+        <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      subject: `Bem-vindo ao AgendarPro - ${salonName}`,
+      html: emailHtml
+    });
+  } catch (err) {
+    console.error("Erro ao enviar e-mail de boas-vindas:", err);
+  }
+  // === FIM DO ENVIO DE E-MAIL ===
+
   return { success: true }
 }
 
@@ -139,6 +189,56 @@ export async function signUpFreeTrial(formData: any) {
 
     return { user, salon }
   })
+
+  // === INÍCIO DO ENVIO DE E-MAIL ===
+  try {
+    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
+    const config = configs?.[0];
+    let extraHtml = "";
+    
+    if (config?.welcome_email_config) {
+       try {
+         const we = JSON.parse(config.welcome_email_config);
+         if (we.enableExtraContent && we.extraHtmlContent) {
+           extraHtml = we.extraHtmlContent;
+         }
+       } catch (e) {}
+    }
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
+    const loginLink = `${appUrl}/pt/${result.salon.slug}/login`;
+
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #0D9488;">Bem-vindo(a) ao AgendarPro!</h2>
+        <p>Olá <strong>${name}</strong>,</p>
+        <p>O salão <strong>${salonName}</strong> foi registado com sucesso e os seus 30 dias grátis já começaram!</p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
+          <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
+          <p><strong>E-mail:</strong> ${email}</p>
+          <p><strong>Palavra-passe:</strong> ${password}</p>
+        </div>
+        
+        <p style="font-size: 12px; color: #6b7280;">Recomendamos que guarde esta palavra-passe num local seguro ou a altere assim que entrar no sistema.</p>
+        
+        ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
+        
+        <br/>
+        <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      subject: `Bem-vindo ao AgendarPro - ${salonName}`,
+      html: emailHtml
+    });
+  } catch (err) {
+    console.error("Erro ao enviar e-mail de boas-vindas:", err);
+  }
+  // === FIM DO ENVIO DE E-MAIL ===
 
   return { success: true }
 }

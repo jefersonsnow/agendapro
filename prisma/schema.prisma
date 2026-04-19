@@ -316,9 +316,8 @@ model GlobalConfig {
   promotion_config String? @db.Text // JSON: trialPremiumActive, promoText, etc.
   seo_config      String?  @db.Text // JSON: metaTitle, metaDesc, fbPixel, etc.
   sales_page_config String? @db.Text // JSON: videoUrl, headline, subheadline, timerDate, fbPixel, googlePixel
+  welcome_email_config String? @db.Text // JSON: enableExtraContent, extraHtmlContent
   updated_at      DateTime @updatedAt
-
-
   @@map("global_configs")
 }
 

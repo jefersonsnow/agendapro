@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { toast } from "sonner"
-import { Globe, ShieldCheck, Zap, Copy, Save, Loader2, Sparkles, Megaphone, CreditCard } from "lucide-react"
+import { Globe, ShieldCheck, Zap, Copy, Save, Loader2, Sparkles, Megaphone, CreditCard, Mail } from "lucide-react"
 
 export function SystemSettings() {
   const [loading, setLoading] = useState(true)
@@ -27,7 +27,8 @@ export function SystemSettings() {
     },
     stripe_configs: { secretKey: "", publishableKey: "", webhookSecret: "", productBasicId: "", productPremiumId: "" },
     kiwify_configs: { webhookSecret: "", productBasicId: "", productPremiumId: "" },
-    sales_page_config: { headline: "", subheadline: "", videoUrl: "", timerDate: "", fbPixel: "", googlePixel: "" }
+    sales_page_config: { headline: "", subheadline: "", videoUrl: "", timerDate: "", fbPixel: "", googlePixel: "" },
+    welcome_email_config: { enableExtraContent: false, extraHtmlContent: "" }
   })
 
   useEffect(() => {
@@ -41,6 +42,7 @@ export function SystemSettings() {
       const kw = JSON.parse(data.kiwify_configs || "{}")
       const st = JSON.parse(data.stripe_configs || "{}")
       const sp = JSON.parse(data.sales_page_config || "{}")
+      const we = JSON.parse(data.welcome_email_config || "{}")
       const pl = lp.plans || config.plans
       
       setConfig({
@@ -73,6 +75,10 @@ export function SystemSettings() {
           timerDate: sp.timerDate || "",
           fbPixel: sp.fbPixel || "",
           googlePixel: sp.googlePixel || ""
+        },
+        welcome_email_config: {
+          enableExtraContent: we.enableExtraContent || false,
+          extraHtmlContent: we.extraHtmlContent || ""
         }
       })
     } catch (error) {
@@ -481,6 +487,48 @@ export function SystemSettings() {
                      </Button>
                      <p className="text-center text-[10px] text-muted-foreground mt-2 italic">Use este link nas suas campanhas de tráfego pago.</p>
                   </div>
+               </div>
+            </div>
+         </CardContent>
+      </Card>
+
+      {/* TRANSACTIONAL EMAIL CONFIG */}
+      <Card className="border-2 border-primary/10 shadow-xl shadow-primary/5 rounded-[2rem] overflow-hidden mt-8">
+         <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
+            <CardTitle className="text-xl flex items-center gap-3">
+               <div className="h-10 w-10 rounded-xl bg-blue-500 flex items-center justify-center shadow-lg shadow-blue-500/20">
+                  <Mail className="h-5 w-5 text-white" />
+               </div>
+               E-mails Transacionais & Boas-Vindas
+            </CardTitle>
+            <CardDescription>Configure conteúdo extra e tutoriais que serão enviados automaticamente no registo de novos salões.</CardDescription>
+         </CardHeader>
+         <CardContent className="space-y-8 pt-8">
+            <div className="space-y-6">
+               <div className="flex items-center justify-between bg-muted/30 p-4 rounded-xl border">
+                  <div className="space-y-0.5">
+                     <Label className="text-sm font-bold">Ativar Conteúdo Extra de Boas-Vindas</Label>
+                     <p className="text-xs text-muted-foreground">Se ativo, o HTML abaixo será injetado no final do e-mail de boas vindas.</p>
+                  </div>
+                  <Button 
+                    size="sm" 
+                    variant={config.welcome_email_config?.enableExtraContent ? "default" : "outline"}
+                    onClick={() => setConfig({...config, welcome_email_config: {...config.welcome_email_config, enableExtraContent: !config.welcome_email_config?.enableExtraContent}})}
+                    className={config.welcome_email_config?.enableExtraContent ? "bg-green-600 hover:bg-green-700" : ""}
+                  >
+                    {config.welcome_email_config?.enableExtraContent ? "Ativado" : "Desativado"}
+                  </Button>
+               </div>
+
+               <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">HTML Personalizado (Tutoriais, Links, Dicas)</Label>
+                  <Textarea 
+                    className="border-2 rounded-xl min-h-[200px] font-mono text-xs"
+                    value={config.welcome_email_config?.extraHtmlContent || ""} 
+                    onChange={(e) => setConfig({...config, welcome_email_config: {...config.welcome_email_config, extraHtmlContent: e.target.value}})}
+                    placeholder="<div style='padding: 20px; background: #f9f9f9; border-radius: 8px;'>\n  <h3>Dica 1: Configure sua Agenda!</h3>\n  <a href='https://youtube.com/...'>Assista ao Tutorial</a>\n</div>"
+                  />
+                  <p className="text-[10px] text-muted-foreground pl-1">Nota: Este conteúdo será inserido logo abaixo das credenciais (link, email e senha) geradas automaticamente.</p>
                </div>
             </div>
          </CardContent>
