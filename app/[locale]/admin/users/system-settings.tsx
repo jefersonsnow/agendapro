@@ -26,7 +26,8 @@ export function SystemSettings() {
        premium: { price: 39, appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
     },
     stripe_configs: { secretKey: "", publishableKey: "", webhookSecret: "", productBasicId: "", productPremiumId: "" },
-    kiwify_configs: { webhookSecret: "", productBasicId: "", productPremiumId: "" }
+    kiwify_configs: { webhookSecret: "", productBasicId: "", productPremiumId: "" },
+    sales_page_config: { headline: "", subheadline: "", videoUrl: "", timerDate: "", fbPixel: "", googlePixel: "" }
   })
 
   useEffect(() => {
@@ -39,6 +40,7 @@ export function SystemSettings() {
       const lp = JSON.parse(data.landing_page || "{}")
       const kw = JSON.parse(data.kiwify_configs || "{}")
       const st = JSON.parse(data.stripe_configs || "{}")
+      const sp = JSON.parse(data.sales_page_config || "{}")
       const pl = lp.plans || config.plans
       
       setConfig({
@@ -63,6 +65,14 @@ export function SystemSettings() {
           webhookSecret: st.webhookSecret || "",
           productBasicId: st.productBasicId || "",
           productPremiumId: st.productPremiumId || ""
+        },
+        sales_page_config: {
+          headline: sp.headline || "",
+          subheadline: sp.subheadline || "",
+          videoUrl: sp.videoUrl || "",
+          timerDate: sp.timerDate || "",
+          fbPixel: sp.fbPixel || "",
+          googlePixel: sp.googlePixel || ""
         }
       })
     } catch (error) {
@@ -382,6 +392,99 @@ export function SystemSettings() {
            </Button>
         </div>
       </div>
+
+      {/* SALES PAGE CONFIG */}
+      <Card className="border-2 border-primary/10 shadow-xl shadow-primary/5 rounded-[2rem] overflow-hidden mt-8">
+         <CardHeader className="bg-primary/5 border-b border-primary/5 pb-8">
+            <CardTitle className="text-xl flex items-center gap-3">
+               <div className="h-10 w-10 rounded-xl bg-orange-500 flex items-center justify-center shadow-lg shadow-orange-500/20">
+                  <Megaphone className="h-5 w-5 text-white" />
+               </div>
+               Página de Vendas (Tráfego Pago)
+            </CardTitle>
+            <CardDescription>Configure a Landing Page de Alta Conversão focado em tráfego de anúncios (Sem Menus).</CardDescription>
+         </CardHeader>
+         <CardContent className="space-y-8 pt-8">
+            <div className="grid lg:grid-cols-2 gap-8">
+               <div className="space-y-6">
+                  <h4 className="font-bold text-sm flex items-center gap-2"><Sparkles className="h-4 w-4 text-primary" /> Copywriting & VSL</h4>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Headline Principal (PNL)</Label>
+                     <Input 
+                       className="h-12 border-2 rounded-xl"
+                       value={config.sales_page_config?.headline || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, headline: e.target.value}})}
+                       placeholder="A sua agenda está vazia? Descubra o segredo..."
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Sub-Headline</Label>
+                     <Textarea 
+                       className="border-2 rounded-xl min-h-[80px]"
+                       value={config.sales_page_config?.subheadline || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, subheadline: e.target.value}})}
+                       placeholder="O método testado por mais de 500 salões para faturar 3x mais."
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Link do Vídeo (VSL - YouTube Embed)</Label>
+                     <Input 
+                       className="h-12 border-2 rounded-xl"
+                       value={config.sales_page_config?.videoUrl || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, videoUrl: e.target.value}})}
+                       placeholder="https://www.youtube.com/embed/..."
+                     />
+                  </div>
+               </div>
+               
+               <div className="space-y-6">
+                  <h4 className="font-bold text-sm flex items-center gap-2"><Globe className="h-4 w-4 text-primary" /> Tracking & Urgência</h4>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Facebook Pixel ID</Label>
+                     <Input 
+                       className="h-12 border-2 rounded-xl"
+                       value={config.sales_page_config?.fbPixel || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, fbPixel: e.target.value}})}
+                       placeholder="123456789012345"
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Google Ads / Analytics ID</Label>
+                     <Input 
+                       className="h-12 border-2 rounded-xl"
+                       value={config.sales_page_config?.googlePixel || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, googlePixel: e.target.value}})}
+                       placeholder="G-XXXXXX / AW-XXXXX"
+                     />
+                  </div>
+                  <div className="space-y-2">
+                     <Label className="text-[10px] font-black uppercase tracking-widest text-muted-foreground pl-1">Contador de Urgência (Data Final)</Label>
+                     <Input 
+                       type="datetime-local"
+                       className="h-12 border-2 rounded-xl"
+                       value={config.sales_page_config?.timerDate || ""} 
+                       onChange={(e) => setConfig({...config, sales_page_config: {...config.sales_page_config, timerDate: e.target.value}})}
+                     />
+                  </div>
+
+                  <div className="pt-4 border-t border-dashed">
+                     <Button 
+                        variant="secondary" 
+                        className="w-full h-12 rounded-xl font-bold shadow-sm"
+                        onClick={() => {
+                           const url = `${window.location.origin}/pt/oferta-exclusiva`
+                           navigator.clipboard.writeText(url)
+                           toast.success("Link da página de vendas copiado!")
+                        }}
+                     >
+                        <Copy className="h-4 w-4 mr-2" /> Copiar Link da Oferta
+                     </Button>
+                     <p className="text-center text-[10px] text-muted-foreground mt-2 italic">Use este link nas suas campanhas de tráfego pago.</p>
+                  </div>
+               </div>
+            </div>
+         </CardContent>
+      </Card>
 
       {/* PLAN DETAILS TIPS */}
       <Card className="bg-muted/50 border-primary/5">

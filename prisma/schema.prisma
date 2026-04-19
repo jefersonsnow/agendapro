@@ -315,6 +315,7 @@ model GlobalConfig {
   support_config  String?  @db.Text // JSON: whatsappNumber, etc.
   promotion_config String? @db.Text // JSON: trialPremiumActive, promoText, etc.
   seo_config      String?  @db.Text // JSON: metaTitle, metaDesc, fbPixel, etc.
+  sales_page_config String? @db.Text // JSON: videoUrl, headline, subheadline, timerDate, fbPixel, googlePixel
   updated_at      DateTime @updatedAt
 
 
