@@ -184,23 +184,27 @@ export default function PlansPage() {
                               if (plan.id === "free") return
                               
                               // Se não houver Price ID configurado, caímos no suporte via WhatsApp/Email
-                              try {
-                                 setUpgradingPlan(plan.id)
-                                 await createCheckoutSession(plan.id as any)
-                              } catch (err: any) {
-                                 console.error("Erro ao iniciar checkout:", err)
-                                 
-                                 // Fallback para WhatsApp se o Stripe falhar (ex: sem chaves configuradas)
-                                 const text = encodeURIComponent(`Olá Napp! Tentei fazer o upgrade para o plano ${plan.name} mas ocorreu um erro. Pode ajudar-me? (Salão: ${salon?.name})`)
-                                 const url = support?.whatsappNumber 
-                                    ? `https://wa.me/${support.whatsappNumber.replace(/\D/g, '')}?text=${text}`
-                                    : `mailto:contato@napp.pt?subject=Erro no Upgrade ${plan.name}&body=${text}`
-                                 
-                                 window.open(url, "_blank")
-                                 toast.error("Não foi possível iniciar o checkout automático. Abrindo suporte...", { duration: 5000 })
-                              } finally {
-                                 setUpgradingPlan(null)
-                              }
+                               try {
+                                  setUpgradingPlan(plan.id)
+                                  const result = await createCheckoutSession(plan.id as any)
+                                  if (result?.url) {
+                                     window.location.assign(result.url)
+                                  }
+                               } catch (err: any) {
+                                  console.error("Erro ao iniciar checkout:", err)
+                                  
+                                  const errorMessage = err?.message || "Erro desconhecido"
+                                  
+                                  const text = encodeURIComponent(`Olá Napp! Tentei fazer o upgrade para o plano ${plan.name} mas ocorreu um erro: ${errorMessage}. Pode ajudar-me? (Salão: ${salon?.name})`)
+                                  const url = support?.whatsappNumber 
+                                     ? `https://wa.me/${support.whatsappNumber.replace(/\D/g, '')}?text=${text}`
+                                     : `mailto:contato@napp.pt?subject=Erro no Upgrade ${plan.name}&body=${text}`
+                                  
+                                  window.open(url, "_blank")
+                                  toast.error(`Falha no checkout: ${errorMessage}. Abrindo suporte...`, { duration: 7000 })
+                               } finally {
+                                  setUpgradingPlan(null)
+                               }
                            }}
                            className={cn(
                               "w-full h-14 rounded-2xl transition-all text-xs font-black uppercase tracking-wider shadow-xl group",
