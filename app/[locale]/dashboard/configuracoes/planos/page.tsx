@@ -187,6 +187,11 @@ export default function PlansPage() {
                                try {
                                   setUpgradingPlan(plan.id)
                                   const result = await createCheckoutSession(plan.id as any)
+                                  
+                                  if (result?.error) {
+                                     throw new Error(result.error)
+                                  }
+
                                   if (result?.url) {
                                      window.location.assign(result.url)
                                   }

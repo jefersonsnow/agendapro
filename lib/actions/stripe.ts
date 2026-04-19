@@ -10,17 +10,15 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
   try {
     const session = await auth()
     if (!session?.user?.id || !session?.user?.email) {
-      throw new Error("Não autorizado. Faça login para continuar.")
+      return { error: "Não autorizado. Faça login para continuar." }
     }
 
-    // 1. Obter configurações da Stripe via Prisma
-    const globalConfig = await (prisma as any).globalConfig.findUnique({
-      where: { id: 'singleton' },
-      select: { stripe_configs: true }
-    })
+    // 1. Obter configurações da Stripe
+    const configs = await (prisma as any).$queryRawUnsafe(`SELECT stripe_configs FROM global_configs WHERE id = 'singleton' LIMIT 1`)
+    const globalConfig = configs?.[0]
     
     if (!globalConfig?.stripe_configs) {
-      throw new Error("Configurações da Stripe não encontradas.")
+      return { error: "Configurações da Stripe não encontradas no banco de dados." }
     }
 
     const stripeConfigs = typeof globalConfig.stripe_configs === 'string' 
@@ -31,11 +29,11 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
     const priceId = planId === "basic" ? stripeConfigs.productBasicId : stripeConfigs.productPremiumId
 
     if (!secretKey) {
-      throw new Error("Secret Key da Stripe não configurada.")
+      return { error: "Secret Key da Stripe não encontrada no painel administrativo." }
     }
 
     if (!priceId) {
-      throw new Error(`Price ID para o plano ${planId} não configurado.`)
+      return { error: `ID de Preço (${planId}) não encontrado no painel administrativo.` }
     }
 
     const stripe = new Stripe(secretKey)
@@ -65,12 +63,12 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
     })
 
     if (!checkoutSession.url) {
-      throw new Error("A Stripe não retornou uma URL.")
+      return { error: "A Stripe não retornou uma URL válida." }
     }
 
     return { url: checkoutSession.url }
   } catch (error: any) {
-    console.error("ERRO NO CHECKOUT:", error)
-    throw new Error(error.message || "Erro no checkout")
+    console.error("ERRO NO CHECKOUT STRIPE:", error)
+    return { error: error.message || "Erro interno no checkout" }
   }
 }
