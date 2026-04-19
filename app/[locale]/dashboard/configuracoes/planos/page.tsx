@@ -8,12 +8,30 @@ import { CheckCircle2, Sparkles, Zap, ShieldCheck, Crown, ChevronRight, MessageS
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
+import { createCheckoutSession } from "@/lib/actions/stripe"
+import { toast } from "sonner"
+import { useSearchParams } from "next/navigation"
+import { Loader2 } from "lucide-react"
 
 export default function PlansPage() {
   const t = useTranslations("Dashboard")
   const [salon, setSalon] = useState<any>(null)
   const [support, setSupport] = useState<any>({})
   const [loading, setLoading] = useState(true)
+  const [upgradingPlan, setUpgradingPlan] = useState<string | null>(null)
+  
+  const searchParams = useSearchParams()
+  const success = searchParams.get("success")
+  const canceled = searchParams.get("canceled")
+
+  useEffect(() => {
+    if (success) {
+      toast.success("Pagamento confirmado! O seu plano será atualizado em instantes.", { duration: 8000 })
+    }
+    if (canceled) {
+      toast.error("O processo de checkout foi cancelado.")
+    }
+  }, [success, canceled])
 
   useEffect(() => {
     async function fetchData() {
@@ -136,7 +154,29 @@ export default function PlansPage() {
                         </Button>
                      ) : (
                         <Button 
-                           asChild 
+                           disabled={upgradingPlan !== null}
+                           onClick={async () => {
+                              if (plan.id === "free") return
+                              
+                              // Se não houver Price ID configurado, caímos no suporte via WhatsApp/Email
+                              try {
+                                 setUpgradingPlan(plan.id)
+                                 await createCheckoutSession(plan.id as any)
+                              } catch (err: any) {
+                                 console.error("Erro ao iniciar checkout:", err)
+                                 
+                                 // Fallback para WhatsApp se o Stripe falhar (ex: sem chaves configuradas)
+                                 const text = encodeURIComponent(`Olá Napp! Tentei fazer o upgrade para o plano ${plan.name} mas ocorreu um erro. Pode ajudar-me? (Salão: ${salon?.name})`)
+                                 const url = support?.whatsappNumber 
+                                    ? `https://wa.me/${support.whatsappNumber.replace(/\D/g, '')}?text=${text}`
+                                    : `mailto:contato@napp.pt?subject=Erro no Upgrade ${plan.name}&body=${text}`
+                                 
+                                 window.open(url, "_blank")
+                                 toast.error("Não foi possível iniciar o checkout automático. Abrindo suporte...", { duration: 5000 })
+                              } finally {
+                                 setUpgradingPlan(null)
+                              }
+                           }}
                            className={cn(
                               "w-full h-14 rounded-2xl transition-all text-xs font-black uppercase tracking-wider shadow-xl group",
                               plan.id === "premium" 
@@ -144,13 +184,14 @@ export default function PlansPage() {
                                  : "bg-primary text-white hover:bg-primary/90 shadow-primary/20"
                            )}
                         >
-                           <a href={support?.whatsappNumber 
-                              ? `https://wa.me/${support.whatsappNumber.replace(/\D/g, '')}?text=${encodeURIComponent(`Olá Napp! Gostaria de mudar para o plano ${plan.name} para o meu salão ${salon?.name}.`)}`
-                              : `mailto:contato@napp.pt?subject=Upgrade para ${plan.name} - ${salon?.name}&body=Olá Equipa Napp,%0D%0A%0D%0ADesejo mudar para o plano ${plan.name} no AgendarPro para o meu salão [${salon?.name}].`
-                           } target="_blank" rel="noopener noreferrer">
-                              {plan.id === "premium" ? "Falar com Consultor" : `Upgrade para ${plan.name}`} 
-                              <MessageSquare className="ml-2 h-5 w-5 group-hover:animate-pulse" />
-                           </a>
+                           {upgradingPlan === plan.id ? (
+                              <Loader2 className="h-5 w-5 animate-spin" />
+                           ) : (
+                              <>
+                                 {plan.id === "premium" ? "Assinar Premium" : `Assinar ${plan.name}`} 
+                                 <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                              </>
+                           )}
                         </Button>
                      )}
                   </div>
