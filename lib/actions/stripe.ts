@@ -54,6 +54,9 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
         },
       ],
       mode: "subscription",
+      tax_id_collection: {
+        enabled: true,
+      },
       success_url: `${baseUrl}/dashboard/configuracoes/planos?success=true`,
       cancel_url: `${baseUrl}/dashboard/configuracoes/planos?canceled=true`,
       metadata: {
@@ -132,6 +135,9 @@ export async function generateStripePaymentLink(priceId: string) {
           quantity: 1,
         },
       ],
+      tax_id_collection: {
+        enabled: true,
+      },
     })
 
     return { url: paymentLink.url }
