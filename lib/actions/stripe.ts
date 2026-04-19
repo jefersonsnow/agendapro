@@ -59,6 +59,6 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
     throw new Error("Falha ao criar sessão de checkout da Stripe.")
   }
 
-  // 4. Redirecionar o utilizador
-  return redirect(checkoutSession.url)
+  // 4. Retornar a URL para o cliente redirecionar
+  return { url: checkoutSession.url }
 }

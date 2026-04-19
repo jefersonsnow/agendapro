@@ -49,6 +49,27 @@ export default function PlansPage() {
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
 
   const currentPlan = salon?.plan || "free"
+  const isTrial = salon?.status === "trial"
+
+  // Sincronizar com a Home Page (Dados dinâmicos do CMS)
+  const planConfigs = salon?.dynamicPlans || {
+    free: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
+    basic: { price: "9.90", appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true },
+    premium: { price: "24.90", appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
+  }
+
+  const getPlanItems = (p: any) => [
+    [p.appointments_per_month === -1 ? "Agendamentos ilimitados" : `${p.appointments_per_month} agendamentos/mês`, true],
+    [p.staff === -1 ? "Profissionais ilimitados" : p.staff === 1 ? "1 Profissional" : `Até ${p.staff} Profissionais`, true],
+    [p.clients === -1 ? "Clientes ilimitados" : `Até ${p.clients} Clientes`, true],
+    [p.services === -1 ? "Serviços ilimitados" : `Até ${p.services} Serviços`, true],
+    ["Página de reservas online", true],
+    ["QR Code de reserva", p.qr_code],
+    ["Logótipo + Capa", p.logo || p.cover],
+    ["Relatórios de BI", p.reports],
+    ["Controlo de comissões", p.commissions],
+    ["Backup & Exportação Profissional", p.professional_export],
+  ]
 
   const PLANS = [
     {
@@ -57,35 +78,36 @@ export default function PlansPage() {
       price: "0€",
       desc: "Ideal para quem está a começar sozinho.",
       color: "bg-slate-500",
-      features: ["Até 50 Clientes", "Equipa: 1 Profissional", "Serviços: 10 Máximo", "Agenda Digital Básica", "Landing Page Padrão"],
+      features: getPlanItems(planConfigs.free),
     },
     {
       id: "basic",
       name: "Basic",
-      price: "9,90€",
+      price: `${planConfigs.basic.price}€`,
       desc: "Para pequenos salões e estúdios em crescimento.",
       color: "bg-primary",
-      features: ["Até 500 Clientes", "Equipa: Até 3 Profissionais", "Serviços: 50 Máximo", "Gestão de Galeria de Fotos", "Personalização do Slogan", "Relatórios Financeiros Básicos"],
+      features: getPlanItems(planConfigs.basic),
     },
     {
        id: "premium",
        name: "Premium",
-       price: "24,90€",
+       price: `${planConfigs.premium.price}€`,
        desc: "A solução total para dominar o seu mercado local.",
        featured: true,
        color: "bg-slate-950",
-       features: [
-          "ILIMITADO: Clientes & Agendamentos",
-          "Equipa: Sem Limite de Profissionais",
-          "Serviços Personalizados (Ilimitados)",
-          "Exportação Profissional em Excel",
-          "Backup Automático de Dados",
-          "Faturação & Gestão Avançada",
-          "Suporte Prioritário NAPP (WhatsApp)",
-          "Landing Page Ultra-Luxuosa"
-       ],
+       features: getPlanItems(planConfigs.premium),
     }
   ]
+
+  // Regra do Usuário: Não mostrar o FREE se ele já estiver no FREE (ou qualquer plano)
+  // Mostramos apenas as opções de UPGRADE.
+  const upgradeOptions = PLANS.filter(p => {
+    if (currentPlan === "free") return p.id !== "free"
+    if (currentPlan === "basic") return p.id === "premium"
+    if (currentPlan === "premium" && !isTrial) return false // Já é premium real
+    if (currentPlan === "premium" && isTrial) return p.id === "premium" // Permitir comprar premium se for trial
+    return false
+  })
 
   return (
     <div className="max-w-6xl mx-auto pb-20 px-4">
@@ -99,8 +121,11 @@ export default function PlansPage() {
          </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
-         {PLANS.map((plan) => (
+      <div className={cn(
+         "grid grid-cols-1 gap-8 items-stretch max-w-4xl mx-auto",
+         upgradeOptions.length === 2 ? "md:grid-cols-2" : "md:grid-cols-1 max-w-md"
+      )}>
+         {upgradeOptions.map((plan) => (
             <Card 
                key={plan.id} 
                className={cn(
@@ -137,14 +162,14 @@ export default function PlansPage() {
                <CardContent className="p-8 flex-1 flex flex-col">
                   <div className="space-y-4 flex-1">
                      <p className={cn("text-xs font-black uppercase tracking-widest", plan.featured ? "text-slate-500" : "text-muted-foreground/60")}>O que inclui:</p>
-                     <ul className="space-y-3">
-                        {plan.features.map((feature, i) => (
-                           <li key={i} className="flex items-center gap-3 text-sm font-medium">
+                      <ul className="space-y-3">
+                        {plan.features.map(([feature, ok]: any, i: number) => (
+                           <li key={i} className={cn("flex items-center gap-3 text-sm font-medium", !ok && "opacity-30 line-through")}>
                               <CheckCircle2 className={cn("h-4 w-4 shrink-0", plan.featured ? "text-amber-400" : "text-primary")} />
                               <span className={plan.featured ? "text-slate-200" : "text-muted-foreground"}>{feature}</span>
                            </li>
                         ))}
-                     </ul>
+                      </ul>
                   </div>
 
                   <div className="mt-12">
