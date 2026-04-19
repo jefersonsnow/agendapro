@@ -232,8 +232,8 @@ export default function SalesPage() {
                <div className="space-y-4">
                   {[
                      "Página de reservas online a funcionar 24h por dia, 7 dias por semana.",
-                     "Lembretes automáticos via SMS/WhatsApp para acabar com as faltas.",
-                     "Relatórios financeiros para saber exatamente para onde vai o seu dinheiro."
+                     "Gestão de Múltiplos Profissionais com cálculo de Comissões totalmente automatizado.",
+                     "Área de cliente exclusiva, preparada para que eles próprios divulguem o seu salão nas suas redes sociais."
                   ].map((p, i) => (
                      <div key={i} className="flex items-start gap-3">
                         <div className="h-6 w-6 rounded-full bg-green-500/20 text-green-500 flex items-center justify-center shrink-0 mt-0.5"><CheckCircle className="h-4 w-4" /></div>
