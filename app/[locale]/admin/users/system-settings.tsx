@@ -258,8 +258,17 @@ export function SystemSettings() {
                     <code className="text-xs break-all text-primary font-mono bg-background px-3 py-1.5 rounded-lg block border">
                         {webhookUrl}
                     </code>
-                    <p className="text-[10px] text-muted-foreground italic">
+                    <p className="text-[10px] text-muted-foreground italic mt-2">
                         Configure este endpoint no painel da Stripe (Developers {`>`} Webhooks) e selecione eventos como `checkout.session.completed` e `customer.subscription.deleted`.
+                    </p>
+                 </div>
+
+                 {/* AVISO IMPORTANTE */}
+                 <div className="bg-amber-500/10 border-l-4 border-amber-500 p-4 rounded-r-xl">
+                    <p className="text-sm font-bold text-amber-600 dark:text-amber-400">⚠️ Atenção aos IDs de Preço</p>
+                    <p className="text-xs text-muted-foreground mt-1">
+                       A Stripe usa IDs diferentes para o <strong>Produto</strong> (começam com `prod_...`) e para o <strong>Preço</strong> (começam com `price_...`). 
+                       Você deve <strong>obrigatoriamente usar os IDs que começam com <code>price_</code></strong> nos campos abaixo.
                     </p>
                  </div>
 
@@ -302,6 +311,30 @@ export function SystemSettings() {
                           onChange={(e) => setConfig({...config, stripe_configs: {...config.stripe_configs, productBasicId: e.target.value}})}
                           placeholder="price_..."
                         />
+                        {config.stripe_configs?.productBasicId?.startsWith('price_') && (
+                           <Button 
+                             size="sm" 
+                             variant="outline" 
+                             className="w-full text-[10px] mt-2 h-7"
+                             onClick={async () => {
+                               const toastId = toast.loading("Gerando link...")
+                               try {
+                                  const { generateStripePaymentLink } = await import('@/lib/actions/stripe')
+                                  const res = await generateStripePaymentLink(config.stripe_configs.productBasicId)
+                                  if (res.error) throw new Error(res.error)
+                                  if (res.url) {
+                                     navigator.clipboard.writeText(res.url)
+                                     toast.success("Link copiado para a área de transferência!", { id: toastId })
+                                  }
+                               } catch (err: any) {
+                                  toast.error(err.message || "Erro ao gerar link", { id: toastId })
+                               }
+                             }}
+                           >
+                             <Copy className="h-3 w-3 mr-2" />
+                             Gerar Link de Pagamento (Direto)
+                           </Button>
+                        )}
                     </div>
                     <div className="space-y-2">
                         <Label>Price ID (Premium)</Label>
@@ -310,6 +343,30 @@ export function SystemSettings() {
                           onChange={(e) => setConfig({...config, stripe_configs: {...config.stripe_configs, productPremiumId: e.target.value}})}
                           placeholder="price_..."
                         />
+                        {config.stripe_configs?.productPremiumId?.startsWith('price_') && (
+                           <Button 
+                             size="sm" 
+                             variant="outline" 
+                             className="w-full text-[10px] mt-2 h-7"
+                             onClick={async () => {
+                               const toastId = toast.loading("Gerando link...")
+                               try {
+                                  const { generateStripePaymentLink } = await import('@/lib/actions/stripe')
+                                  const res = await generateStripePaymentLink(config.stripe_configs.productPremiumId)
+                                  if (res.error) throw new Error(res.error)
+                                  if (res.url) {
+                                     navigator.clipboard.writeText(res.url)
+                                     toast.success("Link copiado para a área de transferência!", { id: toastId })
+                                  }
+                               } catch (err: any) {
+                                  toast.error(err.message || "Erro ao gerar link", { id: toastId })
+                               }
+                             }}
+                           >
+                             <Copy className="h-3 w-3 mr-2" />
+                             Gerar Link de Pagamento (Direto)
+                           </Button>
+                        )}
                     </div>
                  </div>
               </CardContent>
@@ -335,8 +392,11 @@ export function SystemSettings() {
                </div>
                <div className="space-y-1">
                   <h4 className="font-bold text-sm">Próximo Passo para Vendas</h4>
-                  <p className="text-xs text-muted-foreground leading-relaxed">
-                     Ao receber um webhook pago da Stripe, o sistema buscará o salão pelo <strong>email do cliente</strong>. Certifique-se de que o cliente use o mesmo email de registo no AgendarPro ao subscrever na Stripe para que a ativação seja instantânea.
+                  <p className="text-xs text-muted-foreground leading-relaxed mb-2">
+                     Ao receber um webhook pago da Stripe, o sistema buscará o salão pelo <strong>email do cliente</strong> inserido no Checkout. Certifique-se de que o cliente use o mesmo email de registo no AgendarPro ao subscrever na Stripe para que a ativação seja instantânea.
+                  </p>
+                  <p className="text-xs text-primary/80 font-bold leading-relaxed">
+                     ⚠️ Importante: Se você enviar o Link Direto por WhatsApp, avise o cliente para colocar o MESMO email que usa para entrar no painel do AgendarPro.
                   </p>
                </div>
             </div>

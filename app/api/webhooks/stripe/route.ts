@@ -26,9 +26,7 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing signature" }, { status: 401 })
     }
 
-    const stripe = new Stripe(secretKey, {
-      apiVersion: "2026-03-25.dahlia" as any, 
-    })
+    const stripe = new Stripe(secretKey)
 
     let event: Stripe.Event
 
