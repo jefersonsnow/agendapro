@@ -100,7 +100,7 @@ export async function signUpFreeTrial(formData: any) {
     return { user, salon }
   })
 
-  // === ENVIO DE E-MAIL (VOLTAR AO MODO SÍNCRONO QUE FUNCIONAVA) ===
+  // === ENVIO DE E-MAIL (MODO SÍNCRONO) ===
   try {
     const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
     const config = configs?.[0];
@@ -184,6 +184,7 @@ export async function login(formData: any) {
     await signIn("credentials", {
       email,
       password,
+      slug: slug || "",
       redirect: false,
     })
 
@@ -201,8 +202,76 @@ export async function login(formData: any) {
   }
 }
 
-export async function logout() {
-  await signOut()
+export async function logout(slug?: string, locale: string = "pt") {
+  if (slug) {
+    await signOut({ redirectTo: `/${locale}/${slug}/login` })
+  } else {
+    await signOut({ redirectTo: `/${locale}/auth/login` })
+  }
+}
+
+export async function logoutAdmin(arg?: any) {
+  const locale = typeof arg === "string" ? arg : "pt"
+  await signOut({ redirectTo: `/${locale}/admin/login` })
+}
+
+export async function recoverPassword(email: string, slug?: string) {
+  try {
+    if (!email) {
+      return { error: "O e-mail é obrigatório." }
+    }
+
+    let user;
+    if (slug) {
+      const salon = await prisma.salon.findUnique({ where: { slug } })
+      if (!salon) return { error: "Salão não encontrado." }
+      
+      user = await prisma.user.findFirst({
+        where: { email, salon_id: salon.id },
+      })
+    } else {
+      user = await prisma.user.findFirst({
+        where: { email, salon_id: null },
+      })
+    }
+
+    if (!user) {
+      return { error: "Não encontrámos uma conta com este e-mail." }
+    }
+
+    const tempPassword = crypto.randomBytes(4).toString("hex")
+    const hashedPassword = await bcrypt.hash(tempPassword, 10)
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { password: hashedPassword },
+    })
+
+    const emailResult = await sendMail({
+      to: email,
+      subject: "A sua nova Palavra-passe - AgendarPro",
+      html: `
+        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+          <h2 style="color: #0D9488;">Recuperação de Palavra-passe</h2>
+          <p>Olá,</p>
+          <p>Foi solicitada uma nova senha para a sua conta corporativa.</p>
+          <p>A sua nova senha de acesso temporária é: <strong>${tempPassword}</strong></p>
+          <p>Aceda ao seu painel com esta senha e não se esqueça de alterá-la imediatamente nas definições da sua conta de login.</p>
+          <br/>
+          <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
+        </div>
+      `,
+    })
+
+    if (emailResult.error) {
+      return { error: "Erro ao enviar e-mail. A sua senha não foi alterada." }
+    }
+
+    return { success: true }
+  } catch (error) {
+    console.error("Recover password error:", error)
+    return { error: "Ocorreu um erro inesperado." }
+  }
 }
 
 export async function impersonateUser(userId: string) {
@@ -213,10 +282,6 @@ export async function impersonateUser(userId: string) {
     })
 
     if (!user) throw new Error("Utilizador não encontrado")
-    
-    // Obter a password original ou usar uma temporária se necessário
-    // Nota: Em produção, o ideal seria um token de impersonation
-    // Aqui vamos apenas forçar o login se formos admin
     
     return { success: true, slug: user.salon?.slug }
   } catch (error) {
