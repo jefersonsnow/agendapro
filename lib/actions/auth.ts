@@ -65,65 +65,54 @@ export async function signUp(formData: any) {
       return { user, salon }
     })
 
-  // === INÍCIO DO ENVIO DE E-MAIL (NON-BLOCKING) ===
-  // Não usamos 'await' aqui para não travar a resposta ao utilizador se o SMTP for lento.
-  (async () => {
-    try {
-      console.log(`[Email] A preparar envio para: ${email} (Salão: ${salonName})`);
-      const config = await prisma.globalConfig.findUnique({ where: { id: 'singleton' } });
-      let extraHtml = "";
-      
-      if (config?.welcome_email_config) {
-         try {
-           const we = JSON.parse(config.welcome_email_config);
-           if (we.enableExtraContent && we.extraHtmlContent) {
-             extraHtml = we.extraHtmlContent;
-           }
-         } catch (e) {
-           console.error("[Email] Erro ao processar welcome_email_config JSON:", e);
+  // === INÍCIO DO ENVIO DE E-MAIL ===
+  try {
+    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
+    const config = configs?.[0];
+    let extraHtml = "";
+    
+    if (config?.welcome_email_config) {
+       try {
+         const we = JSON.parse(config.welcome_email_config);
+         if (we.enableExtraContent && we.extraHtmlContent) {
+           extraHtml = we.extraHtmlContent;
          }
-      }
-
-      const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
-      const loginLink = `${appUrl}/pt/${result.salon.slug}/login`;
-
-      const emailHtml = `
-        <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-          <h2 style="color: #0D9488;">Bem-vindo(a) ao AgendarPro!</h2>
-          <p>Olá,</p>
-          <p>O salão <strong>${salonName}</strong> foi registado com sucesso!</p>
-          
-          <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-            <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
-            <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
-            <p><strong>E-mail:</strong> ${email}</p>
-            <p><strong>Palavra-passe:</strong> ${password}</p>
-          </div>
-          
-          <p style="font-size: 12px; color: #6b7280;">Recomendamos que guarde esta palavra-passe num local seguro ou a altere assim que entrar no sistema.</p>
-          
-          ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
-          
-          <br/>
-          <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
-        </div>
-      `;
-
-      const mailResult = await sendMail({
-        to: email,
-        subject: `Bem-vindo ao AgendarPro - ${salonName}`,
-        html: emailHtml
-      });
-
-      if (mailResult.success) {
-        console.log(`[Email] Sucesso no envio para ${email}`);
-      } else {
-        console.error(`[Email] Falha no envio para ${email}:`, mailResult.error);
-      }
-    } catch (err) {
-      console.error("[Email] Erro crítico no fluxo de boas-vindas:", err);
+       } catch (e) {}
     }
-  })();
+
+    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
+    const loginLink = `${appUrl}/pt/${result.salon.slug}/login`;
+
+    const emailHtml = `
+      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
+        <h2 style="color: #0D9488;">Bem-vindo(a) ao AgendarPro!</h2>
+        <p>Olá,</p>
+        <p>O salão <strong>${salonName}</strong> foi registado com sucesso!</p>
+        
+        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
+          <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
+          <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
+          <p><strong>E-mail:</strong> ${email}</p>
+          <p><strong>Palavra-passe:</strong> ${password}</p>
+        </div>
+        
+        <p style="font-size: 12px; color: #6b7280;">Recomendamos que guarde esta palavra-passe num local seguro ou a altere assim que entrar no sistema.</p>
+        
+        ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
+        
+        <br/>
+        <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
+      </div>
+    `;
+
+    await sendMail({
+      to: email,
+      subject: `Bem-vindo ao AgendarPro - ${salonName}`,
+      html: emailHtml
+    });
+  } catch (err) {
+    console.error("Erro ao enviar e-mail de boas-vindas:", err);
+  }
   // === FIM DO ENVIO DE E-MAIL ===
 
   return { success: true }
@@ -201,11 +190,13 @@ export async function signUpFreeTrial(formData: any) {
     return { user, salon }
   })
 
-  // === INÍCIO DO ENVIO DE E-MAIL (NON-BLOCKING) ===
+  // === ENVIO DE E-MAIL (NÃO-BLOQUEANTE) ===
+  // Usamos uma IIFE (Immediately Invoked Function Expression) para que o e-mail 
+  // seja processado em background sem travar a resposta para o utilizador.
   (async () => {
     try {
-      console.log(`[Email Trial] A preparar envio para: ${email} (Salão: ${salonName})`);
-      const config = await prisma.globalConfig.findUnique({ where: { id: 'singleton' } });
+      const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
+      const config = configs?.[0];
       let extraHtml = "";
       
       if (config?.welcome_email_config) {
@@ -214,9 +205,7 @@ export async function signUpFreeTrial(formData: any) {
            if (we.enableExtraContent && we.extraHtmlContent) {
              extraHtml = we.extraHtmlContent;
            }
-         } catch (e) {
-           console.error("[Email Trial] Erro ao processar welcome_email_config JSON:", e);
-         }
+         } catch (e) {}
       }
 
       const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
@@ -244,22 +233,15 @@ export async function signUpFreeTrial(formData: any) {
         </div>
       `;
 
-      const mailResult = await sendMail({
+      await sendMail({
         to: email,
         subject: `Bem-vindo ao AgendarPro - ${salonName}`,
         html: emailHtml
       });
-
-      if (mailResult.success) {
-        console.log(`[Email Trial] Sucesso no envio para ${email}`);
-      } else {
-        console.error(`[Email Trial] Falha no envio para ${email}:`, mailResult.error);
-      }
     } catch (err) {
-      console.error("[Email Trial] Erro crítico no fluxo de boas-vindas:", err);
+      console.error("Erro assíncrono ao enviar e-mail:", err);
     }
   })();
-  // === FIM DO ENVIO DE E-MAIL ===
 
   return { success: true }
 }

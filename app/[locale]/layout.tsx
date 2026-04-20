@@ -22,12 +22,7 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   // Fetch SEO Config from Global Config (Singleton)
   const configs = await (prisma as any).$queryRawUnsafe(`SELECT seo_config FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
   const config = configs?.[0]
-  let seo = {}
-  try {
-    seo = config?.seo_config ? JSON.parse(config.seo_config) : {}
-  } catch (e) {
-    console.error("Error parsing seo_config:", e)
-  }
+  const seo = config?.seo_config ? JSON.parse(config.seo_config) : {}
 
   return {
     title: seo.metaTitle || 'agendar.pro - Sistema de Agendamento para Salões',
@@ -67,12 +62,7 @@ export default async function RootLayout({
 
   // Fetch SEO/Pixels for Scripts
   const configs = await (prisma as any).$queryRawUnsafe(`SELECT seo_config FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  let seo = {}
-  try {
-    seo = configs?.[0]?.seo_config ? JSON.parse(configs[0].seo_config) : {}
-  } catch (e) {
-    console.error("Error parsing seo_config in layout:", e)
-  }
+  const seo = configs?.[0]?.seo_config ? JSON.parse(configs[0].seo_config) : {}
 
   return (
     <html lang={locale} data-scroll-behavior="smooth">

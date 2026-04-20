@@ -10,62 +10,63 @@ datasource db {
 }
 
 model Salon {
-  id               String          @id @default(uuid())
+  id               String        @id @default(uuid())
   owner_id         String
   name             String
-  slug             String          @unique
-  description      String?
+  slug             String        @unique
+  description      String?       @db.Text
   address          String?
   phone            String?
   email            String?
   logo_url         String?
   cover_url        String?
-  working_hours    String?
-  settings         String?
-  created_at       DateTime        @default(now())
-  updated_at       DateTime        @updatedAt
-  plan             String          @default("free")
-  status           String          @default("active")
-  locale           String          @default("pt")
-  timezone         String          @default("Europe/Lisbon")
+  working_hours    String?       @db.Text
+  settings         String?       @db.Text
+  created_at       DateTime      @default(now())
+  updated_at       DateTime      @updatedAt
+  plan             String        @default("free")
+  status           String        @default("active")
+  locale           String        @default("pt")
+  timezone         String        @default("Europe/Lisbon")
   translations     String?
   trial_ends_at    DateTime?
   nif              String?
+
   appointments     Appointment[]
-  audit_logs       AuditLog[]
   cash_closings    CashClosing[]
   clients          Client[]
   products         Product[]
-  owner            User            @relation("SalonOwner", fields: [owner_id], references: [id])
+  owner            User          @relation("SalonOwner", fields: [owner_id], references: [id])
   services         Service[]
   staff            Staff[]
-  support_tickets  SupportTicket[]
   transactions     Transaction[]
-  related_users    User[]          @relation("UserToSalon")
-  users_usersalons User[]          @relation("usersalons")
+  users_usersalons User[]        @relation("usersalons")
+  audit_logs       AuditLog[]
+  support_tickets  SupportTicket[]
+  related_users    User[]        @relation("UserToSalon")
 
   @@index([owner_id])
   @@map("salons")
 }
 
 model User {
-  id                String     @id @default(uuid())
+  id                String    @id @default(uuid())
+  salon_id          String?
   name              String?
   email             String?
   emailVerified     DateTime?
   password          String?
   image             String?
-  role              String     @default("owner")
-  locale            String     @default("pt")
-  created_at        DateTime   @default(now())
-  updated_at        DateTime   @updatedAt
-  salon_id          String?
+  role              String    @default("owner")
+  locale            String    @default("pt")
+  created_at        DateTime  @default(now())
+  updated_at        DateTime  @updatedAt
   accounts          Account[]
-  audit_logs        AuditLog[]
-  ownedSalons       Salon[]    @relation("SalonOwner")
+  ownedSalons       Salon[]   @relation("SalonOwner")
   sessions          Session[]
-  salon             Salon?     @relation("UserToSalon", fields: [salon_id], references: [id], onDelete: Cascade)
-  salons_usersalons Salon[]    @relation("usersalons")
+  salons_usersalons Salon[]   @relation("usersalons")
+  audit_logs        AuditLog[]
+  salon             Salon?    @relation("UserToSalon", fields: [salon_id], references: [id], onDelete: Cascade)
 
   @@unique([email, salon_id])
   @@index([salon_id])
@@ -78,12 +79,12 @@ model Account {
   type              String
   provider          String
   providerAccountId String
-  refresh_token     String?
-  access_token      String?
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
   expires_at        Int?
   token_type        String?
   scope             String?
-  id_token          String?
+  id_token          String? @db.Text
   session_state     String?
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -121,9 +122,9 @@ model Staff {
   phone           String?
   role            String         @default("professional")
   avatar_url      String?
-  bio             String?
+  bio             String?        @db.Text
   commission_rate Decimal        @default(0.00) @db.Decimal(5, 2)
-  working_hours   String?
+  working_hours   String?        @db.Text
   is_active       Boolean        @default(true)
   color           String         @default("#0D9488")
   created_at      DateTime       @default(now())
@@ -140,7 +141,7 @@ model Service {
   id               String         @id @default(uuid())
   salon_id         String
   name             String
-  description      String?
+  description      String?        @db.Text
   duration_minutes Int
   price            Decimal        @db.Decimal(10, 2)
   category         String         @default("Geral")
@@ -161,7 +162,7 @@ model Product {
   id             String        @id @default(uuid())
   salon_id       String
   name           String
-  description    String?
+  description    String?       @db.Text
   price          Decimal       @db.Decimal(10, 2)
   stock_quantity Int           @default(0)
   category       String        @default("Geral")
@@ -195,7 +196,7 @@ model Client {
   phone          String?
   address        String?
   nif            String?
-  notes          String?
+  notes          String?       @db.Text
   loyalty_points Int           @default(0)
   total_spent    Decimal       @default(0.00) @db.Decimal(10, 2)
   visit_count    Int           @default(0)
@@ -219,7 +220,7 @@ model Appointment {
   ends_at      DateTime
   status       String        @default("pending")
   price        Decimal       @db.Decimal(10, 2)
-  notes        String?
+  notes        String?       @db.Text
   source       String        @default("online")
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
@@ -269,7 +270,7 @@ model CashClosing {
   total_income    Decimal   @default(0.00) @db.Decimal(10, 2)
   total_expense   Decimal   @default(0.00) @db.Decimal(10, 2)
   status          String    @default("open")
-  notes           String?
+  notes           String?   @db.Text
   created_at      DateTime  @default(now())
   salon           Salon     @relation(fields: [salon_id], references: [id], onDelete: Cascade)
 
@@ -280,7 +281,7 @@ model CashClosing {
 model Announcement {
   id         String   @id @default(uuid())
   title      String
-  content    String
+  content    String   @db.Text
   type       String   @default("info")
   is_active  Boolean  @default(true)
   created_at DateTime @default(now())
@@ -293,13 +294,13 @@ model AuditLog {
   id         String   @id @default(uuid())
   salon_id   String?
   user_id    String?
-  action     String
-  entity     String
-  entity_id  String?
-  details    String?  @db.Text
+  action     String   // ex: "create_appointment", "delete_client", "update_settings"
+  entity     String   // ex: "appointment", "client", "salon"
+  entity_id  String?  // ID do recurso afetado
+  details    String?  @db.Text // JSON string com detalhes da mudança
   created_at DateTime @default(now())
-  salon      Salon?   @relation(fields: [salon_id], references: [id])
-  user       User?    @relation(fields: [user_id], references: [id])
+  salon      Salon?   @relation(fields: [salon_id], references: [id], onDelete: SetNull)
+  user       User?    @relation(fields: [user_id], references: [id], onDelete: SetNull)
 
   @@index([salon_id])
   @@index([user_id])
@@ -307,32 +308,33 @@ model AuditLog {
 }
 
 model GlobalConfig {
-  id                   String   @id @default("singleton")
-  landing_page         String?  @db.Text
-  kiwify_configs       String?  @db.Text
-  stripe_configs       String?  @db.Text
-  support_config       String?  @db.Text
-  promotion_config     String?  @db.Text
-  seo_config           String?  @db.Text
-  sales_page_config    String?  @db.Text
-  welcome_email_config String?  @db.Text
-  updated_at           DateTime @updatedAt
-
+  id             String   @id @default("singleton")
+  landing_page   String?  @db.Text // JSON: heroTitle, heroDesc, prices, etc.
+  kiwify_configs  String?  @db.Text // JSON: webhookSecret, activeProducts, etc.
+  stripe_configs  String?  @db.Text // JSON: secretKey, publishableKey, webhookSecret, priceBasicId, pricePremiumId
+  support_config  String?  @db.Text // JSON: whatsappNumber, etc.
+  promotion_config String? @db.Text // JSON: trialPremiumActive, promoText, etc.
+  seo_config      String?  @db.Text // JSON: metaTitle, metaDesc, fbPixel, etc.
+  sales_page_config String? @db.Text // JSON: videoUrl, headline, subheadline, timerDate, fbPixel, googlePixel
+  welcome_email_config String? @db.Text // JSON: enableExtraContent, extraHtmlContent
+  updated_at      DateTime @updatedAt
   @@map("global_configs")
 }
 
 model SupportTicket {
-  id         String   @id @default(uuid())
-  salon_id   String
-  subject    String
-  message    String
-  status     String   @default("open")
-  priority   String   @default("medium")
-  response   String?
-  created_at DateTime @default(now())
-  updated_at DateTime @updatedAt
-  salon      Salon    @relation(fields: [salon_id], references: [id], onDelete: Cascade)
+  id          String   @id @default(uuid())
+  salon_id    String
+  subject     String
+  message     String   @db.Text
+  status      String   @default("open") // open, in_progress, resolved, closed
+  priority    String   @default("medium") // low, medium, high
+  response    String?  @db.Text
+  created_at  DateTime @default(now())
+  updated_at  DateTime @updatedAt
+  
+  salon       Salon    @relation(fields: [salon_id], references: [id], onDelete: Cascade)
 
   @@index([salon_id])
   @@map("support_tickets")
 }
+

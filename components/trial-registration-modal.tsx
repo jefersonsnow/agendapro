@@ -16,7 +16,6 @@ import {
 } from "@/components/ui/dialog"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
-import { CheckCircle } from "lucide-react"
 import { 
   Form, 
   FormControl, 
@@ -33,6 +32,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select"
+import { CheckCircle } from "lucide-react"
 import { signUpFreeTrial } from "@/lib/actions/auth"
 
 // NIF Validation for Portugal
@@ -81,7 +81,6 @@ interface TrialRegistrationModalProps {
 }
 
 export function TrialRegistrationModal({ isOpen, onClose }: TrialRegistrationModalProps) {
-  const t = useTranslations("Modal.trial")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
@@ -143,30 +142,21 @@ export function TrialRegistrationModal({ isOpen, onClose }: TrialRegistrationMod
     }
   }
 
-  const handleClose = () => {
-    onClose()
-    if (isSuccess) {
-       setTimeout(() => setIsSuccess(false), 300) // Reset after animation
-    }
-  }
-
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
+    <Dialog open={isOpen} onOpenChange={(open) => { if(!open) { setIsSuccess(false); form.reset(); onClose(); } }}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         {isSuccess ? (
-          <div className="py-12 flex flex-col items-center text-center space-y-6 animate-in fade-in zoom-in duration-300">
-            <div className="h-24 w-24 rounded-full bg-green-500/10 flex items-center justify-center border border-green-500/20">
-              <CheckCircle className="h-14 w-14 text-green-500" />
-            </div>
-            <div className="space-y-2">
-              <h2 className="text-3xl font-black text-primary tracking-tight">{t("successTitle")}</h2>
-              <p className="text-lg text-muted-foreground max-w-[400px] mx-auto leading-relaxed">
+          <div className="flex flex-col items-center justify-center py-12 text-center animate-in fade-in zoom-in duration-500">
+             <div className="h-24 w-24 rounded-full bg-green-100 flex items-center justify-center mb-6">
+                <CheckCircle className="h-12 w-12 text-green-600" />
+             </div>
+             <h2 className="text-3xl font-black text-primary tracking-tight mb-4">{t("successTitle")}</h2>
+             <p className="text-lg text-muted-foreground leading-relaxed px-4">
                 {t("success")}
-              </p>
-            </div>
-            <Button onClick={handleClose} className="w-full max-w-xs h-14 rounded-2xl font-black text-lg bg-primary hover:bg-primary/90 shadow-xl shadow-primary/20">
-              Fechar
-            </Button>
+             </p>
+             <Button onClick={() => { setIsSuccess(false); form.reset(); onClose(); }} className="mt-10 h-14 px-12 rounded-2xl font-black uppercase tracking-widest shadow-xl shadow-primary/20">
+                Entendido
+             </Button>
           </div>
         ) : (
           <>
