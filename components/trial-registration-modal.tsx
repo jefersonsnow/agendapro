@@ -81,6 +81,7 @@ interface TrialRegistrationModalProps {
 }
 
 export function TrialRegistrationModal({ isOpen, onClose }: TrialRegistrationModalProps) {
+  const t = useTranslations("Modal.trial")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
 
