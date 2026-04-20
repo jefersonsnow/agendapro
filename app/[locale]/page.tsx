@@ -44,8 +44,21 @@ export default async function HomePage({
   // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT (Safe Raw Query)
   const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
   const globalConfig = configs?.[0]
-  const landingPageData = globalConfig?.landing_page ? JSON.parse(globalConfig.landing_page) : {}
-  const promotionConfig = globalConfig?.promotion_config ? JSON.parse(globalConfig.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
+  
+  let landingPageData: any = {}
+  let promotionConfig: any = { enabled: false, trial_days: 30, promo_text: "" }
+
+  try {
+    if (globalConfig?.landing_page) landingPageData = JSON.parse(globalConfig.landing_page)
+  } catch (e) {
+    console.error("Error parsing landingPageData:", e)
+  }
+
+  try {
+    if (globalConfig?.promotion_config) promotionConfig = JSON.parse(globalConfig.promotion_config)
+  } catch (e) {
+    console.error("Error parsing promotionConfig:", e)
+  }
 
   const isPromoActive = promotionConfig.enabled
   const promoText = promotionConfig.promo_text || "30 Dias de Premium GRÁTIS - Promoção de Lançamento!"
