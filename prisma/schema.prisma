@@ -296,7 +296,7 @@ model AuditLog {
   action     String
   entity     String
   entity_id  String?
-  details    String?
+  details    String?  @db.Text
   created_at DateTime @default(now())
   salon      Salon?   @relation(fields: [salon_id], references: [id])
   user       User?    @relation(fields: [user_id], references: [id])
@@ -308,15 +308,15 @@ model AuditLog {
 
 model GlobalConfig {
   id                   String   @id @default("singleton")
-  landing_page         String?
-  kiwify_configs       String?
-  stripe_configs       String?
-  support_config       String?
-  promotion_config     String?
-  seo_config           String?
+  landing_page         String?  @db.Text
+  kiwify_configs       String?  @db.Text
+  stripe_configs       String?  @db.Text
+  support_config       String?  @db.Text
+  promotion_config     String?  @db.Text
+  seo_config           String?  @db.Text
+  sales_page_config    String?  @db.Text
+  welcome_email_config String?  @db.Text
   updated_at           DateTime @updatedAt
-  sales_page_config    String?
-  welcome_email_config String?
 
   @@map("global_configs")
 }
