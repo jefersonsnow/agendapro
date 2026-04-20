@@ -257,7 +257,8 @@
     "trial": {
       "title": "Comece Grátis por 30 Dias",
       "subtitle": "Acesso total à plataforma, sem restrições. Não precisa de cartão.",
-      "success": "Conta registada! Agora pode entrar e configurar os seus serviços.",
+      "success": "Conta criada com sucesso! O seu link de acesso exclusivo e os dados de login foram enviados para o seu e-mail. Verifique também a sua caixa de spam!",
+      "successTitle": "Tudo Pronto! Verifique o seu E-mail",
       "error": "Ocorreu um erro ao criar a conta. Tente novamente.",
       "errors": {
         "min3": "Mínimo 3 caracteres",
