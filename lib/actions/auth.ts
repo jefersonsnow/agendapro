@@ -181,14 +181,14 @@ export async function login(formData: any) {
     const passwordMatch = await bcrypt.compare(password, user.password)
     if (!passwordMatch) return { error: "Credenciais inválidas" }
 
+    let targetUrl = slug ? `/${slug}/dashboard` : "/admin"
+
     await signIn("credentials", {
       email,
       password,
       slug: slug || "",
-      redirect: false,
+      redirectTo: targetUrl,
     })
-
-    return { success: true }
   } catch (error) {
     if (error instanceof AuthError) {
       switch (error.type) {
@@ -198,6 +198,12 @@ export async function login(formData: any) {
           return { error: "Algo correu mal no login" }
       }
     }
+    
+    // IMPORTANTE: Permitir que o redirecionamento do Next.js funcione
+    if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+      throw error;
+    }
+
     throw error
   }
 }
