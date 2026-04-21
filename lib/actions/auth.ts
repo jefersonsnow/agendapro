@@ -181,7 +181,7 @@ export async function login(formData: any) {
     const passwordMatch = await bcrypt.compare(password, user.password)
     if (!passwordMatch) return { error: "Credenciais inválidas" }
 
-    let targetUrl = slug ? `/${slug}/dashboard` : "/admin"
+    let targetUrl = slug ? "/dashboard" : "/admin"
 
     await signIn("credentials", {
       email,
