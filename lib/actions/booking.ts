@@ -148,28 +148,22 @@ export async function createBooking(data: any) {
     // --- SEC-002: Validação de Horas de Funcionamento ---
     const wh = typeof salon.working_hours === 'string' ? JSON.parse(salon.working_hours) : salon.working_hours
     
-    // Determinar o dia da semana local do salão
-    const localizedDayString = startsAtDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: salonTimezone }).toLowerCase()
+    // IMPORTANT: startsAtDate/endsAtDate are "wall clock" dates (UTC digits = local time digits).
+    // We MUST use UTC methods to extract the time — do NOT apply timezone conversion again
+    // (toLocaleTimeString with a timezone would add the UTC offset a second time, causing bugs).
+    const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+    const localizedDayString = daysOfWeek[startsAtDate.getUTCDay()]
     const dayConfig = (wh as any)?.[localizedDayString]
 
     if (!dayConfig || !dayConfig.open || !dayConfig.close) {
       return { error: "O salão não abre neste dia." }
     }
 
-    const timeString = startsAtDate.toLocaleTimeString('pt-PT', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      timeZone: salonTimezone 
-    })
-    const endTimeString = endsAtDate.toLocaleTimeString('pt-PT', { 
-      hour12: false, 
-      hour: '2-digit', 
-      minute: '2-digit', 
-      timeZone: salonTimezone 
-    })
+    const pad = (n: number) => n.toString().padStart(2, '0')
+    const timeString = `${pad(startsAtDate.getUTCHours())}:${pad(startsAtDate.getUTCMinutes())}`
+    const endTimeString = `${pad(endsAtDate.getUTCHours())}:${pad(endsAtDate.getUTCMinutes())}`
     
-    // Start must be >= open AND end must be <= close (appointment finishing exactly at close is OK)
+    // Start must be >= open AND end must be <= close (finishing exactly at close is OK)
     if (timeString < dayConfig.open || endTimeString > dayConfig.close) {
       return { error: `O salão está fechado às ${timeString}. Horário permitido: ${dayConfig.open} - ${dayConfig.close}.` }
     }
