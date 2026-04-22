@@ -204,35 +204,29 @@ export async function upsertAppointment(id: string | null, data: any) {
 
     if (salon && salon.working_hours) {
       const wh = typeof salon.working_hours === 'string' ? JSON.parse(salon.working_hours) : salon.working_hours
-      // Determinar o dia da semana local do salão
-      const localizedDayString = startsAtDate.toLocaleDateString('en-US', { weekday: 'long', timeZone: salonTimezone }).toLowerCase()
+
+      // IMPORTANT: startsAtDate/endsAtDate are "wall clock" dates (UTC digits = local time digits).
+      // We MUST use UTC methods — do NOT apply timezone conversion again via toLocaleTimeString/toLocaleDateString
+      // (they would add the UTC offset a second time, turning 17:30 into 18:30).
+      const daysOfWeek = ['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday']
+      const localizedDayString = daysOfWeek[startsAtDate.getUTCDay()]
       const dayHours = (wh as any)?.[localizedDayString]
-      const timeStr = startsAtDate.toLocaleTimeString('pt-PT', { 
-        hour12: false, 
-        hour: '2-digit', 
-        minute: '2-digit', 
-        timeZone: salonTimezone 
-      })
+      const pad = (n: number) => n.toString().padStart(2, '0')
+      const timeStr = `${pad(startsAtDate.getUTCHours())}:${pad(startsAtDate.getUTCMinutes())}`
+      const endTimeStr = `${pad(endsAtDate.getUTCHours())}:${pad(endsAtDate.getUTCMinutes())}`
       
-      if (!dayHours || !dayHours.open || timeStr < dayHours.open || timeStr >= dayHours.close) {
+      if (!dayHours || !dayHours.open || timeStr < dayHours.open || endTimeStr > dayHours.close) {
         return { success: false, error: `Horário fora do funcionamento (${timeStr}). Permitido: ${dayHours?.open || 'N/A'} - ${dayHours?.close || 'N/A'}` }
       }
 
-      // Normalizar para comparação apenas de horas/minutos
+      // Normalizar para comparação apenas de horas/minutos (usando wall-clock já extraído acima)
       const hourToMinutes = (time: string) => {
           const [h, m] = time.split(":").map(Number)
           return h * 60 + m
       }
       
-      let appointmentsStartM = hourToMinutes(timeStr)
-      
-      // Se o cliente enviou a hora literal (ex: "09:00"), usamos essa para validar
-      if (data.local_time) {
-          const [h, m] = data.local_time.split(":").map(Number)
-          appointmentsStartM = h * 60 + m
-      }
-      
-      const appointmentsEndM = appointmentsStartM + (endsAtDate.getTime() - startsAtDate.getTime()) / 60000
+      const appointmentsStartM = hourToMinutes(timeStr)
+      const appointmentsEndM = hourToMinutes(endTimeStr)
 
       const [oH, oM] = dayHours.open.split(":").map(Number)
       const [cH, cM] = dayHours.close.split(":").map(Number)
