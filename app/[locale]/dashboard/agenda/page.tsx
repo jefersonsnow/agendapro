@@ -1052,8 +1052,8 @@ export default function AgendaPage() {
                     onValueChange={(value) => {
                       // Filtrar profissionais que realizam este serviço
                       const svc = services.find((s: any) => s.id === value)
-                      const eligible = svc?.staffIds && svc.staffIds.length > 0
-                        ? staff.filter(s => svc.staffIds.includes(s.id))
+                      const eligible = svc?.staffIds && (svc.staffIds as string[]).length > 0
+                        ? staff.filter(s => (svc.staffIds as string[]).includes(s.id))
                         : staff
                       setFilteredStaffForModal(eligible)
 
