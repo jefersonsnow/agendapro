@@ -258,8 +258,8 @@ export default async function DashboardPage({
     totalClients,
     todayAppointments,
     filteredStats,
-    commissionsByStaff,
-    allStaff,
+    commissionAppointments,
+    staffServicesData,
     todayAppointmentsList,
   ] = await Promise.all([
     prisma.client.count({
@@ -280,18 +280,17 @@ export default async function DashboardPage({
       },
       _sum: { price: true }
     }),
-    prisma.appointment.groupBy({
-      by: ['staff_id'],
+    prisma.appointment.findMany({
       where: {
         salon_id: salon.id,
         starts_at: { gte: filterStart, lte: filterEnd },
         status: "completed"
       },
-      _sum: { price: true }
+      select: { staff_id: true, service_id: true }
     }),
-    prisma.staff.findMany({
-      where: { salon_id: salon.id },
-      select: { id: true, commission_rate: true }
+    (prisma as any).staffService.findMany({
+      where: { staff: { salon_id: salon.id } },
+      select: { staff_id: true, service_id: true, commission_value: true }
     }),
     prisma.appointment.findMany({
       where: {
@@ -310,10 +309,13 @@ export default async function DashboardPage({
 
   const filteredRevenue = Number(filteredStats._sum.price || 0)
   
-  const totalCommissions = commissionsByStaff.reduce((acc, current) => {
-    const staff = allStaff.find(s => s.id === current.staff_id)
-    const rate = Number(staff?.commission_rate || 0)
-    return acc + (Number(current._sum.price || 0) * rate / 100)
+  // Calcular comissões via StaffService.commission_value (valor fixo por serviço)
+  const commissionMap = new Map<string, number>()
+  staffServicesData.forEach((ss: any) => {
+    commissionMap.set(`${ss.staff_id}:${ss.service_id}`, ss.commission_value !== null ? Number(ss.commission_value) : 0)
+  })
+  const totalCommissions = commissionAppointments.reduce((acc: number, apt: any) => {
+    return acc + (commissionMap.get(`${apt.staff_id}:${apt.service_id}`) ?? 0)
   }, 0)
 
   const stats = [

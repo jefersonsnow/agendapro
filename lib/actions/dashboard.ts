@@ -87,8 +87,7 @@ export async function getClientProfile(clientId: string) {
         price: Number(app.service.price)
       },
       staff: {
-        ...app.staff,
-        commission_rate: Number(app.staff.commission_rate)
+        ...app.staff
       }
     }))
   }
@@ -170,13 +169,26 @@ export async function getServices() {
 
   const services = await prisma.service.findMany({
     where: { salon_id: salonId },
-    orderBy: { display_order: "asc" }
+    orderBy: { display_order: "asc" },
+    include: {
+      staff: {
+        include: {
+          staff: { select: { id: true, name: true, color: true } }
+        }
+      }
+    }
   })
 
   return services.map((service: any, index: number) => ({
     ...service,
     price: Number(service.price),
-    is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3)
+    is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3),
+    staffAssignments: service.staff.map((ss: any) => ({
+      staffId: ss.staff_id,
+      name: ss.staff.name,
+      color: ss.staff.color,
+      commission: ss.commission_value !== null ? Number(ss.commission_value) : null
+    }))
   }))
 }
 
@@ -190,7 +202,6 @@ export async function upsertService(id: string | null, data: any) {
   })
   const plan = salon?.plan || "free"
 
-  // Buscar planos dinâmicos do CMS
   const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
   const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
 
@@ -204,6 +215,8 @@ export async function upsertService(id: string | null, data: any) {
     salon_id: salonId
   }
 
+  let serviceId = id
+
   if (id) {
     await prisma.service.update({
       where: { id, salon_id: salonId },
@@ -211,7 +224,6 @@ export async function upsertService(id: string | null, data: any) {
     })
     await logAction({ action: "update_service", entity: "service", entityId: id, salonId })
   } else {
-    // Check limit only on create
     const currentCount = await prisma.service.count({ where: { salon_id: salonId } })
     const status = salon?.status || "active"
     if (!isWithinLimit(plan, "services", currentCount, dynamicPlans, status)) {
@@ -219,11 +231,29 @@ export async function upsertService(id: string | null, data: any) {
       throw new Error(`Limite de serviços atingido para o plano ${plan}. Máximo permitido: ${limit}`)
     }
 
-    const service = await prisma.service.create({
-      data: serviceData
-    })
+    const service = await prisma.service.create({ data: serviceData })
+    serviceId = service.id
     await logAction({ action: "create_service", entity: "service", entityId: service.id, salonId })
   }
+
+  // --- Upsert StaffService assignments ---
+  if (data.staffAssignments !== undefined && serviceId) {
+    // Remove all existing assignments for this service, then re-create
+    await (prisma as any).staffService.deleteMany({ where: { service_id: serviceId } })
+
+    if (data.staffAssignments.length > 0) {
+      await (prisma as any).staffService.createMany({
+        data: data.staffAssignments.map((a: any) => ({
+          staff_id: a.staffId,
+          service_id: serviceId,
+          commission_value: a.commission !== null && a.commission !== undefined && a.commission !== "" 
+            ? parseFloat(a.commission) 
+            : null
+        }))
+      })
+    }
+  }
+
   revalidatePath("/dashboard/servicos")
 }
 
@@ -309,26 +339,19 @@ export async function getStaff() {
     if (typeof parsedHours === "string" && parsedHours.length > 0) {
       try {
         parsedHours = JSON.parse(parsedHours)
-        
-        // Limpeza de dados corrompidos (caso uma string tenha sido espalhada em um objeto no passado)
         if (parsedHours && typeof parsedHours === "object" && parsedHours["0"]) {
           const validKeys = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
           const cleaned: any = {}
-          validKeys.forEach(k => {
-            if (parsedHours[k]) cleaned[k] = parsedHours[k]
-          })
+          validKeys.forEach(k => { if (parsedHours[k]) cleaned[k] = parsedHours[k] })
           parsedHours = cleaned
         }
       } catch (e) {
-        console.error("Erro ao processar working_hours do staff:", e)
         parsedHours = {}
       }
     }
-
     return {
       ...member,
       working_hours: parsedHours,
-      commission_rate: Number(member.commission_rate),
       is_plan_blocked: limits.staff !== -1 && index >= (limits.staff || 1)
     }
   })
@@ -347,7 +370,7 @@ export async function upsertStaff(id: string | null, data: any) {
   const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
   const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
 
-  // --- CONTROLO DE PERMISSÕES DE COMISSÃO ---
+  // --- CONTROLO DE PERMISSÕES ---
   const session = await auth()
   const dbUser = await prisma.user.findFirst({
     where: { 
@@ -360,33 +383,8 @@ export async function upsertStaff(id: string | null, data: any) {
   })
   
   let loggedInRole = dbUser?.role || "professional"
-  // Bypas temporário para conta admin de debug
   if (dbUser?.email === "barbanegra@cliente.com") {
     loggedInRole = "owner"
-  }
-
-  let canEditCommission = false
-  if (loggedInRole === "owner") {
-    canEditCommission = true
-  } else if (loggedInRole === "manager") {
-    // Gerente só pode editar comissão de Profissionais (não de outros gerentes ou do dono)
-    const targetRole = data.role || "professional"
-    if (targetRole === "professional") {
-      canEditCommission = true
-    }
-  }
-
-  // Se NÃO tem permissão de edição de comissão, verificamos se tentou mudar o valor
-  if (!canEditCommission && id) {
-     const currentStaff = await (prisma as any).staff.findUnique({ where: { id } })
-     if (currentStaff) {
-        const currentVal = Number(currentStaff.commission_rate)
-        const newVal = data.commission_rate !== undefined ? Number(data.commission_rate) : currentVal
-        
-        if (currentVal !== newVal) {
-           throw new Error("Apenas o Proprietário pode alterar a comissão de cargos de gestão.")
-        }
-     }
   }
 
   if (!id) {
@@ -468,7 +466,6 @@ export async function upsertStaff(id: string | null, data: any) {
     phone: data.phone || null,
     role: data.role || "professional",
     bio: data.bio || null,
-    commission_rate: parseFloat(data.commission_rate) || 0,
     color: data.color || "#0D9488",
     working_hours: data.working_hours && typeof data.working_hours === "object" 
       ? JSON.stringify(data.working_hours) 
@@ -704,7 +701,7 @@ export async function getStaffStats(startDate?: Date, endDate?: Date) {
 
   const staff = await prisma.staff.findFirst({
     where: { user_id: session.user.id },
-    select: { id: true, commission_rate: true }
+    select: { id: true }
   })
 
   if (!staff) return null
@@ -723,22 +720,36 @@ export async function getStaffStats(startDate?: Date, endDate?: Date) {
       starts_at: { gte: filterStart, lte: filterEnd }
     },
     include: {
-      service: { select: { name: true } },
+      service: { select: { id: true, name: true } },
       client: { select: { name: true } }
     },
     orderBy: { starts_at: "desc" }
   })
 
-  const totalRevenue = appointments.reduce((sum, apt) => sum + Number(apt.price), 0)
-  const totalCommission = (totalRevenue * Number(staff.commission_rate)) / 100
+  // Buscar comissões por serviço deste profissional
+  const staffServices = await (prisma as any).staffService.findMany({
+    where: { staff_id: staff.id },
+    select: { service_id: true, commission_value: true }
+  })
+  const commissionMap = new Map<string, number>()
+  staffServices.forEach((ss: any) => {
+    commissionMap.set(ss.service_id, ss.commission_value !== null ? Number(ss.commission_value) : 0)
+  })
+
+  const totalRevenue = appointments.reduce((sum: number, apt: any) => sum + Number(apt.price), 0)
+  const totalCommission = appointments.reduce((sum: number, apt: any) => {
+    return sum + (commissionMap.get(apt.service_id) ?? 0)
+  }, 0)
   const appointmentCount = appointments.length
 
   return {
     totalRevenue,
     totalCommission,
     appointmentCount,
-    commissionRate: Number(staff.commission_rate),
-    appointments: JSON.parse(JSON.stringify(appointments))
+    appointments: JSON.parse(JSON.stringify(appointments)).map((apt: any) => ({
+      ...apt,
+      commission: commissionMap.get(apt.service_id) ?? 0
+    }))
   }
 }
 
@@ -800,37 +811,50 @@ export async function getReportStats(startDate?: Date, endDate?: Date) {
     .sort((a, b) => b.count - a.count)
     .slice(0, 5)
 
-  // Calcular comissões por staff
+  // Calcular comissões por staff usando commission_value por serviço (da tabela StaffService)
   const staffCommStats = new Map()
   
   const allStaff = await prisma.staff.findMany({
-      where: { salon_id: salonId },
-      select: { id: true, name: true, commission_rate: true }
+    where: { salon_id: salonId },
+    select: { id: true, name: true }
+  })
+
+  // Buscar todos os valores de comissão por (staff, serviço) para este salão
+  const staffServices = await (prisma as any).staffService.findMany({
+    where: {
+      staff: { salon_id: salonId }
+    },
+    select: { staff_id: true, service_id: true, commission_value: true }
+  })
+  // Mapa: "staffId:serviceId" → commission_value
+  const commissionMap = new Map<string, number>()
+  staffServices.forEach((ss: any) => {
+    commissionMap.set(`${ss.staff_id}:${ss.service_id}`, ss.commission_value !== null ? Number(ss.commission_value) : 0)
   })
   
   allStaff.forEach(s => {
-      staffCommStats.set(s.id, { 
-          id: s.id,
-          name: s.name, 
-          revenue: 0, 
-          commission: 0,
-          rate: Number(s.commission_rate),
-          appointments: []
-      })
+    staffCommStats.set(s.id, { 
+      id: s.id,
+      name: s.name, 
+      revenue: 0, 
+      commission: 0,
+      appointments: []
+    })
   })
 
   completedAppointments.forEach((apt: any) => {
     const s = staffCommStats.get(apt.staff_id)
     if (s) {
+      const aptCommission = commissionMap.get(`${apt.staff_id}:${apt.service_id}`) ?? 0
       s.revenue += Number(apt.price)
-      s.commission += (Number(apt.price) * s.rate) / 100
+      s.commission += aptCommission
       s.appointments.push({
         id: apt.id,
         date: apt.starts_at,
         client: apt.client?.name || "Cliente Final",
         service: apt.service?.name || "Serviço",
         price: Number(apt.price),
-        commission: (Number(apt.price) * s.rate) / 100
+        commission: aptCommission
       })
     }
   })

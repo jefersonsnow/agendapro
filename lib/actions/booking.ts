@@ -9,7 +9,12 @@ export async function getSalonBySlug(slug: string, requestedLocale?: string) {
     where: { slug },
     include: {
       services: { where: { is_active: true } },
-      staff: { where: { is_active: true, role: { not: "receptionist" } } }
+      staff: {
+        where: { is_active: true, role: { not: "receptionist" } },
+        include: {
+          services: { select: { service_id: true } }
+        }
+      }
     }
   })
 
@@ -88,6 +93,9 @@ export async function getSalonBySlug(slug: string, requestedLocale?: string) {
       if (s.working_hours && typeof s.working_hours === "string") {
         try { s.working_hours = JSON.parse(s.working_hours) } catch(e) {}
       }
+      // Flatten StaffService → array of service IDs for client-side filtering
+      s.serviceIds = (s.services || []).map((ss: any) => ss.service_id)
+      delete s.services
       return s
     })
   }

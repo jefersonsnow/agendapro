@@ -363,7 +363,6 @@ export default function RelatoriosPage() {
                 <thead>
                   <tr className="border-b bg-muted/20">
                     <th className="px-8 py-4 font-semibold text-sm">Profissional</th>
-                    <th className="px-8 py-4 font-semibold text-sm text-right">Taxa (%)</th>
                     <th className="px-8 py-4 font-semibold text-sm text-right">Volume Atendido</th>
                     <th className="px-8 py-4 font-semibold text-sm text-right text-primary">Comissão a Pagar</th>
                   </tr>
@@ -380,7 +379,6 @@ export default function RelatoriosPage() {
                           <ArrowUpRight className="h-4 w-4 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </button>
                       </td>
-                      <td className="px-8 py-4 text-right text-muted-foreground">{staff.rate}%</td>
                       <td className="px-8 py-4 text-right font-medium">{Number(staff.revenue).toFixed(2)}€</td>
                       <td className="px-8 py-4 text-right">
                         <span className="inline-flex items-center px-3 py-1 rounded-full bg-primary/10 text-primary font-bold">

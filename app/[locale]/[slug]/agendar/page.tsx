@@ -40,6 +40,7 @@ interface Staff {
   avatar_url: string | null
   color: string
   working_hours: any
+  serviceIds: string[]  // IDs dos serviços que este profissional realiza
 }
 
 type BookingStep = "service" | "staff" | "datetime" | "info" | "confirm"
@@ -54,6 +55,7 @@ export default function BookingPage({
   const [salon, setSalon] = useState<Salon | null>(null)
   const [services, setServices] = useState<Service[]>([])
   const [staff, setStaff] = useState<Staff[]>([])
+  const [filteredStaff, setFilteredStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(true)
   const [notFound, setNotFound] = useState(false)
   const [step, setStep] = useState<BookingStep>("service")
@@ -96,6 +98,7 @@ export default function BookingPage({
     setSalon(salonData)
     setServices(salonData.services || [])
     setStaff(salonData.staff || [])
+    setFilteredStaff(salonData.staff || [])
     setLoading(false)
   }
 
@@ -368,7 +371,6 @@ export default function BookingPage({
     const steps: BookingStep[] = ["service", "staff", "datetime", "info", "confirm"]
     const currentIndex = steps.indexOf(step)
     
-    // Smart Skip: Se confirm e tivermos dados guardados, volta pro datetime
     if (step === "confirm") {
        const saved = localStorage.getItem(`agendarpro_client_${slug}`)
        if (saved) {
@@ -382,8 +384,8 @@ export default function BookingPage({
        }
     }
 
-    // Smart Skip: Se só houver 1 funcionário, voltar de 'datetime' envia direto para 'service'
-    if (step === "datetime" && staff.length === 1) {
+    // Smart Skip: Se só houver 1 profissional elegivel, voltar de 'datetime' envia direto para 'service'
+    if (step === "datetime" && filteredStaff.length === 1) {
        setStep("service")
        return
     }
@@ -391,7 +393,6 @@ export default function BookingPage({
     if (currentIndex > 0) {
       setStep(steps[currentIndex - 1])
     } else {
-       // Se estiver no primeiro passo, talvez voltar para a Landing Page (Site)
        window.location.href = `/${slug}`
     }
   }
@@ -552,8 +553,15 @@ export default function BookingPage({
                       )}
                       onClick={() => {
                         setSelectedService(service)
-                        if (staff.length === 1) {
-                           setSelectedStaff(staff[0])
+                        // Filtrar profissionais que realizam este serviço
+                        const eligible = staff.filter(s => 
+                          !s.serviceIds || s.serviceIds.length === 0 || s.serviceIds.includes(service.id)
+                        )
+                        const staffForService = eligible.length > 0 ? eligible : staff
+                        setFilteredStaff(staffForService)
+
+                        if (staffForService.length === 1) {
+                           setSelectedStaff(staffForService[0])
                            setStep("datetime")
                         } else {
                            setStep("staff")
@@ -592,7 +600,7 @@ export default function BookingPage({
             </div>
 
             <div className="grid gap-3">
-              {staff.map((member) => (
+              {filteredStaff.map((member) => (
                 <Card
                   key={member.id}
                   className={cn(

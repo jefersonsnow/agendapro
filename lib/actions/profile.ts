@@ -45,7 +45,6 @@ export async function getProfile() {
     profile.phone = staff.phone
     profile.bio = staff.bio
     profile.avatar_url = staff.avatar_url
-    profile.commission_rate = Number(staff.commission_rate)
   }
 
   return profile
@@ -97,20 +96,6 @@ export async function updateProfile(data: any) {
       bio: data.bio,
       avatar_url: data.image || staff.avatar_url
     }
-
-    // Regras de Comissão:
-    // "a comissão de todos pode ser alterado somente pelo proprietario"
-    // Aqui estamos editando o PRÓPRIO perfil. 
-    // Portanto, só o OWNER pode mudar sua própria comissão no perfil.
-    if (data.commission_rate !== undefined) {
-      if (currentProfile.role === "owner") {
-        staffPayload.commission_rate = data.commission_rate
-      } else {
-        // Bloqueio silencioso no backend para prevenir manipulação via DevTools
-        console.warn(`User ${userId} tentou alterar sua própria comissão sem permissão.`)
-      }
-    }
-
     await prisma.staff.update({
       where: { id: staff.id },
       data: staffPayload

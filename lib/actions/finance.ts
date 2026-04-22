@@ -36,7 +36,7 @@ export async function getFinanceData(period: string) {
       startDate = new Date(now.getFullYear(), now.getMonth(), 1)
   }
 
-  const [transactions, appointments, staff] = await Promise.all([
+  const [transactions, appointments, staffList, staffServices] = await Promise.all([
     prisma.transaction.findMany({
       where: {
         salon_id: salonId,
@@ -53,15 +53,18 @@ export async function getFinanceData(period: string) {
         status: "completed",
         starts_at: { gte: startDate }
       },
-      select: { staff_id: true, price: true }
+      select: { staff_id: true, service_id: true, price: true }
     }),
     prisma.staff.findMany({
       where: { salon_id: salonId, is_active: true },
-      select: { id: true, name: true, commission_rate: true }
+      select: { id: true, name: true }
+    }),
+    (prisma as any).staffService.findMany({
+      where: { staff: { salon_id: salonId } },
+      select: { staff_id: true, service_id: true, commission_value: true }
     })
   ])
 
-  // Map to handle Decimals and serializable formats
   const serializedTransactions = transactions.map((t: any) => ({
     ...t,
     amount: Number(t.amount),
@@ -73,9 +76,18 @@ export async function getFinanceData(period: string) {
     price: Number(a.price)
   }))
 
-  const serializedStaff = staff.map((s: any) => ({
-    ...s,
-    commission_rate: Number(s.commission_rate)
+  // Mapa: "staffId:serviceId" → commission_value
+  const commissionMap = new Map<string, number>()
+  staffServices.forEach((ss: any) => {
+    commissionMap.set(`${ss.staff_id}:${ss.service_id}`, ss.commission_value !== null ? Number(ss.commission_value) : 0)
+  })
+
+  const serializedStaff = staffList.map((s: any) => ({
+    id: s.id,
+    name: s.name,
+    commission: appointments
+      .filter(a => a.staff_id === s.id)
+      .reduce((sum: number, a: any) => sum + (commissionMap.get(`${a.staff_id}:${a.service_id}`) ?? 0), 0)
   }))
 
   return {

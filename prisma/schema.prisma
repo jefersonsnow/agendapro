@@ -123,7 +123,6 @@ model Staff {
   role            String         @default("professional")
   avatar_url      String?
   bio             String?        @db.Text
-  commission_rate Decimal        @default(0.00) @db.Decimal(5, 2)
   working_hours   String?        @db.Text
   is_active       Boolean        @default(true)
   color           String         @default("#0D9488")
@@ -178,10 +177,11 @@ model Product {
 }
 
 model StaffService {
-  staff_id   String
-  service_id String
-  service    Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
-  staff      Staff   @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+  staff_id         String
+  service_id       String
+  commission_value Decimal? @db.Decimal(10, 2)
+  service          Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
+  staff            Staff   @relation(fields: [staff_id], references: [id], onDelete: Cascade)
 
   @@id([staff_id, service_id])
   @@index([service_id])

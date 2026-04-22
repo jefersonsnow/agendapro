@@ -28,7 +28,7 @@ import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { Plus, Pencil, Trash2, Mail, Phone, Percent, Users, Lock, AlertCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, Mail, Phone, Users, Lock, AlertCircle } from "lucide-react"
 
 interface Staff {
   id: string
@@ -37,7 +37,6 @@ interface Staff {
   phone: string | null
   role: string
   bio: string | null
-  commission_rate: number
   is_active: boolean
   color: string
   working_hours: any
@@ -87,7 +86,6 @@ export default function EquipaPage() {
     phone: "",
     role: "professional",
     bio: "",
-    commission_rate: 0,
     is_active: true,
     color: "#0D9488",
     has_custom_hours: false,
@@ -125,7 +123,6 @@ export default function EquipaPage() {
       phone: "",
       role: "professional",
       bio: "",
-      commission_rate: 0,
       is_active: true,
       color: "#0D9488",
       has_custom_hours: false,
@@ -144,7 +141,6 @@ export default function EquipaPage() {
       phone: member.phone || "",
       role: member.role,
       bio: member.bio || "",
-      commission_rate: member.commission_rate,
       is_active: member.is_active,
       color: member.color,
       has_custom_hours: !!member.working_hours,
@@ -277,8 +273,7 @@ export default function EquipaPage() {
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
+                <div className="space-y-2">
                     <Label htmlFor="role">Função</Label>
                     <Select
                       value={formData.role}
@@ -298,36 +293,6 @@ export default function EquipaPage() {
                       </SelectContent>
                     </Select>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="commission" className="flex items-center gap-1">
-                      Comissão (%)
-                      {user.role === "manager" && formData.role !== "professional" && (
-                         <div className="group relative">
-                            <AlertCircle className="h-3 w-3 text-amber-500 cursor-help" />
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-48 p-2 bg-slate-900 text-white text-[10px] rounded-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-20 text-center font-medium shadow-xl">
-                               Apenas o Proprietário pode alterar comissões de cargos de gestão.
-                            </div>
-                         </div>
-                      )}
-                    </Label>
-                    <Input
-                      id="commission"
-                      type="number"
-                      min={0}
-                      max={100}
-                      value={isNaN(formData.commission_rate) ? "" : formData.commission_rate}
-                      disabled={user.role === "manager" && formData.role !== "professional"}
-                      onChange={(e) => {
-                        const val = e.target.value === "" ? 0 : parseFloat(e.target.value)
-                        setFormData({
-                          ...formData,
-                          commission_rate: val,
-                        })
-                      }}
-                      className={cn(user.role === "manager" && formData.role !== "professional" && "bg-muted cursor-not-allowed opacity-70")}
-                    />
-                  </div>
-                </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="bio">Biografia</Label>
@@ -589,10 +554,6 @@ export default function EquipaPage() {
                       <span>{member.phone}</span>
                     </div>
                   )}
-                  <div className="flex items-center gap-2 text-muted-foreground font-medium">
-                    <Percent className="h-3 w-3 opacity-50" />
-                    <span>Comissão: <span className="text-foreground font-bold">{member.commission_rate}%</span></span>
-                  </div>
                 </div>
 
                 <div className="flex items-center justify-between mt-4 pt-4 border-t border-muted/50">
