@@ -49,6 +49,7 @@ interface Service {
   name: string
   duration_minutes: number
   price: number
+  staffIds?: string[]  // IDs dos profissionais que realizam este serviço
 }
 
 interface Client {
@@ -177,6 +178,7 @@ export default function AgendaPage() {
   const [workingHours, setWorkingHours] = useState<any>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedStaffFilter, setSelectedStaffFilter] = useState<string>("all")
+  const [filteredStaffForModal, setFilteredStaffForModal] = useState<Staff[]>([])
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
   const [formData, setFormData] = useState({
@@ -215,6 +217,7 @@ export default function AgendaPage() {
       setSalonId(data.salonId)
       setWorkingHours(data.workingHours)
       setStaff(data.staff || [])
+      setFilteredStaffForModal(data.staff || [])
       setServices(data.services || [])
       setClients(data.clients || [])
       setIsProfessional(data.isProfessional || false)
@@ -423,9 +426,11 @@ export default function AgendaPage() {
 
     const minuteStr = minute.toString().padStart(2, "0")
 
+    // Reset sem pré-selecção de serviço ou profissional
+    setFilteredStaffForModal(staff)
     setFormData({
-      staff_id: staff[0]?.id || "",
-      service_id: services[0]?.id || "",
+      staff_id: "",
+      service_id: "",
       client_id: "",
       date: localDateStr,
       time: hour 
@@ -1044,9 +1049,22 @@ export default function AgendaPage() {
                   <Label htmlFor="service-id" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("service")}</Label>
                   <Select
                     value={formData.service_id}
-                    onValueChange={(value) =>
-                      setFormData({ ...formData, service_id: value })
-                    }
+                    onValueChange={(value) => {
+                      // Filtrar profissionais que realizam este serviço
+                      const svc = services.find((s: any) => s.id === value)
+                      const eligible = svc?.staffIds && svc.staffIds.length > 0
+                        ? staff.filter(s => svc.staffIds.includes(s.id))
+                        : staff
+                      setFilteredStaffForModal(eligible)
+
+                      // Limpar seleção de profissional se o atual não faz este serviço
+                      const currentStillValid = eligible.some(s => s.id === formData.staff_id)
+                      setFormData(prev => ({ 
+                        ...prev, 
+                        service_id: value,
+                        staff_id: currentStillValid ? prev.staff_id : (eligible[0]?.id || "")
+                      }))
+                    }}
                   >
                     <SelectTrigger id="service-id" className="h-12 rounded-xl">
                       <SelectValue placeholder={t("selectService")} />
@@ -1077,7 +1095,7 @@ export default function AgendaPage() {
                       <SelectValue placeholder={t("selectProfessional")} />
                     </SelectTrigger>
                     <SelectContent>
-                      {staff.map((member) => (
+                      {filteredStaffForModal.map((member) => (
                         <SelectItem key={member.id} value={member.id}>
                           <div className="flex items-center gap-2">
                             <div

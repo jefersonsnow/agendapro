@@ -48,7 +48,10 @@ export async function getAgendaInitialData() {
     }),
     prisma.service.findMany({
       where: { salon_id: salonId, is_active: true },
-      select: { id: true, name: true, duration_minutes: true, price: true },
+      select: { 
+        id: true, name: true, duration_minutes: true, price: true,
+        staff: { select: { staff_id: true } }  // IDs de quem realiza este serviço
+      },
       orderBy: { name: "asc" }
     }),
     prisma.client.findMany({
@@ -70,7 +73,9 @@ export async function getAgendaInitialData() {
       staff: JSON.parse(JSON.stringify(staff)),
       services: JSON.parse(JSON.stringify(services)).map((s: any) => ({
         ...s,
-        price: Number(s.price)
+        price: Number(s.price),
+        staffIds: (s.staff || []).map((ss: any) => ss.staff_id),
+        staff: undefined
       })),
       clients: JSON.parse(JSON.stringify(clients)),
       isProfessional
