@@ -162,8 +162,15 @@ export async function createBooking(data: any) {
       minute: '2-digit', 
       timeZone: salonTimezone 
     })
+    const endTimeString = endsAtDate.toLocaleTimeString('pt-PT', { 
+      hour12: false, 
+      hour: '2-digit', 
+      minute: '2-digit', 
+      timeZone: salonTimezone 
+    })
     
-    if (timeString < dayConfig.open || timeString >= dayConfig.close) {
+    // Start must be >= open AND end must be <= close (appointment finishing exactly at close is OK)
+    if (timeString < dayConfig.open || endTimeString > dayConfig.close) {
       return { error: `O salão está fechado às ${timeString}. Horário permitido: ${dayConfig.open} - ${dayConfig.close}.` }
     }
 
@@ -189,7 +196,8 @@ export async function createBooking(data: any) {
        }
 
        if (staffDayConfig.open && staffDayConfig.close) {
-          if (timeString < staffDayConfig.open || timeString >= staffDayConfig.close) {
+          // Check that appointment end time does not exceed staff closing time
+          if (timeString < staffDayConfig.open || endTimeString > staffDayConfig.close) {
              return { error: `O profissional ${targetStaff.name} não está disponível às ${timeString}. Horário: ${staffDayConfig.open} - ${staffDayConfig.close}.` }
           }
        }

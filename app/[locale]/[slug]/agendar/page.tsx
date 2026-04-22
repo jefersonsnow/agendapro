@@ -252,7 +252,7 @@ export default function BookingPage({
 
     if (openH > closeH || (openH === closeH && openM >= closeM)) return []
 
-    const slotInterval = 30
+    const slotInterval = 15
     const serviceDuration = selectedService.duration_minutes
 
     let breakStartH = -1, breakStartM = -1
