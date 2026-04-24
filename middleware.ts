@@ -31,6 +31,13 @@ export async function middleware(req: NextRequest) {
   const isAuthRoute = pathname.includes('/auth/')
 
   if (isProtected && !isAuthRoute && !isAuth) {
+    const possibleSlug = segments[2]
+    const reservedSegments = ['admin', 'dashboard', 'auth', 'ajuda', 'contacto', 'privacidade', 'termos', 'oferta-exclusiva']
+    
+    if (possibleSlug && !reservedSegments.includes(possibleSlug)) {
+      return NextResponse.redirect(new URL(`/${locale}/${possibleSlug}/login`, req.url))
+    }
+
     return NextResponse.redirect(new URL(`/${locale}/auth/login`, req.url))
   }
 

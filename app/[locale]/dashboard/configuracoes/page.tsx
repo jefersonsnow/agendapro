@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import Link from "next/link"
@@ -19,7 +20,8 @@ import { cn } from "@/lib/utils"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 import { useRef } from "react"
-import { isFeatureAllowed } from "@/lib/plan-limits"
+import { isFeatureAllowed } from "@/lib/plan-utils"
+
 
 interface Salon {
   id: string
@@ -103,6 +105,7 @@ export default function ConfiguracoesPage() {
     cover_url: "",
     locale: "pt",
     timezone: "Europe/Lisbon",
+    slot_interval: 15,
   })
   
   const [galleryUrls, setGalleryUrls] = useState(["", "", "", ""])
@@ -142,6 +145,7 @@ export default function ConfiguracoesPage() {
         services_subtitles: settings.services_subtitles || {},
         locale: data.locale || "pt",
         timezone: data.timezone || "Europe/Lisbon",
+        slot_interval: settings.slot_interval || 15,
       })
       
       if (settings.gallery_urls) setGalleryUrls(settings.gallery_urls)
@@ -238,6 +242,7 @@ export default function ConfiguracoesPage() {
         services_layout: formData.services_layout,
         services_style: formData.services_style,
         services_subtitles: formData.services_subtitles,
+        slot_interval: formData.slot_interval,
       },
 
 
@@ -1024,6 +1029,28 @@ export default function ConfiguracoesPage() {
         </CardContent>
       </Card>
 
+      {/* NOVO: CONFIGURAÇÃO DE AGENDAMENTO */}
+      <Card className="border-2 border-primary/10 bg-primary/5">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2"> <MousePointer2 className="h-5 w-5 text-primary" /> {t("bookingConfig")} </CardTitle>
+          <CardDescription>{t("slotIntervalDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+           <div className="space-y-3">
+              <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                 <Clock className="h-3 w-3" /> {t("slotInterval")}
+              </Label>
+              <Select value={String(formData.slot_interval)} onValueChange={(v) => setFormData({ ...formData, slot_interval: parseInt(v) })}>
+                 <SelectTrigger className="border-2 h-11 bg-background"> <SelectValue /> </SelectTrigger>
+                 <SelectContent>
+                    <SelectItem value="15">{t("slot15")}</SelectItem>
+                    <SelectItem value="30">{t("slot30")}</SelectItem>
+                 </SelectContent>
+              </Select>
+           </div>
+        </CardContent>
+      </Card>
+
 
       {/* Global Design & Socials (Already there) */}
       <Card>
@@ -1078,13 +1105,16 @@ export default function ConfiguracoesPage() {
                <Printer className="w-5 h-5" /> {t("printQr")} 
              </Button>
           </div>
-          <style dangerouslySetInnerHTML={{__html: `
-            @media print {
-              body * { visibility: hidden; }
-              #qr-container, #qr-container * { visibility: visible; }
-              #qr-container { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-            }
-          `}} />
+          <style>
+            {`
+              @media print {
+                body * { visibility: hidden; }
+                #qr-container, #qr-container * { visibility: visible; }
+                #qr-container { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+              }
+            `}
+          </style>
+
         </DialogContent>
       </Dialog>
     </div>

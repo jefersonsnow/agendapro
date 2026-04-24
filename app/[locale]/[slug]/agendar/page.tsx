@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect, use } from "react"
@@ -255,7 +256,7 @@ export default function BookingPage({
 
     if (openH > closeH || (openH === closeH && openM >= closeM)) return []
 
-    const slotInterval = 15
+    const slotInterval = salon.settings?.slot_interval || 15
     const serviceDuration = selectedService.duration_minutes
 
     let breakStartH = -1, breakStartM = -1
@@ -418,7 +419,8 @@ export default function BookingPage({
   if (notFound) {
     return (
       <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
-        <h1 className="text-2xl font-bold mb-2">{t("salonNotFound")}</h1>
+        <h2 className="text-2xl font-bold mb-2">{t("salonNotFound")}</h2>
+
         <p className="text-muted-foreground">
           {t("salonNotFoundDesc")}
         </p>
@@ -433,7 +435,8 @@ export default function BookingPage({
           <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <Check className="h-8 w-8 text-green-600" />
           </div>
-          <h1 className="text-2xl font-bold mb-2">{t("bookingConfirmed")}</h1>
+          <h2 className="text-2xl font-bold mb-2">{t("bookingConfirmed")}</h2>
+
           <p className="text-muted-foreground mb-6">
             {t("bookingSuccessDesc")}
           </p>
@@ -501,7 +504,8 @@ export default function BookingPage({
                 {salon?.name.charAt(0)}
               </div>
               <div>
-                <h1 className="font-semibold">{salon?.name}</h1>
+                <h2 className="font-semibold">{salon?.name}</h2>
+
                 <p className="text-sm text-muted-foreground">{t("newBooking")}</p>
               </div>
             </div>
@@ -555,10 +559,11 @@ export default function BookingPage({
                         setSelectedService(service)
                         // Filtrar profissionais que realizam este serviço
                         const eligible = staff.filter(s => 
-                          !s.serviceIds || s.serviceIds.length === 0 || s.serviceIds.includes(service.id)
+                          s.serviceIds && s.serviceIds.includes(service.id)
                         )
                         const staffForService = eligible.length > 0 ? eligible : staff
                         setFilteredStaff(staffForService)
+
 
                         if (staffForService.length === 1) {
                            setSelectedStaff(staffForService[0])

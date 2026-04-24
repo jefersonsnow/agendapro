@@ -29,7 +29,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
         }
 
         let user;
-        const email = credentials.email as string;
+        const email = (credentials.email as string).toLowerCase();
+
         const slug = credentials.slug as string;
 
         if (slug) {
@@ -102,7 +103,7 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
       },
       async authorize(credentials) {
         const isAllowed = process.env.NODE_ENV === "development" || process.env.ALLOW_IMPERSONATION === "true"
-        const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+        const secret = process.env.IMPERSONATION_SECRET
 
         if (!isAllowed || !secret || !credentials?.secret || credentials.secret !== secret) return null
 

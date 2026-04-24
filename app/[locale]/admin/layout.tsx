@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { Calendar, Building2, Users, LayoutDashboard, Settings, LogOut, ShieldCheck, MessageSquare } from "lucide-react"

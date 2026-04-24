@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -236,12 +237,14 @@ export default function ServicosPage() {
                             />
                             {!s.is_plan_blocked && (
                                <>
-                                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-primary/10 hover:text-primary transition-all" onClick={() => openEditService(s)}>
+                                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl hover:bg-primary/10 hover:text-primary transition-all" onClick={() => openEditService(s)} aria-label={`Editar serviço ${s.name}`}>
                                      <Pencil className="h-4 w-4" />
                                   </Button>
-                                  <Button variant="ghost" size="icon" className="h-9 w-9 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all" onClick={() => { if(confirm("Deseja eliminar este serviço?")) { deleteService(s.id).then(fetchData) } }}>
+
+                                  <Button variant="ghost" size="icon" className="h-11 w-11 rounded-xl hover:bg-destructive/10 hover:text-destructive transition-all" onClick={() => { if(confirm("Deseja eliminar este serviço?")) { deleteService(s.id).then(fetchData) } }} aria-label={`Eliminar serviço ${s.name}`}>
                                      <Trash2 className="h-4 w-4 text-destructive" />
                                   </Button>
+
                                </>
                             )}
                          </div>
@@ -340,18 +343,22 @@ export default function ServicosPage() {
                        {state.assigned && (
                          <div className="flex items-center gap-1.5">
                            <Euro className="h-3.5 w-3.5 text-muted-foreground" />
-                           <Input
-                             type="number"
-                             step="0.5"
-                             min="0"
-                             placeholder="Comissão"
-                             value={state.commission}
-                             onChange={e => setStaffAssignments(prev => ({
-                               ...prev,
-                               [member.id]: { ...state, commission: e.target.value }
-                             }))}
-                             className="w-28 h-8 text-sm text-right font-bold"
-                           />
+                           <div className="flex flex-col gap-1">
+                              <Label htmlFor={`commission-${member.id}`} className="sr-only">Comissão para {member.name}</Label>
+                              <Input
+                                id={`commission-${member.id}`}
+                                type="number"
+                                step="0.5"
+                                min="0"
+                                placeholder="Comissão"
+                                value={state.commission}
+                                onChange={e => setStaffAssignments(prev => ({
+                                  ...prev,
+                                  [member.id]: { ...state, commission: e.target.value }
+                                }))}
+                                className="w-28 h-11 text-sm text-right font-bold"
+                              />
+                           </div>
                          </div>
                        )}
                      </div>

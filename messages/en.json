@@ -165,6 +165,11 @@
     "servCardLabel": "Card Type",
     "servSubLabel": "Services Section Slogan",
     "servSubHolder": "Ex: Perfect nails with the best products...",
+    "bookingConfig": "Booking Configuration",
+    "slotInterval": "Time Slot Interval",
+    "slotIntervalDesc": "Define the time gap between available slots for the client.",
+    "slot15": "Every 15 minutes",
+    "slot30": "Every 30 minutes",
     "model": "General Model",
 
     "socialTitle": "Social Links",

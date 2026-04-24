@@ -4,6 +4,7 @@ import { auth, signIn as authSignIn } from "@/auth"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 import { revalidatePath } from "next/cache"
+import { getGlobalConfigCache } from "@/lib/dal"
 
 async function checkAdmin() {
   const session = await auth()
@@ -220,7 +221,7 @@ export async function toggleAnnouncement(id: string, is_active: boolean) {
 
 export async function getActiveAnnouncements() {
   try {
-    return await (prisma as any).$queryRawUnsafe(`SELECT * FROM announcements WHERE is_active = 1 ORDER BY created_at DESC`)
+    return await (prisma as any).$queryRawUnsafe(`SELECT * FROM announcements WHERE is_active = TRUE ORDER BY created_at DESC`)
   } catch (err) {
     return []
   }
@@ -228,15 +229,20 @@ export async function getActiveAnnouncements() {
 
 export async function getGlobalConfig() {
   await checkAdmin()
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`)
-  let config = configs?.[0]
+  let config = await getGlobalConfigCache()
   
   if (!config) {
-    await (prisma as any).$executeRawUnsafe(
-      `INSERT INTO global_configs (id, landing_page, kiwify_configs, stripe_configs, support_config, promotion_config, sales_page_config, updated_at) VALUES ('singleton', '{}', '{}', '{}', '{}', '{}', '{}', NOW())`
-    )
-    const newConfigs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`)
-    config = newConfigs?.[0]
+    config = await prisma.globalConfig.create({
+      data: {
+        id: 'singleton',
+        landing_page: '{}',
+        kiwify_configs: '{}',
+        stripe_configs: '{}',
+        support_config: '{}',
+        promotion_config: '{}',
+        sales_page_config: '{}',
+      }
+    })
   }
   return JSON.parse(JSON.stringify(config))
 }
@@ -283,10 +289,10 @@ export async function impersonateUser(userId: string) {
   console.log("Server Action: Impersonate", userId)
   await checkAdmin()
   
-  const secret = process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET
+  const secret = process.env.IMPERSONATION_SECRET
   if (!secret) {
-     console.error("CRITICAL ERRO: Nem AUTH_SECRET nem NEXTAUTH_SECRET definidas")
-     throw new Error("AUTH_SECRET not configured")
+     console.error("CRITICAL ERRO: IMPERSONATION_SECRET não definida")
+     throw new Error("IMPERSONATION_SECRET not configured")
   }
 
   try {
@@ -455,6 +461,7 @@ export async function manageSalonUser(salonId: string, userId: string | null, da
 }
 
 export async function getSalonBySlug(slug: string) {
+
   const salon = await prisma.salon.findUnique({
     where: { slug },
     select: {

@@ -5,6 +5,7 @@ import prisma from "@/lib/prisma"
 import Stripe from "stripe"
 import { headers } from "next/headers"
 import { redirect } from "next/navigation"
+import { getGlobalConfigCache } from "@/lib/dal"
 
 export async function createCheckoutSession(planId: "basic" | "premium") {
   try {
@@ -14,8 +15,7 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
     }
 
     // 1. Obter configurações da Stripe
-    const configs = await (prisma as any).$queryRawUnsafe(`SELECT stripe_configs FROM global_configs WHERE id = 'singleton' LIMIT 1`)
-    const globalConfig = configs?.[0]
+    const globalConfig = await getGlobalConfigCache()
     
     if (!globalConfig?.stripe_configs) {
       return { error: "Configurações da Stripe não encontradas no banco de dados." }
@@ -83,8 +83,7 @@ export async function generateStripePaymentLink(priceId: string) {
       return { error: "Não autorizado." }
     }
 
-    const configs = await (prisma as any).$queryRawUnsafe(`SELECT stripe_configs FROM global_configs WHERE id = 'singleton' LIMIT 1`)
-    const globalConfig = configs?.[0]
+    const globalConfig = await getGlobalConfigCache()
     
     if (!globalConfig?.stripe_configs) {
       return { error: "Configurações da Stripe não encontradas no banco de dados." }

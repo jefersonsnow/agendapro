@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -44,8 +45,8 @@ export default function AdminDashboardPage() {
       title: "Utilizadores (Donos)",
       value: salons.filter(s => s.role !== 'admin').length,
       icon: Users,
-      color: "text-purple-600",
-      bg: "bg-purple-100/50",
+      color: "text-teal-600",
+      bg: "bg-teal-100/50",
     },
     {
       title: "Total Processado",

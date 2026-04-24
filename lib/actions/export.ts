@@ -3,32 +3,20 @@
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 
-async function getSalonId() {
-  const session = await auth()
-  if (!session?.user?.id) return null
-  
-  // Try owner
-  const salon = await prisma.salon.findFirst({
-    where: { owner_id: session.user.id },
-    select: { id: true, name: true }
-  })
-  if (salon) return salon
-
-  // Try staff
-  const staff = await prisma.staff.findFirst({
-    where: { user_id: session.user.id },
-    select: { salon_id: true, salon: { select: { name: true } } }
-  })
-
-  if (staff) return { id: staff.salon_id, name: staff.salon.name }
-  return null
-}
+import { getSalonId } from "@/lib/dal"
 
 export async function exportSalonData(startDate?: string, endDate?: string) {
-  const salon = await getSalonId()
-  if (!salon) throw new Error("Não autorizado")
+  const salonIdStr = await getSalonId()
+  if (!salonIdStr) throw new Error("Não autorizado")
   
-  const salonId = salon.id
+  const salonRec = await prisma.salon.findUnique({
+    where: { id: salonIdStr },
+    select: { id: true, name: true }
+  })
+  if (!salonRec) throw new Error("Salão não encontrado")
+  
+  const salonId = salonRec.id
+  const salonName = salonRec.name
   
   const filterStart = startDate ? new Date(startDate) : undefined
   const filterEnd = endDate ? new Date(endDate + 'T23:59:59') : undefined
@@ -150,7 +138,7 @@ export async function exportSalonData(startDate?: string, endDate?: string) {
   const totalExp = transactions.filter(t => t.type === 'expense').reduce((acc, curr) => acc + Number(curr.amount), 0);
 
   const summaryData = {
-    salon: salon.name,
+    salon: salonName,
     period: { start: startDate || "Início", end: endDate || "Hoje" },
     metrics: [
       { kpi: "Faturação Bruta", value: totalRev, unit: "€" },
@@ -165,7 +153,7 @@ export async function exportSalonData(startDate?: string, endDate?: string) {
   }
 
   return {
-    salonName: salon.name,
+    salonName: salonName,
     data: {
       "Dashboard": summaryData,
       "Base de Clientes": clientsData,

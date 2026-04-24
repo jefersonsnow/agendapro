@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -18,6 +19,7 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import Script from "next/script"
 import { getGlobalConfig } from "@/lib/actions/admin"
 
 export default function SalesPage() {
@@ -83,40 +85,52 @@ export default function SalesPage() {
     <div className="min-h-screen bg-[#0a0a0a] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
       {/* INJECT PIXELS IF EXIST */}
       {config?.sales?.fbPixel && (
-        <script dangerouslySetInnerHTML={{
-          __html: `
-            !function(f,b,e,v,n,t,s)
-            {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
-            n.callMethod.apply(n,arguments):n.queue.push(arguments)};
-            if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
-            n.queue=[];t=b.createElement(e);t.async=!0;
-            t.src=v;s=b.getElementsByTagName(e)[0];
-            s.parentNode.insertBefore(t,s)}(window, document,'script',
-            'https://connect.facebook.net/en_US/fbevents.js');
-            fbq('init', '${config.sales.fbPixel}');
-            fbq('track', 'PageView');
-          `
-        }} />
+        <Script
+          id="fb-pixel"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window, document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${config.sales.fbPixel}');
+              fbq('track', 'PageView');
+            `,
+          }}
+        />
       )}
       {config?.sales?.googlePixel && (
         <>
-          <script async src={`https://www.googletagmanager.com/gtag/js?id=${config.sales.googlePixel.split('/')[0]}`} />
-          <script dangerouslySetInnerHTML={{
-            __html: `
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${config.sales.googlePixel.split('/')[0]}');
-            `
-          }} />
+          <Script
+            src={`https://www.googletagmanager.com/gtag/js?id=${config.sales.googlePixel.split('/')[0]}`}
+            strategy="afterInteractive"
+          />
+          <Script
+            id="google-analytics"
+            strategy="afterInteractive"
+            dangerouslySetInnerHTML={{
+              __html: `
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+                gtag('config', '${config.sales.googlePixel.split('/')[0]}');
+              `,
+            }}
+          />
         </>
       )}
+
 
       {/* HEADER (Clean, no distractions) */}
       <header className="py-6 border-b border-white/5 bg-black/50 backdrop-blur-md sticky top-0 z-50">
          <div className="container mx-auto px-4 flex items-center justify-center">
             <div className="flex items-center gap-2">
-               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-[0_0_15px_rgba(var(--primary),0.5)]">
+               <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-cyan-600 flex items-center justify-center shadow-[0_0_15px_rgba(var(--primary),0.5)]">
                   <Scissors className="h-4 w-4 text-white" />
                </div>
                <span className="font-black text-xl tracking-tight">AgendarPro</span>
@@ -224,7 +238,7 @@ export default function SalesPage() {
                </div>
             </div>
             
-            <div className="bg-gradient-to-br from-primary/20 to-violet-600/20 p-8 rounded-3xl border border-primary/30 relative">
+            <div className="bg-gradient-to-br from-primary/20 to-cyan-600/20 p-8 rounded-3xl border border-primary/30 relative">
                <div className="absolute -top-4 -right-4 h-12 w-12 bg-primary rounded-full flex items-center justify-center shadow-lg shadow-primary/50">
                   <CheckCircle className="h-6 w-6 text-white" />
                </div>

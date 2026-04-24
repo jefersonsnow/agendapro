@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 'use client'
 
 import { login } from '@/lib/actions/auth'

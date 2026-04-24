@@ -3,6 +3,7 @@
 import prisma from "@/lib/prisma"
 import { auth } from "@/auth"
 import { getPlanLimits, isWithinLimit } from "@/lib/plan-limits"
+import { getGlobalConfigCache } from "@/lib/dal"
 
 async function getSalonWithPlan() {
   const session = await auth()
@@ -32,9 +33,9 @@ async function getSalonWithPlan() {
 
 async function getDynamicPlans() {
   try {
-    const config = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`)
-    if (config?.[0]?.landing_page) {
-       const lp = JSON.parse(config[0].landing_page)
+    const config = await getGlobalConfigCache()
+    if (config?.landing_page) {
+       const lp = JSON.parse(config.landing_page)
        return lp.plans || null
     }
   } catch (e) {}

@@ -13,7 +13,8 @@
   --popover-foreground: oklch(0.145 0.015 180);
   --primary: oklch(0.55 0.15 175); /* Verde/Teal original das imagens */
   --primary-foreground: oklch(0.99 0 0);
-  --secondary: oklch(0.5 0.2 300); /* Roxo/Violeta dos destaques */
+  --secondary: oklch(0.6 0.15 200); /* Cyan dos destaques */
+
   --secondary-foreground: oklch(0.25 0.02 180);
   --muted: oklch(0.96 0.01 180);
   --muted-foreground: oklch(0.50 0.02 180);

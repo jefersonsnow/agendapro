@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import Image from "next/image"
@@ -109,8 +110,8 @@ export default function PrimeirosPassosTutorial() {
                    </Card>
                    <Card className="border-none bg-white dark:bg-slate-900 shadow-xl rounded-3xl">
                       <CardContent className="p-6 flex gap-4 items-start">
-                         <div className="h-10 w-10 rounded-2xl bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center shrink-0">
-                            <MousePointer2 className="h-5 w-5 text-purple-600" />
+                         <div className="h-10 w-10 rounded-2xl bg-teal-50 dark:bg-teal-900/30 flex items-center justify-center shrink-0">
+                            <MousePointer2 className="h-5 w-5 text-teal-600" />
                          </div>
                          <div>
                             <h4 className="font-bold text-sm">Slug Personalizado</h4>

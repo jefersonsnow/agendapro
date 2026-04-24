@@ -7,26 +7,7 @@ import { revalidatePath } from "next/cache"
 import { logAction } from "@/lib/audit"
 import { getPlanLimits } from "@/lib/plan-limits"
 
-async function getSalonId() {
-  const session = await auth()
-  if (!session?.user?.id) return null
-  
-  // Se for dono
-  const salon = await prisma.salon.findFirst({
-    where: { owner_id: session.user.id },
-    select: { id: true }
-  })
-  
-  if (salon) return salon.id
-
-  // Se for profissional/equipa
-  const staff = await prisma.staff.findFirst({
-    where: { user_id: session.user.id },
-    select: { salon_id: true }
-  })
-
-  return staff?.salon_id || null
-}
+import { getSalonId, getGlobalConfigCache } from "@/lib/dal"
 
 export async function getAgendaInitialData() {
   const salonId = await getSalonId()
@@ -162,8 +143,8 @@ export async function upsertAppointment(id: string | null, data: any) {
   if (!id && data.status !== "cancelled") {
       const plan = salon?.plan || "free"
       
-      const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-      const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+      const config = await getGlobalConfigCache()
+      const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
       
       const limits = getPlanLimits(plan, dynamicPlans)
       const maxApts = limits.appointments_per_month as number

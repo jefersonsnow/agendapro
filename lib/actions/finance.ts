@@ -5,15 +5,7 @@ import prisma from "@/lib/prisma"
 import { revalidatePath } from "next/cache"
 import { logAction } from "@/lib/audit"
 
-async function getSalonId() {
-  const session = await auth()
-  if (!session?.user?.id) return null
-  const salon = await prisma.salon.findFirst({
-    where: { owner_id: session.user.id },
-    select: { id: true }
-  })
-  return salon?.id || null
-}
+import { getSalonId } from "@/lib/dal"
 
 export async function getFinanceData(period: string) {
   const salonId = await getSalonId()

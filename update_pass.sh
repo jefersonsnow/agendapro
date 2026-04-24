@@ -1,1 +1,0 @@
-docker exec -e PGPASSWORD='XIEOdAe0kYy1wVffpPpWZOiRVOxY0hEtG7LCZN9DMe1r828firenwzQ0Z4Vfr8H1' d5bvgeqaf9zzy9bchopc5me1 psql -U postgres -d postgres -c "UPDATE users SET password = '\$2b\$10\$zmD7PWj8hh/ZSiFOZNm7hO1jDl272GEsnIxeGYI60it0rhyBHUpMC' WHERE email = 'jeferson_sjc@hotmail.com';"

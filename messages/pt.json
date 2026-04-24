@@ -165,6 +165,11 @@
     "servCardLabel": "Tipo de Cartão",
     "servSubLabel": "Slogan da Secção de Serviços",
     "servSubHolder": "Ex: Unhas perfeitas com os melhores produtos...",
+    "bookingConfig": "Configuração do Agendamento",
+    "slotInterval": "Intervalo de Horários (Slots)",
+    "slotIntervalDesc": "Define de quanto em quanto tempo os horários aparecem para o cliente.",
+    "slot15": "A cada 15 minutos",
+    "slot30": "A cada 30 minutos",
     "model": "Modelo Geral",
 
     "socialTitle": "Links Sociais",

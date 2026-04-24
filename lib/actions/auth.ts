@@ -3,16 +3,23 @@
 import { signIn, signOut } from "@/auth"
 import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
+import { getGlobalConfigCache } from "@/lib/dal"
 import { AuthError } from "next-auth"
 import { sendMail } from "@/lib/mail"
 import crypto from "crypto"
+import { signUpSchema, signUpFreeTrialSchema, loginSchema } from "@/lib/validations/auth"
 
 export async function signUp(formData: any) {
-  const { email, password, salonName } = formData
-
-  if (!email || !password || !salonName) {
-    throw new Error("Dados incompletos")
+  const validatedFields = signUpSchema.safeParse(formData)
+  
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.flatten().fieldErrors }
   }
+
+  const { email: rawEmail, password, salonName } = validatedFields.data
+  const email = rawEmail.toLowerCase()
+
+
 
   const hashedPassword = await bcrypt.hash(password, 10)
 
@@ -43,11 +50,16 @@ export async function signUp(formData: any) {
 }
 
 export async function signUpFreeTrial(formData: any) {
-  const { email, password, name, salonName, address, phone, nif } = formData
-
-  if (!email || !password || !name || !salonName) {
-    throw new Error("Dados incompletos")
+  const validatedFields = signUpFreeTrialSchema.safeParse(formData)
+  
+  if (!validatedFields.success) {
+    return { error: validatedFields.error.flatten().fieldErrors }
   }
+
+  const { email: rawEmail, password, name, salonName, address, phone, nif } = validatedFields.data
+  const email = rawEmail.toLowerCase()
+
+
 
   const hashedPassword = await bcrypt.hash(password, 10)
   const trialEndsAt = new Date()
@@ -102,8 +114,7 @@ export async function signUpFreeTrial(formData: any) {
 
   // === ENVIO DE E-MAIL (MODO SÍNCRONO) ===
   try {
-    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`);
-    const config = configs?.[0];
+    const config = await getGlobalConfigCache();
     let extraHtml = "";
     
     if (config?.welcome_email_config) {
@@ -128,10 +139,9 @@ export async function signUpFreeTrial(formData: any) {
           <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
           <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
           <p><strong>E-mail:</strong> ${email}</p>
-          <p><strong>Palavra-passe:</strong> ${password}</p>
         </div>
         
-        <p style="font-size: 12px; color: #6b7280;">Recomendamos que guarde esta palavra-passe num local seguro ou a altere assim que entrar no sistema.</p>
+        <p style="font-size: 12px; color: #6b7280;">Utilize a palavra-passe que definiu durante o registo. Por segurança, nunca partilhamos nem armazenamos palavras-passe em texto legível.</p>
         
         ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
         
@@ -153,8 +163,16 @@ export async function signUpFreeTrial(formData: any) {
 }
 
 export async function login(formData: any) {
+  const validatedFields = loginSchema.safeParse(formData)
+  
+  if (!validatedFields.success) {
+    return { error: "Dados inválidos" }
+  }
+
   try {
-    const { email, password, slug } = formData
+    const { email: rawEmail, password, slug, redirectTo } = validatedFields.data
+    const email = rawEmail.toLowerCase()
+
     
     let user;
     if (slug) {
@@ -181,7 +199,8 @@ export async function login(formData: any) {
     const passwordMatch = await bcrypt.compare(password, user.password)
     if (!passwordMatch) return { error: "Credenciais inválidas" }
 
-    let targetUrl = slug ? "/dashboard" : "/admin"
+    let targetUrl = redirectTo || (user.role === "admin" ? "/admin" : "/dashboard")
+
 
     await signIn("credentials", {
       email,

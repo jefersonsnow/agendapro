@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import { Analytics } from '@vercel/analytics/next'
@@ -67,6 +68,8 @@ export default async function RootLayout({
   return (
     <html lang={locale} data-scroll-behavior="smooth">
       <head>
+        <title>AgendarPro</title>
+
         {seo.fbPixelId && (
           <Script id="fb-pixel" strategy="afterInteractive">
             {`

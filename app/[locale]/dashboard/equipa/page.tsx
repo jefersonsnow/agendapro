@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -517,19 +518,23 @@ export default function EquipaPage() {
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
+                          className="h-11 w-11 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
                           onClick={() => openEditDialog(member)}
+                          aria-label={`Editar membro ${member.name}`}
                         >
-                          <Pencil className="h-3.5 w-3.5" />
+                          <Pencil className="h-4 w-4" />
                         </Button>
+
                         <Button
                           variant="ghost"
                           size="icon"
-                          className="h-8 w-8 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all"
+                          className="h-11 w-11 rounded-lg hover:bg-destructive/10 hover:text-destructive transition-all"
                           onClick={() => handleDelete(member.id)}
+                          aria-label={`Eliminar membro ${member.name}`}
                         >
-                          <Trash2 className="h-3.5 w-3.5" />
+                          <Trash2 className="h-4 w-4" />
                         </Button>
+
                       </>
                     )}
                   </div>

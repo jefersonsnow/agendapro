@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -77,7 +78,9 @@ interface Client {
 
 export default function ClientesPage() {
   const [clients, setClients] = useState<Client[]>([])
-  const [filteredClients, setFilteredClients] = useState<Client[]>([])
+  const [totalCount, setTotalCount] = useState(0)
+  const [currentPage, setCurrentPage] = useState(1)
+  const [pageSize] = useState(50)
   const [loading, setLoading] = useState(true)
   const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "free" })
   const [searchQuery, setSearchQuery] = useState("")
@@ -107,25 +110,30 @@ export default function ClientesPage() {
   }, [])
 
   useEffect(() => {
-    const filtered = clients.filter(
-      (client) =>
-        client.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        (client.email && client.email.toLowerCase().includes(searchQuery.toLowerCase())) ||
-        (client.phone && client.phone.includes(searchQuery))
-    )
-    setFilteredClients(filtered)
-  }, [searchQuery, clients])
+    const timer = setTimeout(() => {
+      fetchData(1) // Reset to page 1 on search
+    }, 500)
+    return () => clearTimeout(timer)
+  }, [searchQuery])
 
-  async function fetchData() {
+  useEffect(() => {
+    fetchData(currentPage)
+  }, [currentPage])
+
+  async function fetchData(page: number = currentPage) {
     setLoading(true)
-    const clientsData = await getClients()
-    setClients(clientsData || [])
-    setFilteredClients(clientsData || [])
-    
-    const limit = await checkClientLimit()
-    setPlanCheck(limit)
-    
-    setLoading(false)
+    try {
+      const data = await getClients(page, pageSize, searchQuery)
+      setClients(data.clients || [])
+      setTotalCount(data.totalCount || 0)
+      
+      const limit = await checkClientLimit()
+      setPlanCheck(limit)
+    } catch (error) {
+      console.error("Error fetching clients:", error)
+    } finally {
+      setLoading(false)
+    }
   }
 
   function openCreateDialog() {
@@ -432,8 +440,10 @@ export default function ClientesPage() {
 
       {/* Search */}
       <div className="relative max-w-sm">
+        <Label htmlFor="search-clients" className="sr-only">Pesquisar clientes</Label>
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
+          id="search-clients"
           placeholder="Pesquisar clientes..."
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
@@ -441,8 +451,9 @@ export default function ClientesPage() {
         />
       </div>
 
+
       {/* Clients Table */}
-      {filteredClients.length === 0 ? (
+      {clients.length === 0 ? (
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-12">
             <div className="rounded-full bg-muted p-4 mb-4">
@@ -489,7 +500,7 @@ export default function ClientesPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredClients.map((client) => (
+                {clients.map((client) => (
                   <TableRow 
                     key={client.id} 
                     className="cursor-pointer hover:bg-muted/50 transition-colors group" 
@@ -579,6 +590,33 @@ export default function ClientesPage() {
                 ))}
               </TableBody>
             </Table>
+            
+            {/* Pagination Controls */}
+            {totalCount > pageSize && (
+              <div className="flex items-center justify-between p-4 border-t">
+                <p className="text-sm text-muted-foreground">
+                  A mostrar <strong>{(currentPage - 1) * pageSize + 1}</strong> a <strong>{Math.min(currentPage * pageSize, totalCount)}</strong> de <strong>{totalCount}</strong> clientes
+                </p>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  >
+                    Anterior
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    disabled={currentPage * pageSize >= totalCount}
+                    onClick={() => setCurrentPage(p => p + 1)}
+                  >
+                    Próximo
+                  </Button>
+                </div>
+              </div>
+            )}
           </CardContent>
         </Card>
       )}
@@ -603,10 +641,10 @@ export default function ClientesPage() {
               </SheetHeader>
               {/* Header Profile Cover Style */}
               <div className="bg-gradient-to-t from-muted/50 to-muted/10 p-6 border-b relative">
-                <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-violet-500/20 -z-10"></div>
+                <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-r from-primary/20 to-cyan-500/20 -z-10"></div>
                 <div className="flex gap-5 mt-4">
                   <Avatar className="h-20 w-20 border-4 border-background shadow-md">
-                    <AvatarFallback className="bg-gradient-to-br from-primary to-violet-600 text-white text-2xl font-bold">
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-cyan-600 text-white text-2xl font-bold">
                       {getInitials(selectedProfile.name)}
                     </AvatarFallback>
                   </Avatar>
@@ -689,8 +727,8 @@ export default function ClientesPage() {
                 {/* Histórico de Serviços */}
                 <div className="pb-8">
                   <div className="flex items-center gap-2 mb-6">
-                    <div className="bg-violet-100 p-1.5 rounded-md">
-                      <HistoryIcon className="h-4 w-4 text-violet-700" />
+                    <div className="bg-cyan-100 p-1.5 rounded-md">
+                      <HistoryIcon className="h-4 w-4 text-cyan-700" />
                     </div>
                     <h3 className="text-sm font-bold uppercase tracking-wider text-muted-foreground">
                       Histórico de Serviços ({selectedProfile.appointments?.length || 0})

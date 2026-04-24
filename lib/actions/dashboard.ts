@@ -9,54 +9,45 @@ import { getPlanLimits, isWithinLimit, isFeatureAllowed } from "@/lib/plan-limit
 import { isAfter } from "date-fns"
 import { logAction } from "@/lib/audit"
 
-// Cachear por request: se for chamado várias vezes na mesma página (pelo servidor),
-// executa a lógica apenas uma vez.
-export const getSalonId = cache(async function getSalonId() {
-  const session = await auth()
-  if (!session?.user?.id && !session?.user?.email) return null
-  
-  const userId = session.user.id
-  const userEmail = session.user.email
+import { getSalonId, getGlobalConfigCache } from "@/lib/dal"
+import { clientSchema, serviceSchema, staffSchema } from "@/lib/validations/dashboard"
+import { supportTicketSchema } from "@/lib/validations/support"
 
-  // 1. Tentar como Dono
-  const salon = await prisma.salon.findFirst({
-    where: { 
-      OR: [
-        { owner_id: userId || undefined },
-        { owner: { email: userEmail || undefined } }
-      ]
-    },
-    select: { id: true }
-  })
-  if (salon) return salon.id
-
-  // 2. Tentar como Staff (Manager/Receptionist/Professional)
-  const staff = await prisma.staff.findFirst({
-    where: { 
-      OR: [
-        { user_id: userId || undefined },
-        { email: userEmail || undefined }
-      ]
-    },
-    select: { salon_id: true }
-  })
-
-  return staff?.salon_id || null
-})
 
 // --- CLIENTS ---
-export async function getClients() {
+export async function getClients(page: number = 1, pageSize: number = 50, search: string = "") {
   const salonId = await getSalonId()
-  if (!salonId) return []
-  const clients = await prisma.client.findMany({
-    where: { salon_id: salonId },
-    orderBy: { name: "asc" }
-  })
-  return clients.map((client: any) => ({
-    ...client,
-    total_spent: Number(client.total_spent),
-    // last_visit e created_at já são serializados como strings pelo Next.js em Server Actions, mas podemos ser explícitos se necessário
-  }))
+  if (!salonId) return { clients: [], totalCount: 0 }
+
+  const where: any = {
+    salon_id: salonId
+  }
+
+  if (search) {
+    where.OR = [
+      { name: { contains: search, mode: 'insensitive' } },
+      { email: { contains: search, mode: 'insensitive' } },
+      { phone: { contains: search, mode: 'insensitive' } },
+    ]
+  }
+
+  const [clients, totalCount] = await Promise.all([
+    prisma.client.findMany({
+      where,
+      orderBy: { name: "asc" },
+      skip: (page - 1) * pageSize,
+      take: pageSize
+    }),
+    prisma.client.count({ where })
+  ])
+
+  return {
+    clients: clients.map((client: any) => ({
+      ...client,
+      total_spent: Number(client.total_spent),
+    })),
+    totalCount
+  }
 }
 
 export async function getClientProfile(clientId: string) {
@@ -94,24 +85,32 @@ export async function getClientProfile(clientId: string) {
 }
 
 export async function upsertClient(id: string | null, data: any) {
+  const validatedFields = clientSchema.safeParse(data)
+  if (!validatedFields.success) {
+    throw new Error("Dados inválidos: " + JSON.stringify(validatedFields.error.flatten().fieldErrors))
+  }
+  const validatedData = validatedFields.data
+
   const salonId = await getSalonId()
   if (!salonId) throw new Error("Não autorizado")
+
 
   const salon = await (prisma as any).salon.findUnique({ where: { id: salonId }, select: { plan: true } })
   const plan = salon?.plan || "free"
   
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+  const config = await getGlobalConfigCache()
+  const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
 
   let updatePayload: any = {
-    name: data.name,
-    email: data.email || null,
-    phone: data.phone || null,
-    address: data.address || null,
-    nif: data.nif || null,
-    notes: data.notes || null,
-    loyalty_points: parseInt(data.loyalty_points) || 0,
+    name: validatedData.name,
+    email: validatedData.email || null,
+    phone: validatedData.phone || null,
+    address: validatedData.address || null,
+    nif: validatedData.nif || null,
+    notes: validatedData.notes || null,
+    loyalty_points: validatedData.loyalty_points || 0,
   }
+
 
   if (data.password) {
     updatePayload.password = await bcrypt.hash(data.password, 10)
@@ -163,8 +162,8 @@ export async function getServices() {
   const plan = salon?.plan || "free"
   const status = salon?.status || "active"
   
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+  const config = await getGlobalConfigCache()
+  const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
   const limits = getPlanLimits(plan, dynamicPlans, status)
 
   const services = await prisma.service.findMany({
@@ -179,22 +178,34 @@ export async function getServices() {
     }
   })
 
-  return services.map((service: any, index: number) => ({
-    ...service,
-    price: Number(service.price),
-    is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3),
-    staffAssignments: service.staff.map((ss: any) => ({
-      staffId: ss.staff_id,
-      name: ss.staff.name,
-      color: ss.staff.color,
-      commission: ss.commission_value !== null ? Number(ss.commission_value) : null
-    }))
-  }))
+  return services.map((service: any, index: number) => {
+    const { staff: assignments, ...rest } = service
+    return {
+      ...rest,
+      price: Number(service.price),
+      is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3),
+      staffAssignments: assignments.map((ss: any) => ({
+        staffId: ss.staff_id,
+        name: ss.staff.name,
+        color: ss.staff.color,
+        commission: ss.commission_value !== null ? Number(ss.commission_value) : null
+      }))
+    }
+  })
+
 }
 
 export async function upsertService(id: string | null, data: any) {
+  const validatedFields = serviceSchema.safeParse(data)
+  if (!validatedFields.success) {
+    const errorMsg = validatedFields.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ")
+    throw new Error("Dados inválidos: " + errorMsg)
+  }
+  const validatedData = validatedFields.data
+
   const salonId = await getSalonId()
   if (!salonId) throw new Error("Não autorizado")
+
 
   const salon = await (prisma as any).salon.findUnique({
      where: { id: salonId },
@@ -202,18 +213,21 @@ export async function upsertService(id: string | null, data: any) {
   })
   const plan = salon?.plan || "free"
 
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+  const config = await getGlobalConfigCache()
+  const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
 
   const serviceData = {
-    name: data.name,
-    description: data.description || null,
-    price: data.price,
-    duration_minutes: parseInt(data.duration_minutes),
-    category: data.category || "Cabelo",
-    is_active: data.is_active ?? true,
+    name: validatedData.name,
+    description: validatedData.description || null,
+    price: validatedData.price,
+    duration_minutes: validatedData.duration_minutes,
+    category: validatedData.category || "Geral",
+    is_active: validatedData.is_active ?? true,
+    image_url: validatedData.image_url || null,
     salon_id: salonId
+
   }
+
 
   let serviceId = id
 
@@ -325,8 +339,8 @@ export async function getStaff() {
   const plan = salon?.plan || "free"
   const status = salon?.status || "active"
   
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+  const config = await getGlobalConfigCache()
+  const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
   const limits = getPlanLimits(plan, dynamicPlans, status)
 
   const staff = await prisma.staff.findMany({
@@ -358,8 +372,16 @@ export async function getStaff() {
 }
 
 export async function upsertStaff(id: string | null, data: any) {
+  const validatedFields = staffSchema.safeParse(data)
+  if (!validatedFields.success) {
+    const errorMsg = validatedFields.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ")
+    throw new Error("Dados inválidos: " + errorMsg)
+  }
+  const validatedData = validatedFields.data
+
   const salonId = await getSalonId()
   if (!salonId) throw new Error("Não autorizado")
+
 
   const salon = await (prisma as any).salon.findUnique({
      where: { id: salonId },
@@ -367,8 +389,8 @@ export async function upsertStaff(id: string | null, data: any) {
   })
   const plan = salon?.plan || "free"
 
-  const configs = await (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-  const dynamicPlans = configs?.[0]?.landing_page ? JSON.parse(configs[0].landing_page).plans : null
+  const config = await getGlobalConfigCache()
+  const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
 
   // --- CONTROLO DE PERMISSÕES ---
   const session = await auth()
@@ -383,9 +405,7 @@ export async function upsertStaff(id: string | null, data: any) {
   })
   
   let loggedInRole = dbUser?.role || "professional"
-  if (dbUser?.email === "barbanegra@cliente.com") {
-    loggedInRole = "owner"
-  }
+
 
   if (!id) {
     const status = salon?.status || "active"
@@ -507,13 +527,7 @@ export async function getSalon() {
        return null
     }
 
-    // Correção temporária
-    if (session.user.email === "barbanegra@cliente.com") {
-       await prisma.user.updateMany({
-          where: { email: "barbanegra@cliente.com" },
-          data: { role: "owner" }
-       }).catch(e => console.error("Erro update temporário:", e))
-    }
+
 
     const salonId = await getSalonId()
     if (!salonId) {
@@ -525,9 +539,9 @@ export async function getSalon() {
       prisma.salon.findUnique({
         where: { id: salonId }
       }),
-      (prisma as any).$queryRawUnsafe(`SELECT landing_page FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch((e: any) => {
+      getGlobalConfigCache().catch((e: any) => {
          console.error("Erro ao buscar global_configs:", e.message)
-         return []
+         return null
       })
     ])
     
@@ -659,7 +673,7 @@ export async function getUserRole() {
            
            // Realizar downgrade via Raw SQL para saltar lógicas de Prisma Client se necessário
            await (prisma as any).$executeRawUnsafe(
-              `UPDATE salons SET plan = 'free', status = 'active' WHERE id = ?`,
+              `UPDATE salons SET plan = 'free', status = 'active' WHERE id = $1`,
               salonId
            )
            
@@ -683,10 +697,7 @@ export async function getUserRole() {
        salonSlug: salonSlug
      }
 
-     // Sobrepor papel para o utilizador específico se necessário
-     if (session.user.email === "barbanegra@cliente.com") {
-        result.role = "owner"
-     }
+
      
      return result
   } catch (err) {
@@ -877,8 +888,7 @@ export async function getSupportConfig() {
     const session = await auth()
     if (!session) return {}
     
-    const configs = await (prisma as any).$queryRawUnsafe(`SELECT support_config FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-    const config = configs?.[0]
+    const config = await getGlobalConfigCache()
     
     if (!config?.support_config) return {}
     try {
@@ -891,18 +901,26 @@ export async function getSupportConfig() {
   }
 }
 
-export async function createSupportTicket(data: { subject: string, message: string, priority?: string }) {
+export async function createSupportTicket(data: any) {
+  const validatedFields = supportTicketSchema.safeParse(data)
+  if (!validatedFields.success) {
+    const errorMsg = validatedFields.error.errors.map(e => `${e.path.join(".")}: ${e.message}`).join(", ")
+    throw new Error("Dados inválidos: " + errorMsg)
+  }
+  const validatedData = validatedFields.data
+
   const salonId = await getSalonId()
   if (!salonId) throw new Error("Não autorizado")
 
   await prisma.supportTicket.create({
     data: {
       salon_id: salonId,
-      subject: data.subject,
-      message: data.message,
-      priority: data.priority || "medium"
+      subject: validatedData.subject,
+      message: validatedData.message,
+      priority: validatedData.priority
     }
   })
+
 
   await logAction({ action: "create_support_ticket", entity: "support_ticket", entityId: "new", salonId })
 }

@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
 import { redirect } from "next/navigation"
@@ -24,7 +25,8 @@ import PlanLimitBanner from "@/components/plan-limit-banner"
 import ProfessionalStatsView from "@/components/professional-stats-view"
 import QRCodeModal from "@/components/qr-code-modal"
 import AnnouncementsBanner from "@/components/announcements-banner"
-import { isFeatureAllowed } from "@/lib/plan-limits"
+import { isFeatureAllowed } from "@/lib/plan-utils"
+
 import { Zap } from "lucide-react"
 import DashboardFilters from "@/components/dashboard-filters"
 import { getTranslations } from "next-intl/server"
@@ -68,7 +70,7 @@ export default async function DashboardPage({
         <div className="space-y-6">
           <AnnouncementsBanner />
           <div className="flex flex-col gap-2">
-          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-violet-600">
+          <h1 className="text-3xl font-extrabold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-primary to-cyan-600">
             {t("hello")}, {(session.user.name || t("professional")).split(' ')[0]} ⚡
           </h1>
           <p className="text-muted-foreground text-lg">
@@ -110,6 +112,7 @@ export default async function DashboardPage({
       <div className="flex flex-col items-center justify-center min-h-[60vh] gap-4">
         <AlertCircle className="h-12 w-12 text-muted-foreground" />
         <h2 className="text-xl font-semibold">{t("salonNotFound")}</h2>
+
         <p className="text-muted-foreground text-center max-w-md">
           {t("salonNotFoundDesc")}
         </p>
@@ -143,9 +146,11 @@ export default async function DashboardPage({
         <div className="space-y-6">
           <AnnouncementsBanner />
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-extrabold tracking-tight">
+            <h2 className="text-3xl font-extrabold tracking-tight">
+
               {t("hello")}, {session.user.name?.split(' ')[0]} 👋
-            </h1>
+            </h2>
+
             <p className="text-muted-foreground text-lg">
               {t("welcomeBack")} {salon.name}.
             </p>
@@ -361,9 +366,11 @@ export default async function DashboardPage({
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">
+          <h2 className="text-2xl font-bold tracking-tight">
+
             {t("welcomeTo")} {salon.name}
-          </h1>
+          </h2>
+
           <p className="text-muted-foreground">
             {t("salonSummary")}
           </p>

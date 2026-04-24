@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import type React from "react"
@@ -28,6 +29,7 @@ import { Button } from "@/components/ui/button"
 import { useTranslations } from "next-intl"
 import TrialStatusBanner from "@/components/trial-status-banner"
 import ProfileDialog from "@/components/profile-dialog"
+import AutoRefresh from "@/components/auto-refresh"
 
 export default function DashboardLayout({
   children,
@@ -337,6 +339,7 @@ export default function DashboardLayout({
 
         {/* Page content */}
         <main className="flex-1 p-2 lg:p-4">
+          <AutoRefresh interval={120000} />
           <TrialStatusBanner plan={user.plan} trialEndsAt={(user as any).trialEndsAt} />
           {children}
           <ProfileDialog open={profileOpen} onOpenChange={setProfileOpen} />

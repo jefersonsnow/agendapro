@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect, use, useRef } from "react"
@@ -137,7 +138,8 @@ export default function SalonLandingPage({
   }, [servLayout, salon?.services, salon])
 
   if (loading) return <div className="min-h-screen flex items-center justify-center bg-background"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
-  if (notFound || !salon) return <div className="min-h-screen flex flex-col items-center justify-center"><h1>Página não encontrada</h1><Link href="/"> <Button>Voltar</Button> </Link></div>
+  if (notFound || !salon) return <div className="min-h-screen flex flex-col items-center justify-center"><h2>Página não encontrada</h2><Link href="/"> <Button>Voltar</Button> </Link></div>
+
 
   const social = salon.settings || {}
   const gallery = salon.settings?.gallery_urls?.filter(url => url !== "") || []
@@ -294,7 +296,7 @@ export default function SalonLandingPage({
                             locale === l ? "bg-primary text-white border-primary shadow-lg shadow-primary/20" : "bg-background/50 opacity-70"
                           )}
                         >
-                           <img src={`https://flagcdn.com/w40/${l === 'en' ? 'gb' : l}.png`} className="w-4 h-3 object-cover rounded-[1px]" alt="" />
+                           <img src={`https://flagcdn.com/w40/${l === 'en' ? 'gb' : l}.png`} className="w-4 h-3 object-cover rounded-[1px]" alt={`Idioma ${l}`} />
                            {l.toUpperCase()}
                         </button>
                      ))}
@@ -317,7 +319,8 @@ export default function SalonLandingPage({
       )}>
         {salon.cover_url && (
            <div className="absolute inset-0 z-0">
-              <img src={salon.cover_url} alt="Cover" className="w-full h-full object-cover" />
+              <img src={salon.cover_url} alt={`Capa de ${salon.name}`} className="w-full h-full object-cover" />
+
               <div className="absolute inset-0 bg-black/40 backdrop-blur-[2px]" />
            </div>
         )}
@@ -561,7 +564,7 @@ export default function SalonLandingPage({
                        onClick={() => setSelectedGalleryImage(url)}
                        className={cn("aspect-[3/4] relative overflow-hidden rounded-[2.5rem] shadow-2xl transition-all hover:scale-105 hover:rotate-3 group cursor-pointer", i % 2 === 1 ? "md:translate-y-16" : "")}
                     >
-                       <img src={url} alt="Galeria" className="object-cover w-full h-full transition-transform duration-[2s] group-hover:scale-125" />
+                       <img src={url} alt={`Imagem ${i + 1} da Galeria`} className="object-cover w-full h-full transition-transform duration-[2s] group-hover:scale-125" />
                        <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
                           <span className="border-2 border-white px-6 py-2 rounded-full text-white font-black text-[10px] uppercase tracking-widest shadow-lg">{t("expandImage")}</span>
                        </div>
@@ -579,7 +582,7 @@ export default function SalonLandingPage({
                <div className="flex items-center gap-3">
                   {salon.logo_url ? (
                      <div className="h-14 w-14 rounded-2xl overflow-hidden border shadow-sm">
-                        <img src={salon.logo_url} alt={salon.name} className="w-full h-full object-cover" />
+                        <img src={salon.logo_url} alt={`Logótipo de ${salon.name}`} className="w-full h-full object-cover" />
                      </div>
                   ) : (
                      <div className={cn("h-12 w-12 flex items-center justify-center font-black rounded-2xl text-xl", themeStyles.primary)}> {salon.name.charAt(0)} </div>

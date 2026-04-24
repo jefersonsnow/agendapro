@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
@@ -194,7 +195,7 @@ export default function HelpSupportPage() {
 
         {/* Lado Direito: Formulário de Ticket */}
         <div className="space-y-6">
-           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-gradient-to-br from-primary to-violet-700 p-px">
+           <Card className="border-none shadow-2xl rounded-[2.5rem] bg-gradient-to-br from-primary to-cyan-700 p-px">
               <div className="bg-background rounded-[2.4rem] p-8 space-y-6 h-full">
                  <div className="space-y-2">
                     <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">

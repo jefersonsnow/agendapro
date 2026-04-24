@@ -86,7 +86,10 @@ model Account {
   scope             String?
   id_token          String? @db.Text
   session_state     String?
+  created_at        DateTime @default(now())
+  updated_at        DateTime @updatedAt
   user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
 
   @@unique([provider, providerAccountId])
   @@index([userId])
@@ -98,7 +101,10 @@ model Session {
   sessionToken String   @unique
   userId       String
   expires      DateTime
+  created_at   DateTime @default(now())
+  updated_at   DateTime @updatedAt
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
 
   @@index([userId])
   @@map("sessions")
@@ -108,6 +114,9 @@ model VerificationToken {
   identifier String
   token      String   @unique
   expires    DateTime
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+
 
   @@unique([identifier, token])
   @@map("verification_tokens")
@@ -180,8 +189,10 @@ model StaffService {
   staff_id         String
   service_id       String
   commission_value Decimal? @db.Decimal(10, 2)
+  created_at       DateTime @default(now())
   service          Service @relation(fields: [service_id], references: [id], onDelete: Cascade)
   staff            Staff   @relation(fields: [staff_id], references: [id], onDelete: Cascade)
+
 
   @@id([staff_id, service_id])
   @@index([service_id])
@@ -232,6 +243,8 @@ model Appointment {
 
   @@index([client_id])
   @@index([salon_id, starts_at])
+  @@index([salon_id, status])
+  @@index([salon_id, starts_at, status])
   @@index([service_id])
   @@index([staff_id])
   @@map("appointments")
@@ -256,6 +269,7 @@ model Transaction {
   @@index([appointment_id])
   @@index([product_id])
   @@index([salon_id, created_at])
+  @@index([salon_id, type])
   @@index([staff_id])
   @@map("transactions")
 }
@@ -317,7 +331,9 @@ model GlobalConfig {
   seo_config      String?  @db.Text // JSON: metaTitle, metaDesc, fbPixel, etc.
   sales_page_config String? @db.Text // JSON: videoUrl, headline, subheadline, timerDate, fbPixel, googlePixel
   welcome_email_config String? @db.Text // JSON: enableExtraContent, extraHtmlContent
+  created_at      DateTime @default(now())
   updated_at      DateTime @updatedAt
+
   @@map("global_configs")
 }
 

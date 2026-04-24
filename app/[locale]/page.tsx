@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { TrialButton } from "@/components/trial-button"
@@ -98,7 +99,7 @@ export default async function HomePage({
       {/* Navbar com Banner Promocional */}
       <div className="flex flex-col">
         {isPromoActive && (
-          <div className="bg-gradient-to-r from-primary via-violet-600 to-primary bg-[length:200%_auto] animate-gradient-x text-white py-2 text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg relative z-[60]">
+          <div className="bg-gradient-to-r from-primary via-cyan-600 to-primary bg-[length:200%_auto] animate-gradient-x text-white py-2 text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg relative z-[60]">
             <div className="container mx-auto px-4 flex items-center justify-center gap-3">
               <Sparkles className="h-4 w-4 animate-pulse" />
               <span>{promoText}</span>
@@ -131,8 +132,9 @@ export default async function HomePage({
                     <img 
                       src={`https://flagcdn.com/w40/${locale === 'en' ? 'gb' : locale}.png`} 
                       className="w-4 h-3 object-cover rounded-[1px]" 
-                      alt="" 
+                      alt={locale} 
                     />
+
                   </div>
                   <span className="hidden sm:inline text-xs uppercase font-bold tracking-widest">{locale}</span>
                 </button>
@@ -145,7 +147,7 @@ export default async function HomePage({
                     >
                       <img 
                         src={`https://flagcdn.com/w40/${l.flag}.png`} 
-                        alt="" 
+                        alt={l.label} 
                         className="w-5 h-3.5 object-cover rounded-sm shadow-sm"
                       />
                       {l.label}
@@ -170,7 +172,7 @@ export default async function HomePage({
         <section className="relative pt-24 pb-32 lg:pt-36 lg:pb-40 overflow-hidden">
           <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/20 via-background to-background"></div>
           <div className="absolute top-1/4 left-1/4 -z-10 w-96 h-96 bg-primary/20 rounded-full blur-[128px] opacity-70 animate-pulse"></div>
-          <div className="absolute top-1/3 right-1/4 -z-10 w-64 h-64 bg-violet-500/20 rounded-full blur-[96px] opacity-50"></div>
+          <div className="absolute top-1/3 right-1/4 -z-10 w-64 h-64 bg-cyan-500/20 rounded-full blur-[96px] opacity-50"></div>
 
           <div className="container mx-auto px-4 text-center">
             <div className="inline-flex items-center rounded-full border border-primary/30 bg-primary/10 px-3 py-1 text-sm font-medium text-primary mb-8 backdrop-blur-sm">
@@ -180,7 +182,7 @@ export default async function HomePage({
 
             <h1 className="text-5xl lg:text-7xl font-extrabold tracking-tight mb-8 text-balance mx-auto max-w-5xl leading-[1.1]">
               {dynamicHeroTitle1} <br className="hidden md:block" />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-violet-500 to-primary animate-gradient-x">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-500 to-primary animate-gradient-x">
                 {dynamicHeroTitle2}
               </span>
             </h1>
@@ -306,9 +308,9 @@ export default async function HomePage({
               </div>
 
               {/* PREMIUM */}
-              <div className="relative rounded-3xl p-px bg-gradient-to-br from-primary via-violet-500 to-primary shadow-2xl shadow-primary/30 flex flex-col h-full">
+              <div className="relative rounded-3xl p-px bg-gradient-to-br from-primary via-cyan-500 to-primary shadow-2xl shadow-primary/30 flex flex-col h-full">
                 <div className="absolute -top-4 left-1/2 -translate-x-1/2">
-                  <div className="bg-gradient-to-r from-primary to-violet-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/40">
+                  <div className="bg-gradient-to-r from-primary to-cyan-600 text-white text-[10px] font-black uppercase tracking-widest px-4 py-1.5 rounded-full shadow-lg shadow-primary/40">
                     {t("planPremiumBadge")}
                   </div>
                 </div>

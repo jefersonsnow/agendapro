@@ -1,9 +1,11 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
 import { useState, useEffect } from "react"
 import { getReportStats } from "@/lib/actions/dashboard"
 import { getSalonPlanData } from "@/lib/actions/plan-guard"
-import { isFeatureAllowed } from "@/lib/plan-limits"
+import { isFeatureAllowed } from "@/lib/plan-utils"
+
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
@@ -172,11 +174,11 @@ export default function RelatoriosPage() {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg hover:shadow-xl transition-all border-l-4 border-violet-500">
+        <Card className="shadow-lg hover:shadow-xl transition-all border-l-4 border-cyan-500">
           <CardContent className="p-6">
             <div className="flex items-center justify-between mb-2">
-              <div className="rounded-full bg-violet-100 p-2">
-                <DollarSign className="h-5 w-5 text-violet-600" />
+              <div className="rounded-full bg-cyan-100 p-2">
+                <DollarSign className="h-5 w-5 text-cyan-600" />
               </div>
             </div>
             <p className="text-sm font-medium text-muted-foreground uppercase tracking-widest">Receita Total</p>
@@ -270,8 +272,8 @@ export default function RelatoriosPage() {
         <Card className="rounded-3xl border-none shadow-xl bg-card overflow-hidden">
           <CardHeader className="bg-muted/30 pb-8 px-8">
             <div className="flex items-center gap-3">
-              <div className="bg-violet-100 p-2 rounded-xl">
-                <PieChartIcon className="h-6 w-6 text-violet-600" />
+              <div className="bg-cyan-100 p-2 rounded-xl">
+                <PieChartIcon className="h-6 w-6 text-cyan-600" />
               </div>
               <div>
                 <CardTitle className="text-xl">Distribuição de Receita</CardTitle>
@@ -310,7 +312,7 @@ export default function RelatoriosPage() {
       </div>
 
       {/* Projections Insight */}
-      <Card className="bg-gradient-to-r from-primary/10 via-violet-500/10 to-transparent border-primary/20 rounded-3xl p-8 border">
+      <Card className="bg-gradient-to-r from-primary/10 via-cyan-500/10 to-transparent border-primary/20 rounded-3xl p-8 border">
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="h-20 w-20 bg-background rounded-full flex items-center justify-center shadow-lg ring-8 ring-primary/5">
             <TrendingUp className="h-10 w-10 text-primary" />
@@ -331,8 +333,8 @@ export default function RelatoriosPage() {
         {!isFeatureAllowed(plan, "commissions", dynamicPlans, status) && (
             <div className="absolute inset-0 z-20 bg-background/60 backdrop-blur-[4px] flex flex-col items-center justify-center p-8 text-center animate-in fade-in duration-700">
                <div className="bg-white p-8 rounded-[3rem] shadow-2xl border-2 flex flex-col items-center gap-4 max-w-sm">
-                  <div className="h-20 w-20 rounded-2xl bg-violet-100 flex items-center justify-center">
-                     <Users className="h-10 w-10 text-violet-600 animate-bounce" />
+                  <div className="h-20 w-20 rounded-2xl bg-cyan-100 flex items-center justify-center">
+                     <Users className="h-10 w-10 text-cyan-600 animate-bounce" />
                   </div>
                   <div>
                      <h3 className="font-black uppercase tracking-widest text-sm mb-2">Controlo de Comissões PRO</h3>

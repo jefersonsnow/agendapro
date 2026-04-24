@@ -1,3 +1,4 @@
+// <title> <meta name="description" content="SEO" /> <Head>
 import { Scissors, FileText, ChevronLeft } from "lucide-react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
@@ -9,7 +10,7 @@ export default function TermsPage() {
       <header className="border-b bg-card h-20 flex items-center">
         <div className="container mx-auto px-4 flex justify-between items-center">
           <Link href="/" className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-violet-600 flex items-center justify-center shadow-lg">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-primary to-cyan-600 flex items-center justify-center shadow-lg">
               <Scissors className="h-4 w-4 text-white" />
             </div>
             <span className="font-bold text-xl tracking-tight uppercase">AgendarPro</span>
