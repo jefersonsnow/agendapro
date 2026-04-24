@@ -118,6 +118,10 @@ export default function ClientesPage() {
 
   useEffect(() => {
     fetchData(currentPage)
+    
+    const handleRefresh = () => fetchData(currentPage)
+    window.addEventListener("next-refresh", handleRefresh)
+    return () => window.removeEventListener("next-refresh", handleRefresh)
   }, [currentPage])
 
   async function fetchData(page: number = currentPage) {

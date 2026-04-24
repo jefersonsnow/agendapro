@@ -178,21 +178,23 @@ export async function getServices() {
     }
   })
 
-  return services.map((service: any, index: number) => {
-    const { staff: assignments, ...rest } = service
-    return {
-      ...rest,
-      price: Number(service.price),
-      is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3),
-      staffAssignments: assignments.map((ss: any) => ({
-        staffId: ss.staff_id,
-        name: ss.staff.name,
-        color: ss.staff.color,
-        commission: ss.commission_value !== null ? Number(ss.commission_value) : null
-      }))
-    }
-  })
-
+  // Retornamos um objeto 100% limpo de instâncias complexas (Decimal, Date, etc)
+  return services.map((service: any, index: number) => ({
+    id: service.id,
+    name: service.name,
+    description: service.description,
+    duration_minutes: service.duration_minutes,
+    price: Number(service.price),
+    category: service.category,
+    is_active: service.is_active,
+    is_plan_blocked: limits.services !== -1 && index >= (limits.services || 3),
+    staffAssignments: (service.staff || []).map((ss: any) => ({
+      staffId: ss.staff_id,
+      name: ss.staff.name,
+      color: ss.staff.color,
+      commission: ss.commission_value !== null ? Number(ss.commission_value) : null
+    }))
+  }))
 }
 
 export async function upsertService(id: string | null, data: any) {
@@ -364,7 +366,14 @@ export async function getStaff() {
       }
     }
     return {
-      ...member,
+      id: member.id,
+      name: member.name,
+      email: member.email,
+      phone: member.phone,
+      role: member.role,
+      avatar_url: member.avatar_url,
+      color: member.color,
+      is_active: member.is_active,
       working_hours: parsedHours,
       is_plan_blocked: limits.staff !== -1 && index >= (limits.staff || 1)
     }

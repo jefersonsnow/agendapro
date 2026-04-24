@@ -77,7 +77,13 @@ export default function ServicosPage() {
   // staffAssignments: map of staffId → commission value (null = not assigned)
   const [staffAssignments, setStaffAssignments] = useState<Record<string, { assigned: boolean; commission: string }>>({})
 
-  useEffect(() => { fetchData() }, [])
+  useEffect(() => { 
+    fetchData() 
+    
+    const handleRefresh = () => fetchData()
+    window.addEventListener("next-refresh", handleRefresh)
+    return () => window.removeEventListener("next-refresh", handleRefresh)
+  }, [])
 
   async function fetchData() {
     setLoading(true)

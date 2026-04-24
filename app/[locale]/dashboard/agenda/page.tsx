@@ -203,8 +203,18 @@ export default function AgendaPage() {
     fetchInitialData()
 
     const timer = setInterval(() => setNow(new Date()), 60000)
-    return () => clearInterval(timer)
-  }, [])
+
+    // Ouvinte para o AutoRefresh global
+    const handleRefresh = () => {
+      fetchAppointments()
+    }
+    window.addEventListener("next-refresh", handleRefresh)
+
+    return () => {
+      clearInterval(timer)
+      window.removeEventListener("next-refresh", handleRefresh)
+    }
+  }, [salonId]) // Dependência do salonId para garantir que fetchAppointments tem o ID
 
   useEffect(() => {
     if (salonId) {

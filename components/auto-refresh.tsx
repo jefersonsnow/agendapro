@@ -18,6 +18,8 @@ export default function AutoRefresh({ interval = 120000 }: AutoRefreshProps) {
       if (document.visibilityState === "visible") {
         console.log("[AutoRefresh] Atualizando dados do dashboard...")
         router.refresh()
+        // Disparar evento customizado para componentes de cliente
+        window.dispatchEvent(new CustomEvent("next-refresh"))
       }
     }, interval)
 
