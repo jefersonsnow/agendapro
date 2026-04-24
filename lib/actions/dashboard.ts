@@ -371,6 +371,8 @@ export async function getStaff() {
       email: member.email,
       phone: member.phone,
       role: member.role,
+      bio: member.bio,
+      user_id: member.user_id,
       avatar_url: member.avatar_url,
       color: member.color,
       is_active: member.is_active,
