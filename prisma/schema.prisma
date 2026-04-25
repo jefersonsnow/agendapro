@@ -224,20 +224,21 @@ model Client {
 model Appointment {
   id           String        @id @default(uuid())
   salon_id     String
-  client_id    String
+  client_id    String?
   staff_id     String
-  service_id   String
+  service_id   String?
   starts_at    DateTime
   ends_at      DateTime
   status       String        @default("pending")
   price        Decimal       @db.Decimal(10, 2)
   notes        String?       @db.Text
   source       String        @default("online")
+  is_break     Boolean       @default(false)
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
-  client       Client        @relation(fields: [client_id], references: [id])
+  client       Client?       @relation(fields: [client_id], references: [id])
   salon        Salon         @relation(fields: [salon_id], references: [id], onDelete: Cascade)
-  service      Service       @relation(fields: [service_id], references: [id])
+  service      Service?      @relation(fields: [service_id], references: [id])
   staff        Staff         @relation(fields: [staff_id], references: [id])
   transactions Transaction[]
 

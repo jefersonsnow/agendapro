@@ -67,11 +67,12 @@ interface Appointment {
   price: number
   notes: string | null
   staff_id: string
-  client_id: string
-  service_id: string
+  client_id: string | null
+  service_id: string | null
   staff: Staff
-  client: Client
-  service: Service
+  client: Client | null
+  service: Service | null
+  is_break?: boolean
 }
 
 const statusColors: Record<string, string> = {
@@ -79,6 +80,7 @@ const statusColors: Record<string, string> = {
   confirmed: "bg-primary/10 border-primary/30 text-primary",
   completed: "bg-green-100 border-green-300 text-green-800",
   cancelled: "bg-red-100 border-red-300 text-red-800",
+  break: "bg-black border-slate-950 text-white opacity-100",
 }
 
 function MonthlyView({ currentDate, appointments, onDayClick }: { 
@@ -144,11 +146,19 @@ function MonthlyView({ currentDate, appointments, onDayClick }: {
               </div>
               
               <div className="mt-1 space-y-1">
-                 {isCurrentMonth && dayAppointments.slice(0, 2).map(apt => (
-                    <div key={apt.id} className="text-[9px] font-bold uppercase truncate px-1 py-0.5 rounded bg-primary/10 border-l-2 border-primary/50 text-primary">
-                       {apt.client?.name}
+                  {isCurrentMonth && dayAppointments.slice(0, 2).map(apt => (
+                    <div 
+                      key={apt.id} 
+                      className={cn(
+                        "text-[9px] font-bold uppercase truncate px-1 py-0.5 rounded border-l-2",
+                        apt.is_break 
+                          ? "bg-slate-900 border-slate-950 text-white" 
+                          : "bg-primary/10 border-primary/50 text-primary"
+                      )}
+                    >
+                       {apt.is_break ? `PAUSA - ${apt.staff?.name || '?'}` : apt.client?.name}
                     </div>
-                 ))}
+                  ))}
                  {isCurrentMonth && dayAppointments.length > 2 && (
                     <div className="text-[8px] font-black text-muted-foreground uppercase pl-1">
                        + {dayAppointments.length - 2}
@@ -191,6 +201,7 @@ export default function AgendaPage() {
     notes: "",
     status: "pending",
     quick_name: "", // Campo para novo cliente
+    is_break: false,
   })
   const [now, setNow] = useState(new Date())
 
@@ -450,6 +461,7 @@ export default function AgendaPage() {
       notes: "",
       status: "pending",
       quick_name: "",
+      is_break: false,
     })
     setIsDialogOpen(true)
   }
@@ -465,13 +477,14 @@ export default function AgendaPage() {
 
     setFormData({
       staff_id: appointment.staff_id,
-      service_id: appointment.service_id,
-      client_id: appointment.client_id,
+      service_id: appointment.service_id || "",
+      client_id: appointment.client_id || "",
       date: localDateStr,
       time: date.toISOString().slice(11, 16),
       notes: appointment.notes || "",
       status: appointment.status,
-      quick_name: "", // Não editamos nome rápido aqui
+      quick_name: "", 
+      is_break: appointment.is_break || false,
     })
     setIsDialogOpen(true)
   }
@@ -480,23 +493,32 @@ export default function AgendaPage() {
     e.preventDefault()
     if (!salonId) return
 
-    const service = services.find((s: any) => s.id === formData.service_id)
-    if (!service) return
-
     const startsAt = new Date(`${formData.date}T${formData.time}`)
-    const endsAtDateObj = new Date(startsAt.getTime() + service.duration_minutes * 60000)
-    const endsAtTime = `${String(endsAtDateObj.getHours()).padStart(2, '0')}:${String(endsAtDateObj.getMinutes()).padStart(2, '0')}`
+    let endsAtTime = ""
+
+    if (formData.is_break) {
+      // Para pausas, a duração é o que estiver no "service_id" (que abusamos para guardar a duração em minutos)
+      const duration = parseInt(formData.service_id) || 15
+      const endsAtDateObj = new Date(startsAt.getTime() + duration * 60000)
+      endsAtTime = `${String(endsAtDateObj.getHours()).padStart(2, '0')}:${String(endsAtDateObj.getMinutes()).padStart(2, '0')}`
+    } else {
+      const service = services.find((s: any) => s.id === formData.service_id)
+      if (!service) return
+      const endsAtDateObj = new Date(startsAt.getTime() + service.duration_minutes * 60000)
+      endsAtTime = `${String(endsAtDateObj.getHours()).padStart(2, '0')}:${String(endsAtDateObj.getMinutes()).padStart(2, '0')}`
+    }
 
     try {
       const result = await upsertAppointment(selectedAppointment?.id || null, {
         staff_id: formData.staff_id,
         service_id: formData.service_id,
         client_id: formData.client_id,
-        starts_at: `${formData.date}T${formData.time}:00`, // Hora literal
+        starts_at: `${formData.date}T${formData.time}:00`,
         ends_at: `${formData.date}T${endsAtTime}:00`, 
-        price: service.price,
+        price: formData.is_break ? 0 : (services.find(s => s.id === formData.service_id)?.price || 0),
         notes: formData.notes,
-        status: formData.status,
+        status: formData.is_break ? "confirmed" : formData.status,
+        is_break: formData.is_break,
         quick_name: formData.quick_name,
         local_time: formData.time // Campo extra para segurança na validação
       })
@@ -510,6 +532,44 @@ export default function AgendaPage() {
     } catch (error: any) {
       console.error("Erro ao salvar agendamento:", error)
       alert(t("errorCritical"))
+    }
+  }
+
+  const handleQuickBreak = async (duration: number) => {
+    if (!salonId) return
+    
+    const targetStaffId = formData.staff_id || (filteredStaffForModal[0]?.id || "")
+    if (!targetStaffId) {
+      alert("Selecione um profissional primeiro.")
+      return
+    }
+
+    const startsAt = new Date(`${formData.date}T${formData.time}`)
+    const endsAtDateObj = new Date(startsAt.getTime() + duration * 60000)
+    const endsAtTime = `${String(endsAtDateObj.getHours()).padStart(2, '0')}:${String(endsAtDateObj.getMinutes()).padStart(2, '0')}`
+
+    try {
+      const result = await upsertAppointment(null, {
+        staff_id: targetStaffId,
+        service_id: duration.toString(),
+        client_id: "",
+        starts_at: `${formData.date}T${formData.time}:00`,
+        ends_at: `${formData.date}T${endsAtTime}:00`, 
+        price: 0,
+        notes: "Pausa rápida",
+        status: "confirmed",
+        is_break: true,
+        local_time: formData.time
+      })
+
+      if (result?.success) {
+        setIsDialogOpen(false)
+        fetchAppointments()
+      } else {
+        alert(result?.error || t("errorSaving"))
+      }
+    } catch (error: any) {
+      console.error("Erro ao salvar pausa:", error)
     }
   }
 
@@ -786,15 +846,16 @@ export default function AgendaPage() {
                             <div
                               key={apt.id}
                               className={cn(
-                                "absolute z-20 rounded-xl border-l-[4px] p-1.5 overflow-hidden shadow-md transition-all cursor-pointer group hover:brightness-95 pointer-events-auto backdrop-blur-[2px] bg-opacity-95",
-                                statusColors[apt.status] || statusColors.pending
+                                "absolute z-20 rounded-xl border-l-[4px] overflow-hidden shadow-md transition-all cursor-pointer group hover:brightness-95 pointer-events-auto backdrop-blur-[2px] bg-opacity-95",
+                                durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5",
+                                apt.is_break ? statusColors.break : (statusColors[apt.status] || statusColors.pending)
                               )}
                               style={{
                                 top: `${top}px`,
                                 height: `${height}px`,
                                 left: `${apt.left}%`,
                                 width: `${apt.width - 1}%`,
-                                borderLeftColor: apt.staff?.color || "#0D9488",
+                                borderLeftColor: apt.is_break ? "#000000" : (apt.staff?.color || "#0D9488"),
                               }}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -802,8 +863,11 @@ export default function AgendaPage() {
                               }}
                             >
                               <div className="flex flex-col h-full gap-1">
-                                <span className="text-[9px] xl:text-[11px] font-black opacity-90 truncate uppercase leading-none">
-                                  {apt.client?.name || "CLIENTE"}
+                                <span className={cn(
+                                  "font-black opacity-90 truncate uppercase leading-none",
+                                  durationMinutes <= 15 ? "text-[7px]" : "text-[9px] xl:text-[11px]"
+                                )}>
+                                  {apt.is_break ? `PAUSA - ${apt.staff?.name || '?'}` : (apt.client?.name || "CLIENTE")}
                                 </span>
                                 
                                 {(() => {
@@ -811,15 +875,21 @@ export default function AgendaPage() {
                                   const isUnconfirmedSoon = apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
                                   
                                   if (isOverdue) return (
-                                    <div className="flex items-center gap-1 text-[8px] font-black uppercase text-red-600 animate-pulse mt-auto bg-red-100/50 rounded px-1 py-0.5">
-                                      <AlertTriangle className="h-2 w-2" />
+                                    <div className={cn(
+                                      "flex items-center gap-1 font-black uppercase text-red-600 animate-pulse mt-auto bg-red-100/50 rounded px-1 py-0.5",
+                                      durationMinutes <= 15 ? "text-[6px]" : "text-[8px]"
+                                    )}>
+                                      <AlertTriangle className={cn(durationMinutes <= 15 ? "h-1.5 w-1.5" : "h-2 w-2")} />
                                       <span>Pendente</span>
                                     </div>
                                   )
                                   
                                   if (isUnconfirmedSoon) return (
-                                    <div className="flex items-center gap-1 text-[8px] font-black uppercase text-orange-600 animate-bounce mt-auto bg-orange-100/50 rounded px-1 py-0.5">
-                                      <BellRing className="h-2 w-2" />
+                                    <div className={cn(
+                                      "flex items-center gap-1 font-black uppercase text-orange-600 animate-bounce mt-auto bg-orange-100/50 rounded px-1 py-0.5",
+                                      durationMinutes <= 15 ? "text-[6px]" : "text-[8px]"
+                                    )}>
+                                      <BellRing className={cn(durationMinutes <= 15 ? "h-1.5 w-1.5" : "h-2 w-2")} />
                                       <span>Confirmar?</span>
                                     </div>
                                   )
@@ -896,12 +966,12 @@ export default function AgendaPage() {
                    
                    if (hourIndex === -1) return null
 
-                   const startMinutes = (hourIndex * 60) + start.getUTCMinutes()
+                  const startMinutes = (hourIndex * 60) + start.getUTCMinutes()
                    const durationMinutes = (end.getTime() - start.getTime()) / 60000
                    
                    const top = (startMinutes / 60) * 90
                    const height = (durationMinutes / 60) * 90
-                   const aptClass = statusColors[apt.status] || statusColors.pending
+                   const aptClass = apt.is_break ? statusColors.break : (statusColors[apt.status] || statusColors.pending)
 
                    return (
                       <div
@@ -911,7 +981,8 @@ export default function AgendaPage() {
                             openEditDialog(apt)
                          }}
                          className={cn(
-                            "absolute z-20 p-1.5 rounded-xl border-l-[4px] shadow-sm transition-all active:scale-[0.98] group overflow-hidden bg-opacity-95 backdrop-blur-[1px] pointer-events-auto cursor-pointer",
+                            "absolute z-20 rounded-xl border-l-[4px] shadow-sm transition-all active:scale-[0.98] group overflow-hidden bg-opacity-95 backdrop-blur-[1px] pointer-events-auto cursor-pointer",
+                             durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5",
                             aptClass
                          )}
                          style={{ 
@@ -919,20 +990,23 @@ export default function AgendaPage() {
                             width: `${apt.width}%`,
                             top: `${top + 4}px`, 
                             height: `${height - 8}px`, 
-                            borderLeftColor: apt.staff?.color || "#0D9488" 
+                            borderLeftColor: apt.is_break ? "#000000" : (apt.staff?.color || "#0D9488")
                          }}
                      >
-                        <div className="flex items-center gap-1.5 min-w-0 flex-1 overflow-hidden px-1">
+                        <div className={cn(
+                           "flex gap-1.5 min-w-0 flex-1 overflow-hidden px-1",
+                           durationMinutes <= 15 ? "items-start" : "items-center"
+                        )}>
                            <span className={cn(
                               "font-black opacity-90 truncate uppercase leading-none",
-                              apt.width < 100 ? "text-[9px]" : "text-[14px]"
+                              durationMinutes <= 15 ? "text-[7.5px]" : (apt.width < 100 ? "text-[9px]" : "text-[14px]")
                            )}>
-                              {apt.client?.name}
+                               {apt.is_break ? `PAUSA - ${apt.staff?.name || '?'}` : apt.client?.name}
                            </span>
-                           <div className="w-1 h-1 bg-black/10 rounded-full shrink-0" />
+                           <div className={cn("w-1 h-1 rounded-full shrink-0", apt.is_break ? "bg-white/20" : "bg-black/10")} />
                            <span className={cn(
                               "font-bold uppercase tracking-tighter shrink-0 opacity-70",
-                              apt.width < 100 ? "text-[8px]" : "text-[10px]"
+                              durationMinutes <= 15 ? "text-[6.5px]" : (apt.width < 100 ? "text-[8px]" : "text-[10px]")
                            )}>
                               {start.getUTCHours().toString().padStart(2, "0")}:{start.getUTCMinutes().toString().padStart(2, "0")} {t("to")} {end.getUTCHours().toString().padStart(2, "0")}:{end.getUTCMinutes().toString().padStart(2, "0")}
                            </span>
@@ -1016,6 +1090,33 @@ export default function AgendaPage() {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4 md:space-y-5">
+                {!selectedAppointment && (
+                  <div className="space-y-2 animate-in fade-in slide-in-from-top-2 duration-500">
+                    <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Adicionar Pausa Rápida</Label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {[15, 30, 60].map((mins) => (
+                        <Button
+                          key={mins}
+                          type="button"
+                          variant="outline"
+                          className="h-12 text-xs font-black uppercase border-2 border-slate-200 hover:border-primary hover:bg-primary/5 rounded-xl transition-all"
+                          onClick={() => handleQuickBreak(mins)}
+                        >
+                          <Clock className="mr-1 h-3 w-3" />
+                          {mins} min
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="relative py-2">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-muted-foreground/10" />
+                      </div>
+                      <div className="relative flex justify-center text-[10px] uppercase font-bold text-muted-foreground/40 bg-background px-2">
+                        ou agendamento normal
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {!selectedAppointment && (
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div className="space-y-2">

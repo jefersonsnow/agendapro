@@ -139,8 +139,8 @@ export async function upsertAppointment(id: string | null, data: any) {
   const startsAtDate = parseWallClock(data.starts_at, salonTimezone)
   const endsAtDate = parseWallClock(data.ends_at, salonTimezone)
 
-  // Validar quota mensal (apenas na criação)
-  if (!id && data.status !== "cancelled") {
+  // Validar quota mensal (apenas na criação de agendamentos reais, não pausas)
+  if (!id && data.status !== "cancelled" && !data.is_break) {
       const plan = salon?.plan || "free"
       
       const config = await getGlobalConfigCache()
@@ -267,13 +267,14 @@ export async function upsertAppointment(id: string | null, data: any) {
   }
 
   // --- SEC-001: Validação de Isolamento (Hardening) ---
-  const [targetStaff, targetService] = await Promise.all([
-    prisma.staff.findFirst({ where: { id: data.staff_id, salon_id: salonId } }),
-    prisma.service.findFirst({ where: { id: data.service_id, salon_id: salonId } })
-  ])
-
+  const targetStaff = await prisma.staff.findFirst({ where: { id: data.staff_id, salon_id: salonId } })
   if (!targetStaff) return { success: false, error: "Profissional inválido para este salão." }
-  if (!targetService) return { success: false, error: "Serviço inválido para este salão." }
+
+  let targetService = null
+  if (!data.is_break) {
+    targetService = await prisma.service.findFirst({ where: { id: data.service_id, salon_id: salonId } })
+    if (!targetService) return { success: false, error: "Serviço inválido para este salão." }
+  }
 
   let clientId = data.client_id
 
@@ -293,13 +294,14 @@ export async function upsertAppointment(id: string | null, data: any) {
   const appointmentData: any = {
     salon_id: salonId,
     staff_id: data.staff_id,
-    service_id: data.service_id,
-    client_id: clientId,
+    service_id: data.is_break ? null : data.service_id,
+    client_id: data.is_break ? null : clientId,
     starts_at: startsAtDate,
     ends_at: endsAtDate,
-    price: data.price,
+    price: data.is_break ? 0 : data.price,
     notes: data.notes || null,
-    status: data.status,
+    status: data.is_break ? "confirmed" : data.status,
+    is_break: data.is_break || false,
   }
 
   try {
@@ -333,8 +335,10 @@ export async function upsertAppointment(id: string | null, data: any) {
       await logAction({ action: "create_appointment", entity: "appointment", entityId: apt.id, salonId })
     }
     
-    // Sync client stats
-    await syncClientStats(clientId, clientPointChange)
+    // Sync client stats (only if it's not a break)
+    if (!appointmentData.is_break && clientId) {
+      await syncClientStats(clientId, clientPointChange)
+    }
     
     revalidatePath("/dashboard/agenda")
     return { success: true }

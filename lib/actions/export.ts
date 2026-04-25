@@ -93,9 +93,9 @@ export async function exportSalonData(startDate?: string, endDate?: string) {
   const appointmentsData = appointments.map(a => ({
     "Data": a.starts_at.toLocaleDateString('pt-PT'),
     "Hora": a.starts_at.toLocaleTimeString('pt-PT', { hour: '2-digit', minute: '2-digit' }),
-    "Cliente": a.client.name,
-    "Telemóvel Cliente": a.client.phone || "N/A",
-    "Serviço": a.service.name,
+    "Cliente": a.client?.name || "PAUSA",
+    "Telemóvel Cliente": a.client?.phone || "N/A",
+    "Serviço": a.service?.name || "PAUSA",
     "Profissional": a.staff.name,
     "Status": a.status.toUpperCase(),
     "Valor (€)": Number(a.price),
