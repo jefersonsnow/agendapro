@@ -1,7 +1,6 @@
 // <title> <meta name="description" content="SEO" /> <Head>
 import type { Metadata } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
-import { Analytics } from '@vercel/analytics/next'
 import '../globals.css'
 import {NextIntlClientProvider} from 'next-intl';
 import {getMessages} from 'next-intl/server';
@@ -11,8 +10,14 @@ import {routing} from '@/i18n/routing';
 import prisma from '@/lib/prisma'
 import Script from 'next/script'
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
+const geistSans = Geist({
+  subsets: ["latin"],
+  variable: "--font-geist-sans",
+});
+const geistMono = Geist_Mono({
+  subsets: ["latin"],
+  variable: "--font-geist-mono",
+});
 
 import { Toaster } from 'sonner'
 
@@ -66,7 +71,7 @@ export default async function RootLayout({
   const seo = configs?.[0]?.seo_config ? JSON.parse(configs[0].seo_config) : {}
 
   return (
-    <html lang={locale} data-scroll-behavior="smooth">
+    <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`} data-scroll-behavior="smooth">
       <head>
         <title>AgendarPro</title>
 
@@ -100,12 +105,11 @@ export default async function RootLayout({
           </>
         )}
       </head>
-      <body className="font-sans antialiased">
+      <body className="font-sans antialiased bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>
           {children}
         </NextIntlClientProvider>
         <Toaster position="top-right" richColors closeButton />
-        <Analytics />
       </body>
     </html>
   )
