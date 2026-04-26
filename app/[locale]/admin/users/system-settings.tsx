@@ -38,12 +38,30 @@ export function SystemSettings() {
   async function fetchConfig() {
     try {
       const data = await getGlobalConfig()
-      const lp = JSON.parse(data.landing_page || "{}")
-      const kw = JSON.parse(data.kiwify_configs || "{}")
-      const st = JSON.parse(data.stripe_configs || "{}")
-      const sp = JSON.parse(data.sales_page_config || "{}")
-      const we = JSON.parse(data.welcome_email_config || "{}")
-      const pl = lp.plans || config.plans
+      
+      const safeParse = (str: string) => {
+        try { return JSON.parse(str || "{}") } catch(e) { return {} }
+      }
+
+      const lp = safeParse(data.landing_page)
+      const kw = safeParse(data.kiwify_configs)
+      const st = safeParse(data.stripe_configs)
+      const sp = safeParse(data.sales_page_config)
+      const we = safeParse(data.welcome_email_config)
+      
+      // Merge com os defaults definidos no estado inicial
+      const defaultPlans = {
+        minimo: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
+        basic: { price: 19, appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true },
+        premium: { price: 39, appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
+      }
+
+      const dbPlans = lp.plans || {}
+      const mergedPlans = {
+        minimo: { ...defaultPlans.minimo, ...(dbPlans.minimo || {}) },
+        basic: { ...defaultPlans.basic, ...(dbPlans.basic || {}) },
+        premium: { ...defaultPlans.premium, ...(dbPlans.premium || {}) }
+      }
       
       setConfig({
         landing_page: {
@@ -55,7 +73,7 @@ export function SystemSettings() {
           plansTitle: lp.plansTitle || "",
           plansDesc: lp.plansDesc || "",
         },
-        plans: pl,
+        plans: mergedPlans,
         kiwify_configs: {
           webhookSecret: kw.webhookSecret || "",
           productBasicId: kw.productBasicId || "",
@@ -84,6 +102,7 @@ export function SystemSettings() {
       })
     } catch (error) {
       console.error("Erro ao carregar configs:", error)
+      toast.error("Erro crítico ao carregar configurações do Core.")
     } finally {
       setLoading(false)
     }
@@ -116,7 +135,11 @@ export function SystemSettings() {
   const webhookUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/api/webhooks/stripe`
 
   const PlanEditor = ({ planKey, label }: { planKey: string, label: string }) => {
-    const p = config.plans[planKey]
+    const p = config.plans?.[planKey] || { 
+      price: 0, appointments_per_month: 0, staff: 0, clients: 0, services: 0, 
+      qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false 
+    }
+    
     const update = (field: string, val: any) => {
        const newPlans = { ...config.plans, [planKey]: { ...p, [field]: val } }
        setConfig({ ...config, plans: newPlans })
@@ -127,23 +150,23 @@ export function SystemSettings() {
           <div className="grid grid-cols-2 gap-4">
              <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase opacity-50">Preço Mensal (€)</Label>
-                <Input type="number" value={p.price} onChange={(e) => update("price", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
+                <Input type="number" value={p.price ?? 0} onChange={(e) => update("price", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
              </div>
              <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase opacity-50">Agendamentos/Mês (-1=ilimitado)</Label>
-                <Input type="number" value={p.appointments_per_month} onChange={(e) => update("appointments_per_month", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
+                <Input type="number" value={p.appointments_per_month ?? 0} onChange={(e) => update("appointments_per_month", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
              </div>
              <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase opacity-50">Max Profissionais</Label>
-                <Input type="number" value={p.staff} onChange={(e) => update("staff", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
+                <Input type="number" value={p.staff ?? 0} onChange={(e) => update("staff", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
              </div>
              <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase opacity-50">Max Clientes</Label>
-                <Input type="number" value={p.clients} onChange={(e) => update("clients", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
+                <Input type="number" value={p.clients ?? 0} onChange={(e) => update("clients", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
              </div>
              <div className="space-y-1.5">
                 <Label className="text-[10px] font-black uppercase opacity-50">Max Serviços</Label>
-                <Input type="number" value={p.services} onChange={(e) => update("services", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
+                <Input type="number" value={p.services ?? 0} onChange={(e) => update("services", Number(e.target.value))} className="h-10 border-2 rounded-xl" />
              </div>
           </div>
           
