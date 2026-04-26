@@ -328,9 +328,9 @@ export default async function HomePage({
           <section id="recursos" className="py-32 relative overflow-hidden">
             <div className="absolute top-1/2 left-0 w-64 h-64 bg-primary/5 rounded-full blur-[100px]"></div>
             <div className="container mx-auto px-4">
-              <div className="max-w-3xl mb-20">
+              <div className="max-w-3xl mb-20 mx-auto text-center">
                 <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-6 leading-none">{dynamicFeaturesTitle}</h2>
-                <div className="h-2 w-24 bg-primary rounded-full mb-8"></div>
+                <div className="h-2 w-24 bg-primary rounded-full mb-8 mx-auto"></div>
                 <p className="text-xl text-muted-foreground font-medium">{t("featuresDesc")}</p>
               </div>
 
