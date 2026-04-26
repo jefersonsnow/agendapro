@@ -73,8 +73,14 @@ export default function DashboardLayout({
     if (saved === "true") setCollapsed(true)
 
     async function fetchRole() {
-      const data = await getUserRole()
-      setUser(data as any)
+      try {
+        const data = await getUserRole()
+        if (data) {
+          setUser(data as any)
+        }
+      } catch (e) {
+        console.error("Error fetching role in layout:", e)
+      }
     }
     fetchRole()
     window.addEventListener("profileUpdated", fetchRole)
