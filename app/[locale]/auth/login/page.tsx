@@ -15,14 +15,18 @@ import { Label } from '@/components/ui/label'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
-import { Calendar } from 'lucide-react'
+import { Calendar, CheckCircle2 } from 'lucide-react'
+import { useSearchParams } from 'next/navigation'
+import { Suspense } from 'react'
 
-export default function LoginPage() {
+function LoginContent() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const isSuccess = searchParams.get('success_registration') === 'true'
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -63,6 +67,18 @@ export default function LoginPage() {
               </CardDescription>
             </CardHeader>
             <CardContent>
+              {isSuccess && (
+                <div className="mb-6 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
+                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-bold text-green-800">Conta criada com sucesso!</p>
+                    <p className="text-xs text-green-700/80 leading-relaxed">
+                      Enviámos as suas credenciais de acesso para o e-mail introduzido. 
+                      <strong> Verifique a sua caixa de entrada e pasta de Spam.</strong>
+                    </p>
+                  </div>
+                </div>
+              )}
               <form onSubmit={handleLogin}>
                 <div className="flex flex-col gap-4">
                   <div className="grid gap-2">
@@ -100,5 +116,17 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  )
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex min-h-svh w-full items-center justify-center bg-muted/30">
+        <div className="animate-pulse font-bold">A carregar...</div>
+      </div>
+    }>
+      <LoginContent />
+    </Suspense>
   )
 }
