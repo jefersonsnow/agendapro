@@ -121,14 +121,15 @@ export default function ConfiguracoesPage() {
   }, [])
 
   async function fetchSalon() {
-    const data = await getSalon()
-    if (!data) {
-      toast.error("Não foi possível carregar os dados do salão. Por favor, recarregue a página.")
-      setLoading(false)
-      return
-    }
-    
-    setSalon(data)
+    try {
+      const data = await getSalon()
+      if (!data) {
+        toast.error("Não foi possível carregar os dados do salão. Por favor, recarregue a página.")
+        setLoading(false)
+        return
+      }
+      
+      setSalon(data)
     const settings = data.settings || {}
     
     setFormData({
@@ -172,8 +173,11 @@ export default function ConfiguracoesPage() {
         }
       })
       setWorkingHours(hours)
+      setLoading(false)
+    } catch (err) {
+      console.error("Error fetching salon:", err)
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   async function handleFileUpload(file: File, type: "logo" | "cover") {
