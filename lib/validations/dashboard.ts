@@ -2,13 +2,13 @@ import { z } from "zod"
 
 export const clientSchema = z.object({
   name: z.string().min(2, "Nome é obrigatório"),
-  email: z.string().email("E-mail inválido").optional().or(z.literal("")),
-  phone: z.string().optional().or(z.literal("")),
-  address: z.string().optional().or(z.literal("")),
-  nif: z.string().optional().or(z.literal("")),
-  notes: z.string().optional().or(z.literal("")),
+  email: z.string().email("E-mail inválido").nullable().optional().or(z.literal("")),
+  phone: z.string().nullable().optional().or(z.literal("")),
+  address: z.string().nullable().optional().or(z.literal("")),
+  nif: z.string().nullable().optional().or(z.literal("")),
+  notes: z.string().nullable().optional().or(z.literal("")),
   loyalty_points: z.coerce.number().int().default(0),
-  password: z.string().optional().or(z.literal("")),
+  password: z.string().nullable().optional().or(z.literal("")),
 })
 
 export const serviceSchema = z.object({
