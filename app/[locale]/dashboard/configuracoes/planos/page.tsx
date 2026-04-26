@@ -52,11 +52,17 @@ export default function PlansPage() {
   const currentPlan = salon?.plan || "minimo"
   const isTrial = salon?.status === "trial"
 
-  // Sincronizar com a Home Page (Dados dinâmicos do CMS)
-  const planConfigs = salon?.dynamicPlans || {
+  // Sincronizar com a Home Page (Dados dinâmicos do CMS) com proteção total
+  const defaultPlans = {
     minimo: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
     basic: { price: "9.90", appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true },
     premium: { price: "24.90", appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
+  }
+
+  const planConfigs = {
+    minimo: { ...defaultPlans.minimo, ...(salon?.dynamicPlans?.minimo || {}) },
+    basic: { ...defaultPlans.basic, ...(salon?.dynamicPlans?.basic || {}) },
+    premium: { ...defaultPlans.premium, ...(salon?.dynamicPlans?.premium || {}) }
   }
 
   const getPlanItems = (p: any) => [
@@ -76,7 +82,7 @@ export default function PlansPage() {
     {
       id: "minimo",
       name: "Mínimo",
-      price: `${planConfigs.minimo.price}€`,
+      price: `${planConfigs.minimo?.price ?? 0}€`,
       desc: "Ideal para quem está a começar sozinho.",
       color: "bg-slate-500",
       features: getPlanItems(planConfigs.minimo),
@@ -84,7 +90,7 @@ export default function PlansPage() {
     {
       id: "basic",
       name: "Basic",
-      price: `${planConfigs.basic.price}€`,
+      price: `${planConfigs.basic?.price ?? "9.90"}€`,
       desc: "Para pequenos salões e estúdios em crescimento.",
       color: "bg-primary",
       features: getPlanItems(planConfigs.basic),
@@ -92,7 +98,7 @@ export default function PlansPage() {
     {
        id: "premium",
        name: "Premium",
-       price: `${planConfigs.premium.price}€`,
+       price: `${planConfigs.premium?.price ?? "24.90"}€`,
        desc: "A solução total para dominar o seu mercado local.",
        featured: true,
        color: "bg-slate-950",
