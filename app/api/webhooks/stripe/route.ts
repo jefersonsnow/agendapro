@@ -111,7 +111,7 @@ export async function POST(request: Request) {
                      </p>
                      <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0;">
                        <p style="margin: 0; font-weight: bold; color: #333;">Seus dados de acesso:</p>
-                       <p style="margin: 10px 0 0 0; color: #666;">Painel: <a href="https://agendar.napp.pt/dashboard" style="color: #007bff; text-decoration: none;">agendar.napp.pt/dashboard</a></p>
+                       <p style="margin: 10px 0 0 0; color: #666;">Painel: <a href="https://agendar.napp.pt/${slug}/login" style="color: #007bff; text-decoration: none;">agendar.napp.pt/${slug}/login</a></p>
                        <p style="margin: 5px 0 0 0; color: #666;">E-mail: ${pending.email}</p>
                      </div>
                      <p style="font-size: 16px; color: #555; line-height: 1.6;">

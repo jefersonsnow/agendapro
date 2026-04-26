@@ -67,50 +67,65 @@ function LoginContent() {
               </CardDescription>
             </CardHeader>
             <CardContent>
-              {isSuccess && (
-                <div className="mb-6 p-4 rounded-xl bg-green-500/10 border-2 border-green-500/20 flex items-start gap-3 animate-in fade-in slide-in-from-top-2 duration-500">
-                  <CheckCircle2 className="h-5 w-5 text-green-600 shrink-0 mt-0.5" />
-                  <div className="space-y-1">
-                    <p className="text-sm font-bold text-green-800">Conta criada com sucesso!</p>
-                    <p className="text-xs text-green-700/80 leading-relaxed">
-                      Enviámos as suas credenciais de acesso para o e-mail introduzido. 
-                      <strong> Verifique a sua caixa de entrada e pasta de Spam.</strong>
-                    </p>
+              {isSuccess ? (
+                <div className="py-4 space-y-6 animate-in fade-in zoom-in duration-500">
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <div className="h-16 w-16 rounded-full bg-green-100 flex items-center justify-center">
+                       <CheckCircle2 className="h-10 w-10 text-green-600" />
+                    </div>
+                    <div className="space-y-2">
+                       <h3 className="text-xl font-black text-green-900">Conta criada com sucesso!</h3>
+                       <p className="text-sm text-muted-foreground leading-relaxed">
+                          Enviámos as suas credenciais de acesso para o e-mail introduzido. 
+                          <strong> Verifique a sua caixa de entrada e pasta de Spam.</strong>
+                       </p>
+                    </div>
                   </div>
-                </div>
-              )}
-              <form onSubmit={handleLogin}>
-                <div className="flex flex-col gap-4">
-                  <div className="grid gap-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      required
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                    />
+                  
+                  <div className="bg-muted/50 p-4 rounded-xl border text-center">
+                     <p className="text-xs text-muted-foreground">
+                        Por segurança, deve aceder ao painel através do link enviado para o seu e-mail.
+                     </p>
                   </div>
-                  <div className="grid gap-2">
-                    <Label htmlFor="password">Palavra-passe</Label>
-                    <Input
-                      id="password"
-                      type="password"
-                      required
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                    />
-                  </div>
-                  {error && <p className="text-sm text-destructive">{error}</p>}
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? 'A entrar...' : 'Entrar'}
+                  
+                  <Button variant="outline" className="w-full h-12 rounded-xl" onClick={() => window.location.href = '/'}>
+                     Voltar à página inicial
                   </Button>
                 </div>
-                <div className="text-center text-sm text-muted-foreground">
-            Entre com as suas credenciais para aceder ao painel.
-          </div>
-              </form>
+              ) : (
+                <form onSubmit={handleLogin}>
+                  <div className="flex flex-col gap-4">
+                    <div className="grid gap-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="seu@email.com"
+                        required
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                      />
+                    </div>
+                    <div className="grid gap-2">
+                      <Label htmlFor="password">Palavra-passe</Label>
+                      <Input
+                        id="password"
+                        type="password"
+                        required
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                      />
+                    </div>
+                    {error && <p className="text-sm text-destructive">{error}</p>}
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? 'A entrar...' : 'Entrar'}
+                    </Button>
+                  </div>
+                  <div className="text-center text-sm text-muted-foreground mt-4">
+                    Entre com as suas credenciais para aceder ao painel.
+                  </div>
+                </form>
+              )}
             </CardContent>
           </Card>
         </div>
