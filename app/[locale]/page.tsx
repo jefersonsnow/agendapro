@@ -101,19 +101,19 @@ export default async function HomePage({
 
     const planConfigs = {
       minimo: { 
-        price: dynamicPriceMinimo, 
+        price: dynamicPriceMinimo ?? 0, 
         appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false,
-        ...landingPageData.plans?.minimo 
+        ...(landingPageData.plans?.minimo || {}) 
       },
       basic: { 
-        price: dynamicPriceBasic, 
+        price: dynamicPriceBasic ?? 19, 
         appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
-        ...landingPageData.plans?.basic 
+        ...(landingPageData.plans?.basic || {}) 
       },
       premium: { 
-        price: dynamicPricePremium, 
+        price: dynamicPricePremium ?? 49, 
         appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
-        ...landingPageData.plans?.premium 
+        ...(landingPageData.plans?.premium || {}) 
       }
     }
 
@@ -368,7 +368,7 @@ export default async function HomePage({
                   <div className="mb-10">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">{t("planFreeLabel")}</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black">{planConfigs.minimo.price}€</span>
+                      <span className="text-5xl font-black">{planConfigs.minimo?.price ?? 0}€</span>
                       <span className="text-slate-500 font-bold">/mês</span>
                     </div>
                     <p className="text-slate-400 text-sm mt-4 font-medium">{t("planFreeDesc")}</p>
@@ -394,7 +394,7 @@ export default async function HomePage({
                   <div className="mb-10">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-4">⚡ BASIC</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black">{planConfigs.basic.price}€</span>
+                      <span className="text-5xl font-black">{planConfigs.basic?.price ?? 19}€</span>
                       <span className="text-slate-500 font-bold">/mês</span>
                     </div>
                     <p className="text-slate-400 text-sm mt-4 font-medium">{t("planBasicDesc")}</p>
@@ -421,7 +421,7 @@ export default async function HomePage({
                   <div className="mb-10">
                     <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">💎 PREMIUM</p>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-5xl font-black">{planConfigs.premium.price}€</span>
+                      <span className="text-5xl font-black">{planConfigs.premium?.price ?? 49}€</span>
                       <span className="text-slate-500 font-bold">/mês</span>
                     </div>
                     <p className="text-slate-400 text-sm mt-4 font-medium">{t("planPremiumDesc")}</p>
