@@ -334,9 +334,9 @@ export default async function HomePage({
                 <p className="text-xl text-muted-foreground font-medium text-center mx-auto">{t("featuresDesc")}</p>
               </div>
 
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 max-w-7xl mx-auto">
                 {features.map((feature, i) => (
-                  <div key={i} className="group p-8 rounded-3xl bg-muted/30 border border-transparent hover:bg-background hover:border-primary/20 hover:shadow-xl transition-all duration-300">
+                  <div key={i} className="group p-8 rounded-3xl bg-muted/30 border border-transparent hover:bg-background hover:border-primary/20 hover:shadow-xl transition-all duration-300 text-center flex flex-col items-center">
                     <div className="mb-6 h-12 w-12 rounded-xl bg-background flex items-center justify-center border group-hover:border-primary/30 group-hover:text-primary transition-all">
                       <feature.icon className="h-6 w-6" />
                     </div>
