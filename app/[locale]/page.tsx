@@ -218,14 +218,14 @@ export default async function HomePage({
                   <span>{t("badge")}</span>
                 </div>
 
-                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 max-w-5xl leading-[0.9] animate-in fade-in slide-in-from-bottom-4 duration-1000">
+                <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 max-w-5xl leading-[0.9] animate-in fade-in slide-in-from-bottom-4 duration-1000 transform-gpu backface-hidden">
                   {dynamicHeroTitle1} <br className="hidden md:block" />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-primary bg-[length:200%_auto] animate-gradient-x">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu">
                     {dynamicHeroTitle2}
                   </span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000">
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu">
                   {dynamicHeroDesc} <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">{t("heroDescStrong")}</span>
                 </p>
 
