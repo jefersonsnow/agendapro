@@ -350,7 +350,7 @@ export default async function SalesPage({
               Não deixe para amanhã a organização que o seu negócio precisa hoje. 
               Junte-se à elite dos salões de beleza.
             </p>
-            <TrialButton size="lg" className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white">
+            <TrialButton plan="premium" size="lg" className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white">
               Assinar Agora
               <Sparkles className="ml-4 h-8 w-8" />
             </TrialButton>
