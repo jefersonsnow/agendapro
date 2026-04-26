@@ -13,10 +13,14 @@ import Script from 'next/script'
 const geistSans = Geist({
   subsets: ["latin"],
   variable: "--font-geist-sans",
+  display: 'swap',
+  preload: false,
 });
 const geistMono = Geist_Mono({
   subsets: ["latin"],
   variable: "--font-geist-mono",
+  display: 'swap',
+  preload: false,
 });
 
 import { Toaster } from 'sonner'
