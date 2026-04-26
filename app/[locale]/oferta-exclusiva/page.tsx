@@ -1,112 +1,122 @@
-"use client"
+export const dynamic = "force-dynamic"
 
-import { useState, useEffect } from "react"
+import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { 
-  CheckCircle2, 
-  Play, 
-  ShieldCheck, 
-  Star, 
-  TrendingUp, 
-  Zap, 
+import { TrialButton } from "@/components/trial-button"
+import {
+  Calendar,
+  Users,
+  BarChart3,
+  Clock,
+  CheckCircle,
   Smartphone,
+  Sparkles,
+  TrendingUp,
+  ShieldCheck,
+  Zap,
   ChevronRight,
   Scissors,
-  Crown,
+  Percent,
+  X,
+  Play,
   ArrowRight,
-  Sparkles,
-  Timer
+  Timer,
+  Star
 } from "lucide-react"
-import Link from "next/link"
 import { cn } from "@/lib/utils"
-import Script from "next/script"
-import { getGlobalConfig } from "@/lib/actions/admin"
+import { getTranslations } from "next-intl/server"
+import { routing } from "@/i18n/routing"
+import prisma from "@/lib/prisma"
 
-export default function SalesPage() {
-  const [config, setConfig] = useState<any>(null)
-  const [loading, setLoading] = useState(true)
-  const [timeLeft, setTimeLeft] = useState({ hours: 0, minutes: 0, seconds: 0 })
+export default async function SalesPage({
+  params,
+}: {
+  params: Promise<{ locale: string }> | { locale: string }
+}) {
+  const resolvedParams = await Promise.resolve(params)
+  const locale = resolvedParams?.locale || routing.defaultLocale
 
-  useEffect(() => {
-    async function load() {
-      try {
-        const data = await getGlobalConfig()
-        const salesConfig = JSON.parse(data.sales_page_config || "{}")
-        setConfig({ sales: salesConfig })
-      } catch (e) {
-        console.error(e)
-      } finally {
-        setLoading(false)
+  let t: any
+  try {
+    t = await getTranslations({ locale, namespace: "Home" })
+  } catch (e) {
+    console.error("Translation error:", e)
+    t = (key: string) => key
+  }
+
+  // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT
+  let landingPageData: any = {}
+  let salesPageConfig: any = {}
+  
+  try {
+    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
+    
+    if (configs && configs.length > 0) {
+      const globalConfig = configs[0]
+      
+      if (globalConfig.landing_page) {
+        try {
+          landingPageData = typeof globalConfig.landing_page === 'string' 
+            ? JSON.parse(globalConfig.landing_page) 
+            : globalConfig.landing_page
+        } catch (e) {
+          console.error("Error parsing landing_page JSON:", e)
+        }
+      }
+
+      if (globalConfig.sales_page_config) {
+        try {
+          salesPageConfig = typeof globalConfig.sales_page_config === 'string'
+            ? JSON.parse(globalConfig.sales_page_config)
+            : globalConfig.sales_page_config
+        } catch (e) {
+          console.error("Error parsing sales_page_config JSON:", e)
+        }
       }
     }
-    load()
+  } catch (error) {
+    console.error("Error fetching global configs:", error)
+  }
 
-    // Timer de escassez (reset a cada 24h ou fixo)
-    const interval = setInterval(() => {
-      const now = new Date()
-      const endOfDay = new Date()
-      endOfDay.setHours(23, 59, 59, 999)
-      const diff = endOfDay.getTime() - now.getTime()
-      
-      setTimeLeft({
-        hours: Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)),
-        minutes: Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60)),
-        seconds: Math.floor((diff % (1000 * 60)) / 1000)
-      })
-    }, 1000)
+  const dynamicPlansTitle = landingPageData.plansTitle || t("plansTitle")
+  const dynamicPriceMinimo = landingPageData.plans?.minimo?.price ?? 0
+  const dynamicPriceBasic = landingPageData.plans?.basic?.price ?? (landingPageData.priceBasic || "19")
+  const dynamicPricePremium = landingPageData.plans?.premium?.price ?? (landingPageData.pricePremium || "49")
 
-    return () => clearInterval(interval)
-  }, [])
-
-  if (loading) return (
-    <div className="min-h-screen bg-[#050505] flex items-center justify-center">
-      <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-primary border-r-2" />
-    </div>
-  )
-
-  const PLANS = [
-    {
-      id: "basic",
-      name: "Basic",
-      price: "9.90",
-      desc: "Essencial para profissionais liberais.",
-      features: [
-        "Agendamentos Ilimitados",
-        "Até 5 Profissionais",
-        "Página de Reservas Online",
-        "Gestão de Clientes",
-        "Relatórios Básicos"
-      ]
+  const planConfigs = {
+    minimo: { 
+      price: dynamicPriceMinimo ?? 0, 
+      appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false,
+      ...(landingPageData.plans?.minimo || {}) 
     },
-    {
-      id: "premium",
-      name: "Premium",
-      price: "24.90",
-      featured: true,
-      desc: "O motor de crescimento para o seu salão.",
-      features: [
-        "Tudo do plano Basic",
-        "Profissionais Ilimitados",
-        "Controlo de Comissões",
-        "Relatórios de BI Avançados",
-        "QR Code de Reserva",
-        "Exportação de Dados"
-      ]
+    basic: { 
+      price: dynamicPriceBasic ?? 19, 
+      appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
+      ...(landingPageData.plans?.basic || {}) 
     },
-    {
-      id: "elite",
-      name: "Elite",
-      price: "49.90",
-      desc: "Para redes e grandes unidades.",
-      features: [
-        "Tudo do plano Premium",
-        "Multi-Unidades (Redes)",
-        "Suporte Prioritário 24/7",
-        "Treino de Equipa VIP",
-        "Infraestrutura Dedicada"
-      ]
+    premium: { 
+      price: dynamicPricePremium ?? 49, 
+      appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
+      ...(landingPageData.plans?.premium || {}) 
     }
+  }
+
+  const getPlanItems = (p: any) => [
+    [p.appointments_per_month === -1 ? "Agendamentos ilimitados" : `${p.appointments_per_month} agendamentos/mês`, true],
+    [p.staff === -1 ? "Profissionais ilimitados" : p.staff === 1 ? "1 Profissional" : `Até ${p.staff} Profissionais`, true],
+    [p.clients === -1 ? "Clientes ilimitados" : `Até ${p.clients} Clientes`, true],
+    [p.services === -1 ? "Serviços ilimitados" : `Até ${p.services} Serviços`, true],
+    ["Página de reservas online", true],
+    ["QR Code de reserva", p.qr_code],
+    ["Logótipo + Capa", p.logo || p.cover],
+    ["Relatórios de BI", p.reports],
+    ["Controlo de comissões", p.commissions],
+    ["Backup & Exportação Profissional", p.professional_export],
   ]
+
+  const headline = salesPageConfig.headline || "PARE DE PERDER DINHEIRO COM AGENDAS MANUAIS NO WHATSAPP"
+  const subheadline = salesPageConfig.subheadline || "A solução definitiva para donos de salões que querem liberdade, controlo total e uma agenda que trabalha sozinha 24/7."
+  const videoUrl = salesPageConfig.videoUrl
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
@@ -131,7 +141,7 @@ export default function SalesPage() {
       <div className="bg-primary/10 border-b border-primary/20 py-3 text-center overflow-hidden relative">
         <div className="flex items-center justify-center gap-4 text-sm font-black uppercase tracking-widest text-primary transform-gpu">
           <Timer className="h-4 w-4" />
-          <span>A oferta expira em: {String(timeLeft.hours).padStart(2, '0')}:{String(timeLeft.minutes).padStart(2, '0')}:{String(timeLeft.seconds).padStart(2, '0')}</span>
+          <span>OFERTA EXCLUSIVA: AS VAGAS PARA ESTE PREÇO ESTÃO A TERMINAR</span>
         </div>
       </div>
 
@@ -145,104 +155,142 @@ export default function SalesPage() {
               <Sparkles className="h-3 w-3 text-primary" /> Mais de 500 Salões Ativos
             </div>
             
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.85] mb-8 animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu italic">
-              PARE DE PERDER <br />
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-primary bg-[length:200%_auto] animate-gradient-x">DINHEIRO</span> COM AGENDAS<br />
-              MANUAIS NO WHATSAPP
+            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.85] mb-8 animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu italic uppercase">
+              {headline}
             </h1>
 
             <p className="text-lg md:text-2xl text-white/60 mb-12 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000">
-              A solução definitiva para donos de salões que querem <strong>liberdade</strong>, 
-              <strong> controlo total</strong> e uma agenda que trabalha sozinha 24/7.
+              {subheadline}
             </p>
 
-            {/* VSL PLACEHOLDER */}
+            {/* VSL VIDEO */}
             <div className="relative group max-w-4xl mx-auto mb-20 animate-in fade-in zoom-in duration-1000">
               <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-cyan-500/50 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
               <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-black border border-white/10 shadow-2xl">
-                <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 grayscale" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20" />
-                <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 cursor-pointer group/play">
-                  <div className="h-24 w-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center backdrop-blur-md transition-all duration-500 group-hover/play:scale-110 group-hover/play:bg-primary/40 group-hover/play:border-primary">
-                    <Play className="h-10 w-10 text-white fill-current ml-1" />
-                  </div>
-                  <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
-                </div>
+                {videoUrl ? (
+                  <iframe 
+                    src={videoUrl} 
+                    className="w-full h-full absolute inset-0"
+                    allow="autoplay; fullscreen; picture-in-picture"
+                    allowFullScreen
+                  />
+                ) : (
+                  <>
+                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 grayscale" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20" />
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 cursor-pointer group/play">
+                      <div className="h-24 w-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center backdrop-blur-md transition-all duration-500 group-hover/play:scale-110 group-hover/play:bg-primary/40 group-hover/play:border-primary">
+                        <Play className="h-10 w-10 text-white fill-current ml-1" />
+                      </div>
+                      <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
+                    </div>
+                  </>
+                )}
               </div>
             </div>
 
-            <a href="#pricing">
+            <a href="#planos">
               <Button className="h-20 px-12 text-xl font-black uppercase tracking-tighter rounded-2xl bg-white text-black hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-white/10 hover:shadow-primary/40">
                 Garantir o Meu Acesso Agora <ArrowRight className="ml-2 h-6 w-6" />
               </Button>
             </a>
-            <div className="mt-6 flex items-center justify-center gap-6 opacity-40 grayscale">
-              <div className="flex items-center gap-2"><ShieldCheck className="h-4 w-4" /> Pagamento Seguro</div>
-              <div className="flex items-center gap-2"><Zap className="h-4 w-4" /> Ativação Instantânea</div>
-            </div>
           </div>
         </section>
 
-        {/* PRICING SECTION */}
-        <section id="pricing" className="py-32 bg-white/5 border-y border-white/5 relative">
-          <div className="container mx-auto px-4">
-            <div className="text-center mb-20">
-               <h2 className="text-4xl md:text-6xl font-black tracking-tighter italic mb-4">ESCOLHA O SEU <span className="text-primary">PLANO</span></h2>
-               <p className="text-white/40 font-bold uppercase tracking-widest text-xs">Investimento com retorno garantido</p>
+        {/* PRICING - EXACTLY LIKE HOME */}
+        <section id="planos" className="py-32 bg-slate-950 text-white relative overflow-hidden">
+          <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
+          <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[150px]"></div>
+          
+          <div className="container mx-auto px-4 relative z-10">
+            <div className="text-center mb-24">
+              <div className="inline-flex items-center gap-2 bg-primary/20 text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full mb-8 border border-primary/30 backdrop-blur-md">
+                <Zap className="h-4 w-4" /> {t("plansTag")}
+              </div>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic">{dynamicPlansTitle}</h2>
+              <p className="text-xl text-slate-400 max-w-2xl mx-auto font-medium">{t("plansDesc")}</p>
             </div>
 
-            <div className="grid md:grid-cols-3 gap-8 items-stretch max-w-6xl mx-auto">
-               {PLANS.map((plan) => (
-                  <div 
-                    key={plan.id}
-                    className={cn(
-                      "relative flex flex-col p-8 rounded-[2.5rem] border transition-all duration-500 group",
-                      plan.featured 
-                        ? "bg-slate-950 border-amber-400 scale-105 z-10 shadow-2xl shadow-amber-400/10" 
-                        : "bg-black/40 border-white/10 hover:border-white/20"
-                    )}
-                  >
-                    {plan.featured && (
-                      <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] shadow-lg">
-                        Mais Vendido
-                      </div>
-                    )}
-
-                    <div className="mb-8">
-                      <h3 className={cn("text-2xl font-black uppercase tracking-widest mb-2", plan.featured ? "text-amber-400" : "text-white")}>
-                        {plan.name}
-                      </h3>
-                      <p className="text-white/40 text-sm font-medium">{plan.desc}</p>
-                    </div>
-
-                    <div className="mb-8">
-                      <div className="flex items-baseline gap-1">
-                        <span className="text-5xl font-black italic">{plan.price}€</span>
-                        <span className="text-white/40 font-bold uppercase tracking-widest text-[10px]">/mês</span>
-                      </div>
-                    </div>
-
-                    <ul className="space-y-4 mb-10 flex-1">
-                      {plan.features.map((f, i) => (
-                        <li key={i} className="flex items-start gap-3 text-sm font-medium text-white/70">
-                          <CheckCircle2 className={cn("h-5 w-5 shrink-0", plan.featured ? "text-amber-400" : "text-primary")} />
-                          {f}
-                        </li>
-                      ))}
-                    </ul>
-
-                    <Link href={`/auth/register?plan=${plan.id}`}>
-                      <Button className={cn(
-                        "w-full h-16 rounded-2xl font-black uppercase tracking-widest transition-all text-xs",
-                        plan.featured 
-                          ? "bg-amber-400 text-slate-950 hover:bg-amber-500" 
-                          : "bg-white/10 text-white hover:bg-white/20"
-                      )}>
-                        Assinar Agora <ChevronRight className="ml-2 h-4 w-4" />
-                      </Button>
-                    </Link>
+            <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
+              {/* MINIMO */}
+              <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border border-slate-800 flex flex-col h-full hover:bg-slate-900 transition-all duration-500 group">
+                <div className="mb-10">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">{t("planFreeLabel")}</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">{planConfigs.minimo?.price ?? 0}€</span>
+                    <span className="text-slate-500 font-bold">/mês</span>
                   </div>
-               ))}
+                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planFreeDesc")}</p>
+                </div>
+                <div className="h-px bg-slate-800 w-full mb-10" />
+                <ul className="space-y-4 mb-12 flex-1">
+                  {getPlanItems(planConfigs.minimo).map(([item, ok], i) => (
+                    <li key={i} className={cn("flex items-center gap-4 text-sm font-medium", ok ? "text-slate-200" : "text-slate-600 line-through")}>
+                      <div className={cn("h-5 w-5 rounded-full flex items-center justify-center shrink-0", ok ? "bg-primary/20 text-primary" : "bg-slate-800 text-slate-700")}>
+                        {ok ? <CheckCircle className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                      </div>
+                      {item as string}
+                    </li>
+                  ))}
+                </ul>
+                <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
+                  Assinar Agora
+                </TrialButton>
+              </div>
+
+              {/* BASIC */}
+              <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border border-slate-800 flex flex-col h-full hover:bg-slate-900 transition-all duration-500 group">
+                <div className="mb-10">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-4">⚡ BASIC</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">{planConfigs.basic?.price ?? 19}€</span>
+                    <span className="text-slate-500 font-bold">/mês</span>
+                  </div>
+                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planBasicDesc")}</p>
+                </div>
+                <div className="h-px bg-slate-800 w-full mb-10" />
+                <ul className="space-y-4 mb-12 flex-1">
+                  {getPlanItems(planConfigs.basic).map(([item, ok], i) => (
+                    <li key={i} className={cn("flex items-center gap-4 text-sm font-medium", ok ? "text-slate-200" : "text-slate-600 line-through")}>
+                      <div className={cn("h-5 w-5 rounded-full flex items-center justify-center shrink-0", ok ? "bg-primary/20 text-primary" : "bg-slate-800 text-slate-700")}>
+                        {ok ? <CheckCircle className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                      </div>
+                      {item as string}
+                    </li>
+                  ))}
+                </ul>
+                <TrialButton plan="basic" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
+                  Assinar Agora
+                </TrialButton>
+              </div>
+
+              {/* PREMIUM */}
+              <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border-2 border-primary/40 flex flex-col h-full hover:bg-slate-900 transition-all duration-500 relative group scale-105 shadow-2xl shadow-primary/20">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl text-white">RECOMENDADO</div>
+                <div className="mb-10">
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">💎 PREMIUM</p>
+                  <div className="flex items-baseline gap-1">
+                    <span className="text-5xl font-black">{planConfigs.premium?.price ?? 49}€</span>
+                    <span className="text-slate-500 font-bold">/mês</span>
+                  </div>
+                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planPremiumDesc")}</p>
+                </div>
+                <div className="h-px bg-slate-800 w-full mb-10" />
+                <ul className="space-y-4 mb-12 flex-1">
+                  {getPlanItems(planConfigs.premium).map(([item, ok], i) => (
+                    <li key={i} className={cn("flex items-center gap-4 text-sm font-medium", ok ? "text-slate-200" : "text-slate-600 line-through")}>
+                      <div className={cn("h-5 w-5 rounded-full flex items-center justify-center shrink-0", ok ? "bg-cyan-500/20 text-cyan-400" : "bg-slate-800 text-slate-700")}>
+                        {ok ? <CheckCircle className="h-3 w-3" /> : <X className="h-3 w-3" />}
+                      </div>
+                      {item as string}
+                    </li>
+                  ))}
+                </ul>
+                <TrialButton plan="premium" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all">
+                  <Sparkles className="mr-2 h-5 w-5" />
+                  Assinar Agora
+                </TrialButton>
+              </div>
             </div>
           </div>
         </section>
@@ -296,17 +344,16 @@ export default function SalesPage() {
         <section className="py-40 bg-gradient-to-t from-primary/10 to-transparent border-t border-white/5 text-center px-4">
           <div className="max-w-4xl mx-auto">
             <Crown className="h-16 w-16 text-amber-400 mx-auto mb-8 animate-bounce" />
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic">PRONTO PARA O <br/><span className="text-primary">PRÓXIMO NÍVEL?</span></h2>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic uppercase leading-none">PRONTO PARA O <br/><span className="text-primary italic">PRÓXIMO NÍVEL?</span></h2>
             <p className="text-white/60 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
               Não deixe para amanhã a organização que o seu negócio precisa hoje. 
               Junte-se à elite dos salões de beleza.
             </p>
-            <a href="#pricing">
-              <Button className="h-24 px-16 text-2xl font-black uppercase tracking-tighter rounded-full bg-primary text-white hover:bg-white hover:text-black transition-all duration-500 shadow-[0_0_50px_rgba(var(--primary),0.3)]">
-                Assinar e Começar Agora
-              </Button>
-            </a>
-            <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30">
+            <TrialButton size="lg" className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white">
+              Assinar Agora
+              <Sparkles className="ml-4 h-8 w-8" />
+            </TrialButton>
+            <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">
               Garantia de Satisfação Total • Suporte Especializado • Ativação Imediata
             </p>
           </div>
