@@ -165,35 +165,38 @@ export default async function HomePage({
                   <Scissors className="h-5 w-5 text-white" />
                 </div>
                 <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
-                <div className="flex items-center gap-3">
-                  {/* Language Switcher */}
-                  <div className="relative group">
-                    <button className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/5 bg-muted/30 border border-border/50">
-                      <div className="flex items-center gap-1.5 grayscale opacity-60">
-                        <img 
-                          src={`https://flagcdn.com/w40/${locale === 'en' ? 'gb' : locale}.png`} 
-                          className="w-4 h-3 object-cover rounded-[1px]" 
-                          alt={locale} 
-                        />
-                      </div>
-                      <span className="hidden sm:inline text-xs uppercase font-bold tracking-widest">{locale}</span>
-                    </button>
-                    <div className="absolute right-0 top-full mt-2 w-44 bg-background/95 backdrop-blur border border-border/60 rounded-2xl shadow-xl shadow-black/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 z-50">
-                      {LOCALES.map((l) => (
-                        <a
-                          key={l.code}
-                          href={`/${l.code}`}
-                          className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:text-primary hover:bg-primary/5 ${locale === l.code ? "text-primary bg-primary/5 font-bold" : "text-muted-foreground"}`}
-                        >
-                          <img 
-                            src={`https://flagcdn.com/w40/${l.flag}.png`} 
-                            alt={l.label} 
-                            className="w-5 h-3.5 object-cover rounded-sm shadow-sm"
-                          />
-                          {l.label}
-                        </a>
-                      ))}
+                  AgendarPro
+                </span>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {/* Language Switcher */}
+                <div className="relative group">
+                  <button className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/5 bg-muted/30 border border-border/50">
+                    <div className="flex items-center gap-1.5 grayscale opacity-60">
+                      <img 
+                        src={`https://flagcdn.com/w40/${locale === 'en' ? 'gb' : locale}.png`} 
+                        className="w-4 h-3 object-cover rounded-[1px]" 
+                        alt={locale} 
+                      />
                     </div>
+                    <span className="hidden sm:inline text-xs uppercase font-bold tracking-widest">{locale}</span>
+                  </button>
+                  <div className="absolute right-0 top-full mt-2 w-44 bg-background/95 backdrop-blur border border-border/60 rounded-2xl shadow-xl shadow-black/10 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 py-2 z-50">
+                    {LOCALES.map((l) => (
+                      <a
+                        key={l.code}
+                        href={`/${l.code}`}
+                        className={`flex items-center gap-3 px-4 py-2.5 text-sm font-medium transition-colors hover:text-primary hover:bg-primary/5 ${locale === l.code ? "text-primary bg-primary/5 font-bold" : "text-muted-foreground"}`}
+                      >
+                        <img 
+                          src={`https://flagcdn.com/w40/${l.flag}.png`} 
+                          alt={l.label} 
+                          className="w-5 h-3.5 object-cover rounded-sm shadow-sm"
+                        />
+                        {l.label}
+                      </a>
+                    ))}
                   </div>
                 </div>
               </div>
