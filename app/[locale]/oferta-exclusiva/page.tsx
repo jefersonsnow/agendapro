@@ -117,7 +117,19 @@ export default async function SalesPage({
 
   const headline = salesPageConfig.headline || "PARE DE PERDER DINHEIRO COM AGENDAS MANUAIS NO WHATSAPP"
   const subheadline = salesPageConfig.subheadline || "A solução definitiva para donos de salões que querem liberdade, controlo total e uma agenda que trabalha sozinha 24/7."
-  const videoUrl = salesPageConfig.videoUrl
+  const formatVideoUrl = (url: string) => {
+    if (!url) return null
+    // Converter links do YouTube para formato embed se necessário
+    if (url.includes("youtu.be/")) {
+      return url.replace("youtu.be/", "www.youtube.com/embed/")
+    }
+    if (url.includes("watch?v=")) {
+      return url.replace("watch?v=", "embed/")
+    }
+    return url
+  }
+
+  const videoUrl = formatVideoUrl(salesPageConfig.videoUrl)
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
