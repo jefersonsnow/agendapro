@@ -122,12 +122,17 @@ export default function ConfiguracoesPage() {
 
   async function fetchSalon() {
     const data = await getSalon()
-    if (data) {
-      setSalon(data)
-      const settings = data.settings || {}
-      
-      setFormData({
-        name: data.name,
+    if (!data) {
+      toast.error("Não foi possível carregar os dados do salão. Por favor, recarregue a página.")
+      setLoading(false)
+      return
+    }
+    
+    setSalon(data)
+    const settings = data.settings || {}
+    
+    setFormData({
+      name: data.name || "",
         description: data.description || "",
         address: data.address || "",
         phone: data.phone || "",
