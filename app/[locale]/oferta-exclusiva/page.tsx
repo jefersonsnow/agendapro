@@ -160,19 +160,17 @@ export default async function SalesPage({
 
       <main className="relative">
         {/* HERO SECTION */}
-        <section className="pt-20 pb-32 px-4 relative overflow-hidden">
-          <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full max-w-6xl h-[500px] bg-primary/10 blur-[150px] rounded-full pointer-events-none opacity-50" />
-          
-          <div className="max-w-5xl mx-auto text-center relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-white/60 text-[10px] font-black uppercase tracking-[0.3em] mb-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
-              <Sparkles className="h-3 w-3 text-primary" /> Mais de 500 Salões Ativos
+        <section className="relative pt-32 pb-20 px-4 overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent -z-10"></div>
+          <div className="max-w-6xl mx-auto text-center">
+            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+               <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Oferta Exclusiva e Limitada</span>
             </div>
-            
-            <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter leading-[0.85] mb-8 animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu italic uppercase">
-              {headline}
+            <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 italic animate-in fade-in slide-in-from-bottom-8 duration-1000 transform-gpu backface-hidden">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/20">{headline}</span>
             </h1>
-
-            <p className="text-lg md:text-2xl text-white/60 mb-12 max-w-3xl mx-auto leading-relaxed animate-in fade-in slide-in-from-bottom-6 duration-1000">
+            <p className="text-lg md:text-2xl text-white/60 max-w-3xl mx-auto mb-16 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 transform-gpu backface-hidden">
               {subheadline}
             </p>
 
@@ -186,15 +184,13 @@ export default async function SalesPage({
                     className="w-full h-full absolute inset-0"
                     allow="autoplay; fullscreen; picture-in-picture"
                     allowFullScreen
-                  />
+                  ></iframe>
                 ) : (
                   <>
-                    <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1521590832167-7bcbfaa6381f?q=80&w=2070&auto=format&fit=crop')] bg-cover bg-center opacity-30 grayscale" />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-black/20" />
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-6 cursor-pointer group/play">
-                      <div className="h-24 w-24 rounded-full bg-primary/20 border-2 border-primary/40 flex items-center justify-center backdrop-blur-md transition-all duration-500 group-hover/play:scale-110 group-hover/play:bg-primary/40 group-hover/play:border-primary">
-                        <Play className="h-10 w-10 text-white fill-current ml-1" />
-                      </div>
+                    <div className="h-24 w-24 rounded-full bg-white text-black flex items-center justify-center shadow-2xl group-hover/video:scale-110 transition-transform duration-500">
+                      <Play className="h-10 w-10 fill-current" />
+                    </div>
+                    <div className="mt-8 flex flex-col items-center gap-2 group/play">
                       <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
                     </div>
                   </>
