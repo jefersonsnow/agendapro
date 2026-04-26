@@ -128,13 +128,20 @@ export default function ClientesPage() {
     setLoading(true)
     try {
       const data = await getClients(page, pageSize, searchQuery)
-      setClients(data.clients || [])
-      setTotalCount(data.totalCount || 0)
+      
+      // APENAS atualiza se recebermos dados válidos do servidor.
+      // Isso evita que a lista de clientes fique vazia se a Server Action falhar.
+      if (data && Array.isArray(data.clients)) {
+        setClients(data.clients)
+        setTotalCount(data.totalCount || 0)
+      }
       
       const limit = await checkClientLimit()
       setPlanCheck(limit)
     } catch (error) {
       console.error("Error fetching clients:", error)
+      // No caso de erro (ex: 500 do servidor), NÃO limpamos o estado.
+      // O utilizador continua a ver os dados carregados anteriormente.
     } finally {
       setLoading(false)
     }

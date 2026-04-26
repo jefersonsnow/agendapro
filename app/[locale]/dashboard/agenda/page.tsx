@@ -225,7 +225,7 @@ export default function AgendaPage() {
       clearInterval(timer)
       window.removeEventListener("next-refresh", handleRefresh)
     }
-  }, [salonId]) // Dependência do salonId para garantir que fetchAppointments tem o ID
+  }, []) // Removida dependência salonId para evitar loop e re-execução desnecessária
 
   useEffect(() => {
     if (salonId) {
@@ -234,37 +234,52 @@ export default function AgendaPage() {
   }, [currentDate, salonId, view, selectedStaffFilter])
 
   async function fetchInitialData() {
-    const data = await getAgendaInitialData()
-    if (data) {
-      setSalonId(data.salonId)
-      setWorkingHours(data.workingHours)
-      setStaff(data.staff || [])
-      setFilteredStaffForModal(data.staff || [])
-      setServices(data.services || [])
-      setClients(data.clients || [])
-      setIsProfessional(data.isProfessional || false)
+    try {
+      const data = await getAgendaInitialData()
+      if (data) {
+        setSalonId(data.salonId)
+        setWorkingHours(data.workingHours)
+        setStaff(data.staff || [])
+        setFilteredStaffForModal(data.staff || [])
+        setServices(data.services || [])
+        setClients(data.clients || [])
+        setIsProfessional(data.isProfessional || false)
+      }
+    } catch (error) {
+      console.error("Erro ao carregar dados iniciais da agenda:", error)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   async function fetchAppointments() {
     if (!salonId) return
 
-    let startDate: Date;
-    let endDate: Date;
+    try {
+      let startDate: Date;
+      let endDate: Date;
 
-    if (view === "month") {
-      startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
-      endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
-      endDate.setHours(23, 59, 59, 999)
-    } else {
-      startDate = getStartOfWeek(currentDate)
-      endDate = new Date(startDate)
-      endDate.setDate(endDate.getDate() + 7)
+      if (view === "month") {
+        startDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1)
+        endDate = new Date(currentDate.getFullYear(), currentDate.getMonth() + 1, 0)
+        endDate.setHours(23, 59, 59, 999)
+      } else {
+        startDate = getStartOfWeek(currentDate)
+        endDate = new Date(startDate)
+        endDate.setDate(endDate.getDate() + 7)
+      }
+
+      const data = await getAppointments(startDate, endDate, selectedStaffFilter)
+      // APENAS atualiza se recebermos um array válido. 
+      // Se data for null ou undefined (erro no servidor), preservamos os dados atuais.
+      if (Array.isArray(data)) {
+        setAppointments(data)
+      }
+    } catch (error) {
+      console.error("Erro ao carregar agendamentos:", error)
+      // No caso de erro (ex: 500 do servidor), NÃO limpamos o estado.
+      // Isso evita que a agenda fique vazia do nada.
     }
-
-    const data = await getAppointments(startDate, endDate, selectedStaffFilter)
-    setAppointments(data || [])
   }
 
   // Algoritmo de Layout para Agendamentos Sobrepostos
