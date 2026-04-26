@@ -82,7 +82,7 @@ export default function ClientesPage() {
   const [currentPage, setCurrentPage] = useState(1)
   const [pageSize] = useState(50)
   const [loading, setLoading] = useState(true)
-  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "free" })
+  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "minimo" })
   const [searchQuery, setSearchQuery] = useState("")
   
   // Dialog States

@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server"
 import prisma from "@/lib/prisma"
 import Stripe from "stripe"
+import { sendMail } from "@/lib/mail"
+import { getGlobalConfigCache } from "@/lib/dal"
 
 export async function POST(request: Request) {
   try {
@@ -44,21 +46,112 @@ export async function POST(request: Request) {
       case 'checkout.session.completed': {
         const session = event.data.object as Stripe.Checkout.Session
         const email = session.customer_details?.email
+        const pendingId = session.client_reference_id
         
-        if (email) {
-          // Encontrar Salão pelo email do dono
+        if (pendingId) {
+          // 1. NOVO REGISTO APÓS PAGAMENTO
+          const pending = await prisma.pendingRegistration.findUnique({
+            where: { id: pendingId }
+          })
+
+          if (pending) {
+            // A. Criar Usuário (Dono)
+            const user = await prisma.user.create({
+              data: {
+                name: pending.name,
+                email: pending.email,
+                password: pending.password,
+                role: "owner",
+              }
+            })
+
+            // B. Criar Salão (Slug gerado do nome)
+            const baseSlug = pending.salon_name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")
+            let slug = baseSlug
+            const existingSalon = await prisma.salon.findUnique({ where: { slug } })
+            if (existingSalon) {
+              slug = `${baseSlug}-${Math.floor(Math.random() * 1000)}`
+            }
+
+            const salon = await prisma.salon.create({
+              data: {
+                name: pending.salon_name,
+                slug,
+                email: pending.email,
+                phone: pending.phone,
+                address: pending.address,
+                nif: pending.nif,
+                owner_id: user.id,
+                plan: pending.plan,
+                status: "active",
+                trial_ends_at: null
+              }
+            })
+
+            // C. Vincular usuário ao salão
+            await prisma.user.update({
+              where: { id: user.id },
+              data: { salon_id: salon.id }
+            })
+
+            // D. Enviar E-mail de Boas-vindas
+            try {
+               const config = await getGlobalConfigCache()
+               const welcomeConfig = config?.welcome_email_config ? JSON.parse(config.welcome_email_config) : {}
+               const extraContent = welcomeConfig.enableExtraContent ? (welcomeConfig.extraHtmlContent || "") : ""
+
+               await sendMail({
+                 to: pending.email,
+                 subject: `Bem-vindo ao AgendarPro! Sua conta foi criada com sucesso`,
+                 html: `
+                   <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 40px; border-radius: 10px;">
+                     <h1 style="color: #333;">Olá, ${pending.name}!</h1>
+                     <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                       Parabéns! O seu salão <strong>${pending.salon_name}</strong> já está configurado na nossa plataforma após o pagamento confirmado.
+                     </p>
+                     <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                       <p style="margin: 0; font-weight: bold; color: #333;">Seus dados de acesso:</p>
+                       <p style="margin: 10px 0 0 0; color: #666;">Painel: <a href="https://agendar.napp.pt/dashboard" style="color: #007bff; text-decoration: none;">agendar.napp.pt/dashboard</a></p>
+                       <p style="margin: 5px 0 0 0; color: #666;">E-mail: ${pending.email}</p>
+                     </div>
+                     <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                       O seu link público para agendamentos é: <br/>
+                       <a href="https://agendar.napp.pt/${slug}" style="font-weight: bold; color: #007bff; text-decoration: none;">agendar.napp.pt/${slug}</a>
+                     </p>
+                     ${extraContent ? `<hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;"> ${extraContent}` : ""}
+                     <p style="font-size: 14px; color: #888; margin-top: 40px;">
+                       Se precisar de ajuda, responda a este e-mail ou entre em contacto com o suporte. <br/>
+                       Equipa AgendarPro
+                     </p>
+                   </div>
+                 `
+               })
+            } catch (err) {
+               console.error("Stripe Webhook: Erro ao enviar email de boas-vindas:", err)
+            }
+
+            // E. Apagar o registo pendente
+            await prisma.pendingRegistration.delete({
+               where: { id: pendingId }
+            })
+
+            console.log(`Stripe Webhook: Novo salão ${salon.name} criado com sucesso após pagamento!`)
+          }
+        } else if (email) {
+          // 2. UPGRADE DE PLANO PARA SALÃO EXISTENTE
           const salon = await prisma.salon.findFirst({
             where: { email: email }
           })
 
           if (salon) {
-            // Obter os itens da sessão para saber qual preço foi comprado
             const lineItems = await stripe.checkout.sessions.listLineItems(session.id)
             const priceId = lineItems.data[0]?.price?.id
 
             let newPlan = "premium"
             if (priceId && priceId === stripeConfigs.productBasicId) {
                 newPlan = "basic"
+            } else if (priceId && priceId === stripeConfigs.productMinimoId) {
+                newPlan = "minimo"
             }
 
             await prisma.salon.update({
@@ -66,13 +159,11 @@ export async function POST(request: Request) {
               data: {
                 plan: newPlan,
                 status: "active",
-                trial_ends_at: null // Remover trial pois ativou plano pago
+                trial_ends_at: null
               }
             })
 
             console.log(`Stripe Webhook: Salão ${salon.name} atualizado para plano ${newPlan} via Stripe!`)
-          } else {
-            console.warn(`Stripe Webhook: Salão não encontrado para o email ${email}`)
           }
         }
         break
@@ -92,14 +183,14 @@ export async function POST(request: Request) {
            })
            
            if (salon) {
-             // Downgrade automático para o plano Free (ou pode marcar status como 'expired')
+             // Downgrade automático para o plano Mínimo (ou pode marcar status como 'expired')
              await prisma.salon.update({
                 where: { id: salon.id },
                 data: {
-                  plan: "free"
+                  plan: "minimo"
                 }
              })
-             console.log(`Stripe Webhook: Assinatura cancelada! Salão ${salon.name} alterado para plano free.`)
+             console.log(`Stripe Webhook: Assinatura cancelada! Salão ${salon.name} alterado para plano minimo.`)
            }
         }
         break

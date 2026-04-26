@@ -7,7 +7,8 @@ import { getGlobalConfigCache } from "@/lib/dal"
 import { AuthError } from "next-auth"
 import { sendMail } from "@/lib/mail"
 import crypto from "crypto"
-import { signUpSchema, signUpFreeTrialSchema, loginSchema } from "@/lib/validations/auth"
+import { signUpSchema, signUpWithDetailsSchema, loginSchema } from "@/lib/validations/auth"
+import Stripe from "stripe"
 
 export async function signUp(formData: any) {
   const validatedFields = signUpSchema.safeParse(formData)
@@ -49,118 +50,92 @@ export async function signUp(formData: any) {
   }
 }
 
-export async function signUpFreeTrial(formData: any) {
-  const validatedFields = signUpFreeTrialSchema.safeParse(formData)
+export async function signUpWithDetails(formData: any) {
+  const validatedFields = signUpWithDetailsSchema.safeParse(formData)
   
   if (!validatedFields.success) {
     return { error: validatedFields.error.flatten().fieldErrors }
   }
 
-  const { email: rawEmail, password, name, salonName, address, phone, nif } = validatedFields.data
+  const { email: rawEmail, password, name, salonName, address, phone, nif, plan } = validatedFields.data
   const email = rawEmail.toLowerCase()
 
-
-
-  const hashedPassword = await bcrypt.hash(password, 10)
-  const trialEndsAt = new Date()
-  trialEndsAt.setDate(trialEndsAt.getDate() + 30)
-
-  const result = await prisma.$transaction(async (tx: any) => {
-    // 1. CRIAR O UTILIZADOR
-    const user = await tx.user.create({
-      data: {
-        email,
-        password: hashedPassword,
-        name: name,
-      }
-    })
-
-    // 2. CRIAR O SALÃO (Trial)
-    const slugBase = salonName
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9]/g, "-")
-      .replace(/-+/g, "-")
-      .replace(/^-|-$/g, "")
-
-    const existingSlug = await tx.salon.findUnique({ where: { slug: slugBase } })
-    const finalSlug = existingSlug 
-      ? `${slugBase}-${Math.random().toString(36).substring(2, 5)}` 
-      : slugBase
-
-    const salon = await tx.salon.create({
-      data: {
-        name: salonName,
-        slug: finalSlug,
-        owner_id: user.id,
-        address: address,
-        phone: phone,
-        nif: nif,
-        plan: "free",
-        status: "trial",
-        trial_ends_at: trialEndsAt
-      }
-    })
-
-    // 3. VINCULAR O UTILIZADOR AO SALÃO
-    await tx.user.update({
-      where: { id: user.id },
-      data: { salon_id: salon.id }
-    })
-
-    return { user, salon }
+  // 1. Verificar se usuário já existe
+  const existingUser = await prisma.user.findUnique({
+    where: { email }
   })
 
-  // === ENVIO DE E-MAIL (MODO SÍNCRONO) ===
-  try {
-    const config = await getGlobalConfigCache();
-    let extraHtml = "";
-    
-    if (config?.welcome_email_config) {
-       try {
-         const we = JSON.parse(config.welcome_email_config);
-         if (we.enableExtraContent && we.extraHtmlContent) {
-           extraHtml = we.extraHtmlContent;
-         }
-       } catch (e) {}
-    }
-
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || "https://agendar.napp.pt";
-    const loginLink = `${appUrl}/pt/${result.salon.slug}/login`;
-
-    const emailHtml = `
-      <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <h2 style="color: #0D9488;">Bem-vindo(a) ao AgendarPro!</h2>
-        <p>Olá <strong>${name}</strong>,</p>
-        <p>O salão <strong>${salonName}</strong> foi registado com sucesso e os seus 30 dias grátis já começaram!</p>
-        
-        <div style="background-color: #f3f4f6; padding: 20px; border-radius: 8px; margin: 20px 0;">
-          <h3 style="margin-top: 0; color: #111827;">Os seus dados de acesso:</h3>
-          <p><strong>Link do Painel:</strong> <a href="${loginLink}" style="color: #0D9488;">${loginLink}</a></p>
-          <p><strong>E-mail:</strong> ${email}</p>
-        </div>
-        
-        <p style="font-size: 12px; color: #6b7280;">Utilize a palavra-passe que definiu durante o registo. Por segurança, nunca partilhamos nem armazenamos palavras-passe em texto legível.</p>
-        
-        ${extraHtml ? `<div style="margin-top: 30px; border-top: 1px solid #e5e7eb; padding-top: 20px;">${extraHtml}</div>` : ""}
-        
-        <br/>
-        <p>Com os melhores cumprimentos,<br/>Equipa AgendarPro</p>
-      </div>
-    `;
-
-    await sendMail({
-      to: email,
-      subject: `Bem-vindo ao AgendarPro - ${salonName}`,
-      html: emailHtml
-    });
-  } catch (err) {
-    console.error("Erro ao enviar e-mail de boas-vindas:", err);
+  if (existingUser) {
+    return { error: { email: ["Este e-mail já está em uso."] } }
   }
 
-  return { success: true }
+  // 2. Hash da password
+  const hashedPassword = await bcrypt.hash(password, 10)
+
+  // 3. Criar Registo Pendente
+  const pending = await prisma.pendingRegistration.create({
+    data: {
+      email,
+      password: hashedPassword,
+      name,
+      salon_name: salonName,
+      address,
+      phone,
+      nif,
+      plan
+    }
+  })
+
+  // 4. Obter Configurações do Stripe
+  const config = await getGlobalConfigCache()
+  const stripeConfigs = config?.stripe_configs ? JSON.parse(config.stripe_configs) : {}
+  const secretKey = stripeConfigs.secretKey || process.env.STRIPE_SECRET_KEY
+
+  if (!secretKey) {
+     return { error: "Erro de configuração: Stripe não configurado." }
+  }
+
+  const stripe = new Stripe(secretKey)
+
+  // 5. Determinar o Price ID
+  let priceId = ""
+  if (plan === "minimo") priceId = stripeConfigs.productMinimoId
+  else if (plan === "basic") priceId = stripeConfigs.productBasicId
+  else if (plan === "premium") priceId = stripeConfigs.productPremiumId
+
+  if (!priceId) {
+     return { error: "Erro de configuração: ID do produto Stripe não encontrado para este plano." }
+  }
+
+  // 6. Criar Sessão de Checkout
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  
+  try {
+    const session = await stripe.checkout.sessions.create({
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price: priceId,
+          quantity: 1,
+        },
+      ],
+      mode: "subscription",
+      success_url: `${baseUrl}/auth/login?success_registration=true`,
+      cancel_url: `${baseUrl}/?canceled_registration=true`,
+      client_reference_id: pending.id,
+      customer_email: email,
+      metadata: {
+        pending_registration_id: pending.id
+      }
+    })
+
+    return { success: true, url: session.url }
+  } catch (error: any) {
+    console.error("Stripe Checkout Error:", error)
+    return { error: "Erro ao criar sessão de pagamento: " + error.message }
+  }
 }
+
 
 export async function login(formData: any) {
   const validatedFields = loginSchema.safeParse(formData)

@@ -613,7 +613,7 @@ export default function AgendaPage() {
                     size="sm" 
                     className={cn(
                        "h-8 text-[10px] uppercase font-black px-4 rounded-xl transition-all duration-300",
-                       view === 'week' ? "bg-white text-primary shadow-md scale-[1.02]" : "text-muted-foreground hover:text-foreground"
+                       view === 'week' ? "bg-card text-primary shadow-md scale-[1.02]" : "text-muted-foreground hover:text-foreground"
                     )}
                     onClick={() => setView('week')}
                  >
@@ -624,7 +624,7 @@ export default function AgendaPage() {
                     size="sm" 
                     className={cn(
                        "h-8 text-[10px] uppercase font-black px-4 rounded-xl transition-all duration-300",
-                       view === 'month' ? "bg-white text-primary shadow-md scale-[1.02]" : "text-muted-foreground hover:text-foreground"
+                       view === 'month' ? "bg-card text-primary shadow-md scale-[1.02]" : "text-muted-foreground hover:text-foreground"
                     )}
                     onClick={() => setView('month')}
                  >

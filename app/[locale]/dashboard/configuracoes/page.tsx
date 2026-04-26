@@ -38,6 +38,7 @@ interface Salon {
   locale: string
   timezone: string
   dynamicPlans?: any
+  color_palette: string
 }
 
 const weekDays = [
@@ -106,6 +107,7 @@ export default function ConfiguracoesPage() {
     locale: "pt",
     timezone: "Europe/Lisbon",
     slot_interval: 15,
+    color_palette: "default",
   })
   
   const [galleryUrls, setGalleryUrls] = useState(["", "", "", ""])
@@ -146,6 +148,7 @@ export default function ConfiguracoesPage() {
         locale: data.locale || "pt",
         timezone: data.timezone || "Europe/Lisbon",
         slot_interval: settings.slot_interval || 15,
+        color_palette: (data as any).color_palette || "default",
       })
       
       if (settings.gallery_urls) setGalleryUrls(settings.gallery_urls)
@@ -221,46 +224,50 @@ export default function ConfiguracoesPage() {
         }
       }
     })
-
-    await updateSalonSettings({
-      ...formData,
-      logo_url: (formData as any).logo_url,
-      cover_url: (formData as any).cover_url,
-      working_hours: hoursToSave,
-      settings: {
-        ...salon.settings, 
-        theme: formData.theme,
-        social_instagram: formData.social_instagram,
-        social_facebook: formData.social_facebook,
-        social_whatsapp: formData.social_whatsapp,
-        gallery_urls: galleryUrls,
-        about_link: formData.about_link,
-        amenities: selectedAmenities,
-        amenities_layout: formData.amenities_layout,
-        amenities_style: formData.amenities_style,
-        amenities_color: formData.amenities_color,
-        services_layout: formData.services_layout,
-        services_style: formData.services_style,
-        services_subtitles: formData.services_subtitles,
-        slot_interval: formData.slot_interval,
-      },
-
-
-      locale: (formData as any).locale,
-      timezone: (formData as any).timezone
-    })
-
-    setSaving(false)
-    fetchSalon()
-    toast.success(t("saveBtn") + " - OK!")
-    
-    // Se o idioma tiver sido alterado, forçar o recarregamento da página para o novo locale
-    if ((formData as any).locale && (formData as any).locale !== salon.locale) {
-      setTimeout(() => {
-        const newLocale = (formData as any).locale;
-        // Always use explicit locale prefix so next-intl sets the NEXT_LOCALE cookie correctly
-        window.location.href = `/${newLocale}/dashboard/configuracoes`;
-      }, 500);
+    try {
+      await updateSalonSettings({
+        ...formData,
+        logo_url: (formData as any).logo_url,
+        cover_url: (formData as any).cover_url,
+        working_hours: hoursToSave,
+        settings: {
+          ...salon.settings, 
+          theme: formData.theme,
+          social_instagram: formData.social_instagram,
+          social_facebook: formData.social_facebook,
+          social_whatsapp: formData.social_whatsapp,
+          gallery_urls: galleryUrls,
+          about_link: formData.about_link,
+          amenities: selectedAmenities,
+          amenities_layout: formData.amenities_layout,
+          amenities_style: formData.amenities_style,
+          amenities_color: formData.amenities_color,
+          services_layout: formData.services_layout,
+          services_style: formData.services_style,
+          services_subtitles: formData.services_subtitles,
+          slot_interval: formData.slot_interval,
+        },
+  
+        locale: (formData as any).locale,
+        timezone: (formData as any).timezone,
+        color_palette: formData.color_palette
+      })
+  
+      fetchSalon()
+      toast.success(t("saveBtn") + " - OK!")
+      
+      // Se o idioma tiver sido alterado, forçar o recarregamento da página para o novo locale
+      if ((formData as any).locale && (formData as any).locale !== salon.locale) {
+        setTimeout(() => {
+          const newLocale = (formData as any).locale;
+          window.location.href = `/${newLocale}/dashboard/configuracoes`;
+        }, 1000)
+      }
+    } catch (error: any) {
+      console.error("Erro ao salvar:", error);
+      toast.error("Erro ao salvar: " + (error.message || "Erro desconhecido"));
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -498,7 +505,7 @@ export default function ConfiguracoesPage() {
                     </div>
 
                     <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center rounded-[2rem] z-10">
-                        {isFeatureAllowed(salon?.plan || "free", "logo", salon?.dynamicPlans, salon?.status) ? (
+                        {isFeatureAllowed(salon?.plan || "minimo", "logo", salon?.dynamicPlans, salon?.status) ? (
                            <Button 
                               onClick={() => logoRef.current?.click()}
                               variant="outline" 
@@ -558,7 +565,7 @@ export default function ConfiguracoesPage() {
                     </div>
 
                     <div className="absolute inset-0 bg-background/60 backdrop-blur-sm opacity-0 group-hover:opacity-100 transition-all flex items-center justify-center rounded-[2rem] z-10">
-                        {isFeatureAllowed(salon?.plan || "free", "cover", salon?.dynamicPlans, salon?.status) ? (
+                        {isFeatureAllowed(salon?.plan || "minimo", "cover", salon?.dynamicPlans, salon?.status) ? (
                            <Button 
                               onClick={() => coverRef.current?.click()}
                               variant="outline" 
@@ -610,15 +617,15 @@ export default function ConfiguracoesPage() {
                  {typeof window !== "undefined" ? `${window.location.host}/${salon?.slug}` : "" }
               </code>
                <Button 
-                  title={isFeatureAllowed(salon?.plan || "free", "qr_code", salon?.dynamicPlans, salon?.status) ? "Gerar QR Code para Impressão" : "QR Code não disponível no seu plano"} 
+                  title={isFeatureAllowed(salon?.plan || "minimo", "qr_code", salon?.dynamicPlans, salon?.status) ? "Gerar QR Code para Impressão" : "QR Code não disponível no seu plano"} 
                   variant="outline" 
                   size="icon" 
                   className={cn(
                     "h-12 w-12 rounded-xl transition-all",
-                    !isFeatureAllowed(salon?.plan || "free", "qr_code", salon?.dynamicPlans, salon?.status) && "opacity-40 grayscale cursor-not-allowed"
+                    !isFeatureAllowed(salon?.plan || "minimo", "qr_code", salon?.dynamicPlans, salon?.status) && "opacity-40 grayscale cursor-not-allowed"
                   )} 
                   onClick={() => {
-                    if (isFeatureAllowed(salon?.plan || "free", "qr_code", salon?.dynamicPlans, salon?.status)) {
+                    if (isFeatureAllowed(salon?.plan || "minimo", "qr_code", salon?.dynamicPlans, salon?.status)) {
                        setQrOpen(true)
                     } else {
                        toast.error("O QR Code de reserva é exclusivo dos planos pagos. Faça o upgrade para liberar!")
@@ -636,7 +643,7 @@ export default function ConfiguracoesPage() {
 
       {/* EXPORTAÇÃO DE DADOS */}
       <Card className="border-2 border-primary/20 bg-gradient-to-r from-background to-primary/5 group overflow-hidden relative">
-         {!isFeatureAllowed(salon?.plan || "free", "professional_export", salon?.dynamicPlans, salon?.status) && (
+         {!isFeatureAllowed(salon?.plan || "minimo", "professional_export", salon?.dynamicPlans, salon?.status) && (
             <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500">
                <div className="bg-white p-6 rounded-[2rem] shadow-2xl border flex flex-col items-center gap-4 max-w-xs">
                   <div className="h-16 w-16 rounded-2xl bg-amber-100 flex items-center justify-center">
@@ -920,114 +927,153 @@ export default function ConfiguracoesPage() {
       </Card>
 
       {/* AMENIDADES CONFIG */}
-      <Card className="border-2 border-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"> <Sparkles className="h-5 w-5 text-primary" /> {t("amenities")} </CardTitle>
-          <CardDescription>{t("amenitiesDesc")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-           <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-              {AMENITIES.map((am) => (
-                <button
-                  key={am.id}
-                  onClick={() => toggleAmenity(am.id)}
-                  className={cn(
-                    "flex flex-col items-center p-3 rounded-xl border-2 transition-all gap-1",
-                    selectedAmenities.includes(am.id) ? "border-primary bg-primary/10 shadow-md" : "border-muted bg-white opacity-50"
-                  )}
-                >
-                  <am.icon className={cn("h-5 w-5", selectedAmenities.includes(am.id) ? "text-primary" : "text-muted")} />
-                  <span className="text-[9px] font-black uppercase text-center leading-none">{tAm(am.id)}</span>
-                </button>
-              ))}
-           </div>
+      <div className="relative group">
+        {!isFeatureAllowed(salon?.plan || "minimo", "amenities", salon?.dynamicPlans, salon?.status) && (
+          <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 rounded-3xl">
+              <div className="bg-white p-6 rounded-[2rem] shadow-2xl border flex flex-col items-center gap-4 max-w-xs">
+                <div className="h-16 w-16 rounded-2xl bg-amber-100 flex items-center justify-center">
+                    <Sparkles className="h-8 w-8 text-amber-600 animate-pulse" />
+                </div>
+                <div>
+                    <h3 className="font-black uppercase tracking-widest text-xs mb-1">Amenidades Bloqueadas</h3>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      A personalização de comodidades e diferenciais está disponível apenas nos planos <strong>Basic</strong> e <strong>Premium</strong>.
+                    </p>
+                </div>
+                <Button variant="default" className="w-full rounded-xl font-black text-[10px] uppercase tracking-widest h-10 shadow-lg shadow-primary/20" asChild>
+                    <Link href="/dashboard/configuracoes/planos">FAZER UPGRADE AGORA</Link>
+                </Button>
+              </div>
+          </div>
+        )}
+        <Card className="border-2 border-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2"> <Sparkles className="h-5 w-5 text-primary" /> {t("amenities")} </CardTitle>
+            <CardDescription>{t("amenitiesDesc")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                {AMENITIES.map((am) => (
+                  <button
+                    key={am.id}
+                    onClick={() => toggleAmenity(am.id)}
+                    className={cn(
+                      "flex flex-col items-center p-3 rounded-xl border-2 transition-all gap-1",
+                      selectedAmenities.includes(am.id) ? "border-primary bg-primary/10 shadow-md" : "border-muted bg-white opacity-50"
+                    )}
+                  >
+                    <am.icon className={cn("h-5 w-5", selectedAmenities.includes(am.id) ? "text-primary" : "text-muted")} />
+                    <span className="text-[9px] font-black uppercase text-center leading-none">{tAm(am.id)}</span>
+                  </button>
+                ))}
+            </div>
 
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
-              <div className="space-y-2">
-                 <Label className="text-xs uppercase font-bold text-muted-foreground">{t("amBannerLayout")}</Label>
-                 <Select value={formData.amenities_layout} onValueChange={(v) => setFormData({ ...formData, amenities_layout: v })}>
-                    <SelectTrigger className="border-2"> <SelectValue /> </SelectTrigger>
-                    <SelectContent>
-                       <SelectItem value="grid">{t("amGrid")}</SelectItem>
-                       <SelectItem value="single-line">{t("amSingle")}</SelectItem>
-                       <SelectItem value="carousel">{t("amCarousel")}</SelectItem>
-                       <SelectItem value="ticker">{t("amTicker")}</SelectItem>
-                    </SelectContent>
-                 </Select>
-              </div>
-              <div className="space-y-2">
-                 <Label className="text-xs uppercase font-bold text-muted-foreground">{t("amBannerStyle")}</Label>
-                 <Select value={formData.amenities_style} onValueChange={(v) => setFormData({ ...formData, amenities_style: v })}>
-                    <SelectTrigger className="border-2"> <SelectValue /> </SelectTrigger>
-                    <SelectContent>
-                       <SelectItem value="card">{t("amCard")}</SelectItem>
-                       <SelectItem value="minimal">{t("amMinimal")}</SelectItem>
-                       <SelectItem value="badge">{t("amBadge")}</SelectItem>
-                    </SelectContent>
-                 </Select>
-              </div>
-           </div>
-        </CardContent>
-      </Card>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase font-bold text-muted-foreground">{t("amBannerLayout")}</Label>
+                  <Select value={formData.amenities_layout} onValueChange={(v) => setFormData({ ...formData, amenities_layout: v })}>
+                      <SelectTrigger className="border-2"> <SelectValue /> </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="grid">{t("amGrid")}</SelectItem>
+                        <SelectItem value="single-line">{t("amSingle")}</SelectItem>
+                        <SelectItem value="carousel">{t("amCarousel")}</SelectItem>
+                        <SelectItem value="ticker">{t("amTicker")}</SelectItem>
+                      </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-xs uppercase font-bold text-muted-foreground">{t("amBannerStyle")}</Label>
+                  <Select value={formData.amenities_style} onValueChange={(v) => setFormData({ ...formData, amenities_style: v })}>
+                      <SelectTrigger className="border-2"> <SelectValue /> </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="card">{t("amCard")}</SelectItem>
+                        <SelectItem value="minimal">{t("amMinimal")}</SelectItem>
+                        <SelectItem value="badge">{t("amBadge")}</SelectItem>
+                      </SelectContent>
+                  </Select>
+                </div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* NOVO: CONTROLO DE SERVIÇOS (A sua nova solicitação!) */}
-      <Card className="border-2 border-primary/5">
-        <CardHeader>
-          <CardTitle className="text-lg flex items-center gap-2"> <Briefcase className="h-5 w-5 text-primary" /> {t("servicesSettings")} </CardTitle>
-          <CardDescription>{t("servicesSub")}</CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-3">
-                 <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
-                    <LayoutGrid className="h-3 w-3" /> {t("servLayoutLabel")}
-                 </Label>
-                 <Select value={formData.services_layout} onValueChange={(v) => setFormData({ ...formData, services_layout: v })}>
-                    <SelectTrigger className="border-2 h-11"> <SelectValue /> </SelectTrigger>
-                    <SelectContent>
-                       <SelectItem value="grid">{t("servGrid")}</SelectItem>
-                       <SelectItem value="carousel">{t("servCarousel")}</SelectItem>
-                       <SelectItem value="list">{t("servList")}</SelectItem>
-                    </SelectContent>
-                 </Select>
-                 <p className="text-[10px] text-muted-foreground italic">{t("servCarouselHint")}</p>
+      <div className="relative group">
+        {!isFeatureAllowed(salon?.plan || "minimo", "service_section", salon?.dynamicPlans, salon?.status) && (
+          <div className="absolute inset-0 z-10 bg-background/60 backdrop-blur-[2px] flex flex-col items-center justify-center p-6 text-center animate-in fade-in duration-500 rounded-3xl">
+              <div className="bg-white p-6 rounded-[2rem] shadow-2xl border flex flex-col items-center gap-4 max-w-xs">
+                <div className="h-16 w-16 rounded-2xl bg-amber-100 flex items-center justify-center">
+                    <LayoutGrid className="h-8 w-8 text-amber-600 animate-pulse" />
+                </div>
+                <div>
+                    <h3 className="font-black uppercase tracking-widest text-xs mb-1">Layout de Serviços Bloqueado</h3>
+                    <p className="text-[10px] text-muted-foreground leading-relaxed">
+                      A personalização da vitrine e slogans de serviços está disponível apenas nos planos <strong>Basic</strong> e <strong>Premium</strong>.
+                    </p>
+                </div>
+                <Button variant="default" className="w-full rounded-xl font-black text-[10px] uppercase tracking-widest h-10 shadow-lg shadow-primary/20" asChild>
+                    <Link href="/dashboard/configuracoes/planos">FAZER UPGRADE AGORA</Link>
+                </Button>
               </div>
+          </div>
+        )}
+        <Card className="border-2 border-primary/5">
+          <CardHeader>
+            <CardTitle className="text-lg flex items-center gap-2"> <Briefcase className="h-5 w-5 text-primary" /> {t("servicesSettings")} </CardTitle>
+            <CardDescription>{t("servicesSub")}</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-3">
+                  <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                      <LayoutGrid className="h-3 w-3" /> {t("servLayoutLabel")}
+                  </Label>
+                  <Select value={formData.services_layout} onValueChange={(v) => setFormData({ ...formData, services_layout: v })}>
+                      <SelectTrigger className="border-2 h-11"> <SelectValue /> </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="grid">{t("servGrid")}</SelectItem>
+                        <SelectItem value="carousel">{t("servCarousel")}</SelectItem>
+                        <SelectItem value="list">{t("servList")}</SelectItem>
+                      </SelectContent>
+                  </Select>
+                  <p className="text-[10px] text-muted-foreground italic">{t("servCarouselHint")}</p>
+                </div>
 
-              <div className="space-y-3">
-                 <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
-                    <Layers className="h-3 w-3" /> {t("servCardLabel")}
-                 </Label>
-                 <Select value={formData.services_style} onValueChange={(v) => setFormData({ ...formData, services_style: v })}>
-                    <SelectTrigger className="border-2 h-11"> <SelectValue /> </SelectTrigger>
-                    <SelectContent>
-                       <SelectItem value="card">{t("servCard")}</SelectItem>
-                       <SelectItem value="compact">{t("servCompact")}</SelectItem>
-                    </SelectContent>
-                 </Select>
-              </div>
-           </div>
+                <div className="space-y-3">
+                  <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                      <Layers className="h-3 w-3" /> {t("servCardLabel")}
+                  </Label>
+                  <Select value={formData.services_style} onValueChange={(v) => setFormData({ ...formData, services_style: v })}>
+                      <SelectTrigger className="border-2 h-11"> <SelectValue /> </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="card">{t("servCard")}</SelectItem>
+                        <SelectItem value="compact">{t("servCompact")}</SelectItem>
+                      </SelectContent>
+                  </Select>
+                </div>
+            </div>
 
-           <div className="space-y-3 pt-4 border-t border-dashed">
-              <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
-                 <MessageCircle className="h-3 w-3" /> {t("servSubLabel")}
-              </Label>
-              <Textarea 
-                value={formData.services_subtitles[formData.locale] || ""} 
-                onChange={(e) => setFormData({
-                   ...formData, 
-                   services_subtitles: {
-                      ...formData.services_subtitles,
-                      [formData.locale]: e.target.value
-                   }
-                })} 
-                className="border-2 rounded-xl h-24 resize-none" 
-                placeholder={t("servSubHolder")}
-              />
-              <p className="text-[10px] text-muted-foreground italic">Este texto muda conforme o <strong>Idioma de Interface</strong> selecionado no topo. Configure uma frase para cada idioma que suporta.</p>
-           </div>
-
-        </CardContent>
-      </Card>
+            <div className="space-y-3 pt-4 border-t border-dashed">
+                <Label className="text-xs uppercase font-bold text-muted-foreground flex items-center gap-2">
+                  <MessageCircle className="h-3 w-3" /> {t("servSubLabel")}
+                </Label>
+                <Textarea 
+                  value={formData.services_subtitles[formData.locale] || ""} 
+                  onChange={(e) => setFormData({
+                    ...formData, 
+                    services_subtitles: {
+                        ...formData.services_subtitles,
+                        [formData.locale]: e.target.value
+                    }
+                  })} 
+                  className="border-2 rounded-xl h-24 resize-none" 
+                  placeholder={t("servSubHolder")}
+                />
+                <p className="text-[10px] text-muted-foreground italic">Este texto muda conforme o <strong>Idioma de Interface</strong> selecionado no topo. Configure uma frase para cada idioma que suporta.</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* NOVO: CONFIGURAÇÃO DE AGENDAMENTO */}
       <Card className="border-2 border-primary/10 bg-primary/5">
@@ -1060,8 +1106,13 @@ export default function ConfiguracoesPage() {
             <SelectTrigger className="h-12 border-2"> <SelectValue /> </SelectTrigger>
             <SelectContent>
               <SelectItem value="default">{t("themeDefault")}</SelectItem> <SelectItem value="dark">{t("themeDark")}</SelectItem>
-              <SelectItem value="minimal">{t("amMinimal")}</SelectItem> <SelectItem value="retro">{t("themeRetro")}</SelectItem>
+              <SelectItem value="minimal">{t("themeMinimal")}</SelectItem> <SelectItem value="retro">{t("themeRetro")}</SelectItem>
               <SelectItem value="feminine-modern">{t("themeFeminine")}</SelectItem> <SelectItem value="luxury">{t("themeLuxury")}</SelectItem>
+              <SelectItem value="safira">{t("themeSafira")}</SelectItem> <SelectItem value="imperial">{t("themeImperial")}</SelectItem>
+              <SelectItem value="oceano">{t("themeOceano")}</SelectItem> <SelectItem value="cyber">{t("themeCyber")}</SelectItem>
+              <SelectItem value="forest">{t("themeForest")}</SelectItem> <SelectItem value="sunset">{t("themeSunset")}</SelectItem>
+              <SelectItem value="arctic">{t("themeArctic")}</SelectItem> <SelectItem value="onyx">{t("themeOnyx")}</SelectItem>
+              <SelectItem value="lavender">{t("themeLavender")}</SelectItem> <SelectItem value="emerald">{t("themeEmerald")}</SelectItem>
             </SelectContent>
           </Select>
         </CardContent>
@@ -1086,6 +1137,55 @@ export default function ConfiguracoesPage() {
       </div>
 
       {/* Dialog QR Code */}
+      {/* NOVO: PALETA DO DASHBOARD */}
+      <Card className="border-2 border-primary/10">
+        <CardHeader>
+           <CardTitle className="text-lg flex items-center gap-2"> <Palette className="h-5 w-5 text-primary" /> {t("dashboardTheme") || "Paleta do Dashboard"} </CardTitle>
+           <CardDescription>Escolha um dos 10 temas modernos para personalizar a sua área de trabalho.</CardDescription>
+        </CardHeader>
+        <CardContent>
+           <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+              {[
+                { id: "default", name: "Esmeralda", color: "#10b981" },
+                { id: "midnight", name: "Midnight", color: "#1e293b" },
+                { id: "imperial-deep", name: "Imperial", color: "#4c0519" },
+                { id: "titanium", name: "Titânio", color: "#334155" },
+                { id: "forest", name: "Forest", color: "#064e3b" },
+                { id: "obsidian", name: "Obsidian", color: "#000000" },
+                { id: "safira", name: "Safira", color: "#3b82f6" },
+                { id: "imperial", name: "Imperial", color: "#8b5cf6" },
+                { id: "oceano", name: "Oceano", color: "#06b6d4" },
+                { id: "fusao", name: "Fusão", color: "#2dd4bf" },
+                { id: "cosmico", name: "Cósmico", color: "#6366f1" },
+                { id: "aurora", name: "Aurora", color: "#d946ef" },
+                { id: "veludo", name: "Veludo", color: "#2563eb" },
+                { id: "nebula", name: "Nébula", color: "#a855f7" },
+                { id: "onyx", name: "Onyx", color: "#334155" },
+              ].map((theme) => (
+                <button
+                  key={theme.id}
+                  onClick={() => setFormData({ ...formData, color_palette: theme.id })}
+                  className={cn(
+                    "flex flex-col items-center gap-2 p-3 rounded-2xl border-2 transition-all hover:scale-105",
+                    formData.color_palette === theme.id 
+                      ? "border-primary bg-primary/5 shadow-lg" 
+                      : "border-transparent bg-muted/30 opacity-70 hover:opacity-100"
+                  )}
+                >
+                  <div 
+                    className="h-10 w-10 rounded-full shadow-inner border-2 border-white" 
+                    style={{ backgroundColor: theme.color }}
+                  />
+                  <span className="text-[10px] font-black uppercase tracking-tighter">{theme.name}</span>
+                </button>
+              ))}
+           </div>
+           <p className="text-[10px] text-muted-foreground mt-4 italic text-center">
+             * A alteração da paleta afeta apenas este painel administrativo, mantendo a experiência focada em produtividade.
+           </p>
+        </CardContent>
+      </Card>
+
       <Dialog open={qrOpen} onOpenChange={setQrOpen}>
         <DialogContent className="max-w-sm sm:max-w-md print:max-w-none print:w-full print:h-full print:m-0 print:p-0 print:border-none print:shadow-none bg-white">
           <DialogHeader className="print:hidden">

@@ -49,12 +49,12 @@ export default function PlansPage() {
 
   if (loading) return <div className="flex items-center justify-center min-h-[60vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" /></div>
 
-  const currentPlan = salon?.plan || "free"
+  const currentPlan = salon?.plan || "minimo"
   const isTrial = salon?.status === "trial"
 
   // Sincronizar com a Home Page (Dados dinâmicos do CMS)
   const planConfigs = salon?.dynamicPlans || {
-    free: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
+    minimo: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
     basic: { price: "9.90", appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true },
     premium: { price: "24.90", appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
   }
@@ -74,12 +74,12 @@ export default function PlansPage() {
 
   const PLANS = [
     {
-      id: "free",
-      name: "Free",
-      price: "0€",
+      id: "minimo",
+      name: "Mínimo",
+      price: `${planConfigs.minimo.price}€`,
       desc: "Ideal para quem está a começar sozinho.",
       color: "bg-slate-500",
-      features: getPlanItems(planConfigs.free),
+      features: getPlanItems(planConfigs.minimo),
     },
     {
       id: "basic",
@@ -100,13 +100,10 @@ export default function PlansPage() {
     }
   ]
 
-  // Regra do Usuário: Não mostrar o FREE se ele já estiver no FREE (ou qualquer plano)
   // Mostramos apenas as opções de UPGRADE.
   const upgradeOptions = PLANS.filter(p => {
-    if (currentPlan === "free") return p.id !== "free"
+    if (currentPlan === "minimo") return p.id !== "minimo"
     if (currentPlan === "basic") return p.id === "premium"
-    if (currentPlan === "premium" && !isTrial) return false // Já é premium real
-    if (currentPlan === "premium" && isTrial) return p.id === "premium" // Permitir comprar premium se for trial
     return false
   })
 
@@ -182,7 +179,7 @@ export default function PlansPage() {
                         <Button 
                            disabled={upgradingPlan !== null}
                            onClick={async () => {
-                              if (plan.id === "free") return
+                              if (plan.id === "minimo") return
                               
                               // Se não houver Price ID configurado, caímos no suporte via WhatsApp/Email
                                try {

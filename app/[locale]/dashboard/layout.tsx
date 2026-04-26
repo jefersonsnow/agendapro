@@ -56,9 +56,10 @@ export default function DashboardLayout({
     name: "", 
     image: null as string | null,
     status: "active",
-    plan: "free",
+    plan: "minimo",
     trialEndsAt: null as string | null,
-    salonSlug: ""
+    salonSlug: "",
+    colorPalette: "default"
   })
   const [profileOpen, setProfileOpen] = useState(false)
   const pathname = usePathname()
@@ -142,7 +143,7 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
+    <div className={cn("min-h-screen bg-muted/30 transition-colors duration-500", user.colorPalette !== "default" && `theme-${user.colorPalette}`)}>
       {/* Mobile sidebar backdrop */}
       {sidebarOpen && (
         <div
@@ -338,7 +339,7 @@ export default function DashboardLayout({
         </header>
 
         {/* Page content */}
-        <main className="flex-1 p-2 lg:p-4">
+        <main className="flex-1 p-2 lg:p-4 bg-background text-foreground transition-colors duration-500">
           <AutoRefresh interval={120000} />
           <TrialStatusBanner plan={user.plan} trialEndsAt={(user as any).trialEndsAt} />
           {children}

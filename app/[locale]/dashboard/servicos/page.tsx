@@ -65,7 +65,7 @@ export default function ServicosPage() {
   const [services, setServices] = useState<Service[]>([])
   const [allStaff, setAllStaff] = useState<StaffMember[]>([])
   const [loading, setLoading] = useState(true)
-  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "free" })
+  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "minimo" })
   
   const [isServiceDialogOpen, setIsServiceDialogOpen] = useState(false)
   const [editingService, setEditingService] = useState<Service | null>(null)

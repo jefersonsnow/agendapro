@@ -41,7 +41,7 @@ const COLORS = ["#0D9488", "#7C3AED", "#2563EB", "#D97706", "#DC2626"]
 export default function RelatoriosPage() {
   const [stats, setStats] = useState<any>(null)
   const [loading, setLoading] = useState(true)
-  const [plan, setPlan] = useState<string>("free")
+  const [plan, setPlan] = useState<string>("minimo")
   const [status, setStatus] = useState<string>("active")
   const [dynamicPlans, setDynamicPlans] = useState<any>(null)
   const now = new Date()

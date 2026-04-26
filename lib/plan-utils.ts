@@ -2,8 +2,8 @@
 // Este ficheiro NÃO IMPORTA o Prisma e pode ser usado em componentes de cliente.
 
 export const PLAN_LIMITS = {
-  free: {
-    name: "Gratuito",
+  minimo: {
+    name: "Mínimo",
     price: 0,
     appointments_per_month: 50,
     staff: 1,
@@ -15,6 +15,8 @@ export const PLAN_LIMITS = {
     reports: false,
     commissions: false,
     professional_export: false,
+    amenities: false,
+    service_section: false,
   },
   basic: {
     name: "Basic",
@@ -29,6 +31,8 @@ export const PLAN_LIMITS = {
     reports: true,
     commissions: true,
     professional_export: true,
+    amenities: true,
+    service_section: true,
   },
   premium: {
     name: "Premium",
@@ -43,6 +47,8 @@ export const PLAN_LIMITS = {
     reports: true,
     commissions: true,
     professional_export: true,
+    amenities: true,
+    service_section: true,
   },
 }
 
@@ -53,10 +59,10 @@ export type PlanKey = keyof typeof PLAN_LIMITS
  * Se o status for 'trial', ignoramos o plano base e entregamos limites 'premium'
  */
 export function getPlanLimits(plan: string, dynamicPlans?: any, status?: string) {
-  // Regra de Ouro da NAPP: Trial = Premium
-  const actualPlan = status === "trial" ? "premium" : (plan?.toLowerCase() || "free")
+  const actualPlan = (plan?.toLowerCase() || "minimo")
   const key = actualPlan as PlanKey
-  const base = PLAN_LIMITS[key] || PLAN_LIMITS.free
+  const base = PLAN_LIMITS[key] || PLAN_LIMITS.minimo
+
   
   if (dynamicPlans && dynamicPlans[key]) {
      return { ...base, ...dynamicPlans[key] }
@@ -64,7 +70,7 @@ export function getPlanLimits(plan: string, dynamicPlans?: any, status?: string)
   return base
 }
 
-export function isFeatureAllowed(plan: string, feature: keyof typeof PLAN_LIMITS.free, dynamicPlans?: any, status?: string): boolean {
+export function isFeatureAllowed(plan: string, feature: keyof typeof PLAN_LIMITS.minimo, dynamicPlans?: any, status?: string): boolean {
   const limits = getPlanLimits(plan, dynamicPlans, status)
   const val = (limits as any)[feature]
   if (typeof val === "boolean") return val

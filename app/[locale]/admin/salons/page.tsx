@@ -106,7 +106,7 @@ export default function AdminSalonsPage() {
               <TableRow className="border-none">
                 <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest">Salão</TableHead>
                 <TableHead className="px-8 py-5 text-[10px] font-black uppercase tracking-widest text-muted-foreground whitespace-nowrap">Plan & Revenue</TableHead>
-                <TableHead className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Trial</TableHead>
+
                 <TableHead className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Estado</TableHead>
                 <TableHead className="px-6 py-5 text-left text-[10px] font-black uppercase tracking-widest text-muted-foreground">Stats</TableHead>
                 <TableHead className="px-8 py-5 text-right"></TableHead>
@@ -153,49 +153,18 @@ export default function AdminSalonsPage() {
                        </div>
                     </TableCell>
                     
-                    <TableCell className="px-6 py-6">
-                       {salon.plan !== 'free' ? (
-                          <div className="flex items-center gap-2 opacity-30 select-none">
-                             <ShieldCheck className="h-4 w-4" />
-                             <span className="text-[10px] font-black uppercase tracking-widest">Plano Pago</span>
-                          </div>
-                       ) : salon.trial_ends_at ? (() => {
-                          const endDate = new Date(salon.trial_ends_at)
-                          const today = new Date()
-                          const expired = isAfter(today, endDate)
-                          const daysLeft = differenceInDays(endDate, today)
-                          
-                          return (
-                             <div className="space-y-1">
-                                <div className={cn(
-                                   "flex items-center gap-1.5 text-[11px] font-black uppercase tracking-tighter",
-                                   expired ? "text-destructive" : daysLeft <= 7 ? "text-amber-600" : "text-green-600"
-                                )}>
-                                   {expired ? <AlertTriangle className="h-3 w-3 animate-pulse" /> : <Clock className="h-3 w-3" />}
-                                   {expired ? "EXPIRADO" : `${daysLeft} dias restam`}
-                                </div>
-                                <div className="text-[9px] text-muted-foreground font-mono opacity-60">
-                                   Fim: {new Date(salon.trial_ends_at).toLocaleDateString()}
-                                </div>
-                             </div>
-                          )
-                       })() : (
-                          <span className="text-[10px] text-muted-foreground italic">Sem trial activo</span>
-                       )}
-                    </TableCell>
+
                     <td className="px-6 py-6">
                        <DropdownMenu>
                            <DropdownMenuTrigger asChild>
                               <Button variant="outline" className={cn(
                                  "h-8 rounded-full px-4 gap-2 text-[10px] font-black uppercase tracking-widest shadow-sm transition-all",
                                  salon.status === 'active' ? "bg-green-50 text-green-700 border-green-200 hover:bg-green-100" : 
-                                 salon.status === 'trial' ? "bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100" :
                                  "bg-destructive/10 text-destructive border-destructive/20 hover:bg-destructive/20"
                               )}>
                                  <div className={cn(
                                     "h-1.5 w-1.5 rounded-full",
                                     salon.status === 'active' ? "bg-green-500 animate-pulse" :
-                                    salon.status === 'trial' ? "bg-blue-500 animate-pulse" :
                                     "bg-destructive"
                                  )} />
                                  {salon.status}
@@ -206,12 +175,11 @@ export default function AdminSalonsPage() {
                              <DropdownMenuSeparator />
                              <DropdownMenuItem onClick={() => handleUpdate(salon.id, { status: "active" })} className="font-bold text-green-700 focus:bg-green-50">Marcar como Ativo</DropdownMenuItem>
                              <DropdownMenuItem onClick={() => handleUpdate(salon.id, { status: "suspended" })} className="font-bold text-destructive focus:bg-destructive/5">Suspender Acesso</DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => handleUpdate(salon.id, { status: "trial" })} className="font-bold opacity-70">Período de Experiência</DropdownMenuItem>
                              <DropdownMenuSeparator />
                              <DropdownMenuLabel className="text-[10px] uppercase font-black tracking-tighter opacity-50">Mudar Plano</DropdownMenuLabel>
                              <DropdownMenuItem onClick={() => handleUpdate(salon.id, { plan: "premium" })} className="font-bold flex items-center gap-2"><Zap className="h-3 w-3 text-amber-500 fill-amber-500" /> Premium</DropdownMenuItem>
                              <DropdownMenuItem onClick={() => handleUpdate(salon.id, { plan: "basic" })} className="font-bold flex items-center gap-2"><Users className="h-3 w-3 text-blue-500" /> Basic</DropdownMenuItem>
-                             <DropdownMenuItem onClick={() => handleUpdate(salon.id, { plan: "free" })} className="font-bold opacity-70 text-[10px]">Plano Gratuito</DropdownMenuItem>
+                             <DropdownMenuItem onClick={() => handleUpdate(salon.id, { plan: "minimo" })} className="font-bold opacity-70 text-[10px]">Plano Mínimo</DropdownMenuItem>
                           </DropdownMenuContent>
                        </DropdownMenu>
                     </td>

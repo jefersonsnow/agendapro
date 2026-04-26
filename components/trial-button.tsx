@@ -6,9 +6,10 @@ import { TrialRegistrationModal } from "./trial-registration-modal"
 
 interface TrialButtonProps extends ButtonProps {
   children: React.ReactNode
+  plan?: string
 }
 
-export function TrialButton({ children, ...props }: TrialButtonProps) {
+export function TrialButton({ children, plan = "minimo", ...props }: TrialButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -19,6 +20,7 @@ export function TrialButton({ children, ...props }: TrialButtonProps) {
       <TrialRegistrationModal 
         isOpen={isOpen} 
         onClose={() => setIsOpen(false)} 
+        plan={plan}
       />
     </>
   )

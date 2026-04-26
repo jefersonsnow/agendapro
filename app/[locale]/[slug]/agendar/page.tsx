@@ -421,32 +421,54 @@ export default function BookingPage({
       <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
         <h2 className="text-2xl font-bold mb-2">{t("salonNotFound")}</h2>
 
-        <p className="text-muted-foreground">
+        <p className="opacity-60">
           {t("salonNotFoundDesc")}
         </p>
       </div>
     )
   }
 
+  const themes: Record<string, any> = {
+    default: { bg: "bg-background", primary: "bg-primary text-white", text: "text-foreground", card: "bg-card border-muted/20", accent: "text-primary", badge: "bg-primary/10 text-primary", button: "rounded-full" },
+    dark: { bg: "bg-black text-white", primary: "bg-orange-500 text-black", text: "text-white", card: "bg-[#111111] border-neutral-800", accent: "text-orange-500", badge: "bg-orange-500/10 text-orange-500", button: "rounded-xl" },
+    minimal: { bg: "bg-white text-black", primary: "bg-black text-white", text: "text-black", card: "bg-white border-gray-100", accent: "text-black", badge: "bg-gray-100 text-black", button: "rounded-none" },
+    retro: { bg: "bg-[#fdf8f4] text-[#4a3427]", primary: "bg-[#8b4513] text-white", text: "text-[#4a3427]", card: "bg-white/60 border-[#8b4513]/20", accent: "text-[#8b4513]", badge: "bg-[#8b4513]/10 text-[#8b4513]", button: "rounded-none font-serif italic" },
+    "feminine-modern": { bg: "bg-[#fffafa] text-[#5d4037]", primary: "bg-rose-400 text-white", text: "text-[#5d4037]", card: "bg-white border-rose-50", accent: "text-rose-500", badge: "bg-rose-50 text-rose-600", button: "rounded-3xl" },
+    luxury: { bg: "bg-[#050505] text-white", primary: "bg-gradient-to-r from-stone-400 to-stone-100 text-black", text: "text-white", card: "bg-[#0f0f0f] border-stone-800", accent: "text-stone-200", badge: "bg-stone-900 text-stone-100 border border-stone-800", button: "rounded-none uppercase tracking-[0.3em] font-black" },
+    safira: { bg: "bg-[#f0f4f8] text-[#102a43]", primary: "bg-[#243b53] text-white", text: "text-[#102a43]", card: "bg-white border-blue-100", accent: "text-[#334e68]", badge: "bg-blue-100 text-blue-900", button: "rounded-2xl" },
+    imperial: { bg: "bg-[#f5f3f7] text-[#2d1b3d]", primary: "bg-[#4a1a4c] text-white", text: "text-[#2d1b3d]", card: "bg-white border-purple-100", accent: "text-[#702459]", badge: "bg-purple-100 text-purple-900", button: "rounded-xl border-b-4 border-[#2d1b3d] active:border-b-0" },
+    oceano: { bg: "bg-[#f0fdfa] text-[#134e4a]", primary: "bg-[#0d9488] text-white", text: "text-[#134e4a]", card: "bg-white border-teal-100", accent: "text-[#0f766e]", badge: "bg-teal-100 text-teal-900", button: "rounded-full" },
+    cyber: { bg: "bg-[#0a0a0f] text-white", primary: "bg-[#00f2ff] text-black shadow-[0_0_20px_rgba(0,242,255,0.5)]", text: "text-white", card: "bg-[#15151e] border-[#00f2ff]/20", accent: "text-[#ff00ea]", badge: "bg-[#ff00ea]/10 text-[#ff00ea] border border-[#ff00ea]/30", button: "rounded-none uppercase italic font-black" },
+    forest: { bg: "bg-[#f7fcf5] text-[#1a2e1a]", primary: "bg-[#2d4d2d] text-white", text: "text-[#1a2e1a]", card: "bg-white border-green-100", accent: "text-[#1a2e1a]", badge: "bg-green-100 text-green-900", button: "rounded-lg" },
+    sunset: { bg: "bg-[#fff7ed] text-[#7c2d12]", primary: "bg-gradient-to-r from-orange-500 to-rose-500 text-white", text: "text-[#7c2d12]", card: "bg-white/80 backdrop-blur border-orange-100 shadow-xl", accent: "text-rose-600", badge: "bg-orange-100 text-orange-900", button: "rounded-[2rem]" },
+    arctic: { bg: "bg-slate-50 text-slate-900", primary: "bg-slate-900 text-white", text: "text-slate-900", card: "bg-white border-slate-200", accent: "text-blue-600", badge: "bg-blue-50 text-blue-700", button: "rounded-sm" },
+    onyx: { bg: "bg-[#121212] text-[#e0e0e0]", primary: "bg-[#e0e0e0] text-black", text: "text-[#e0e0e0]", card: "bg-[#1e1e1e] border-neutral-800 shadow-2xl", accent: "text-white", badge: "bg-neutral-800 text-white", button: "rounded-none font-bold tracking-tighter" },
+    lavender: { bg: "bg-[#f9f5ff] text-[#42307d]", primary: "bg-[#7f56d9] text-white", text: "text-[#42307d]", card: "bg-white border-purple-100 shadow-lg shadow-purple-500/5", accent: "text-[#6941c6]", badge: "bg-[#f4ebff] text-[#6941c6]", button: "rounded-xl" },
+    emerald: { bg: "bg-[#f0fdf4] text-[#064e3b]", primary: "bg-[#059669] text-white", text: "text-[#064e3b]", card: "bg-white border-emerald-100 shadow-[0_10px_25px_rgba(5,150,105,0.1)]", accent: "text-[#047857]", badge: "bg-emerald-100 text-emerald-900", button: "rounded-2xl" }
+  }
+
+  const salonTheme = salon?.settings?.theme || "default"
+  const themeStyles = themes[salonTheme] || themes.default
+
   if (bookingComplete) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center bg-muted/30 p-4">
-        <div className="bg-card rounded-2xl p-8 max-w-md w-full text-center shadow-lg">
-          <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Check className="h-8 w-8 text-green-600" />
+      <div className={cn("min-h-screen flex flex-col items-center justify-center p-4", themeStyles.bg)}>
+        <div className={cn("rounded-2xl p-8 max-w-md w-full text-center shadow-lg border", themeStyles.card)}>
+          <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4", themeStyles.badge)}>
+            <Check className="h-8 w-8" />
           </div>
           <h2 className="text-2xl font-bold mb-2">{t("bookingConfirmed")}</h2>
 
-          <p className="text-muted-foreground mb-6">
+          <p className="opacity-60 mb-6">
             {t("bookingSuccessDesc")}
           </p>
           <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2 mb-6 text-sm">
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Serviço:</span>
+              <span className="opacity-60">Serviço:</span>
               <span className="font-medium">{selectedService?.name}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Data:</span>
+              <span className="opacity-60">Data:</span>
               <span className="font-medium">
                 {selectedDate?.toLocaleDateString("pt-PT", {
                   weekday: "long",
@@ -456,11 +478,11 @@ export default function BookingPage({
               </span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Hora:</span>
+              <span className="opacity-60">Hora:</span>
               <span className="font-medium">{selectedTime}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-muted-foreground">Profissional:</span>
+              <span className="opacity-60">Profissional:</span>
               <span className="font-medium">{selectedStaff?.name}</span>
             </div>
           </div>
@@ -479,7 +501,7 @@ export default function BookingPage({
             </Button>
           )}
           <Button
-            className="w-full"
+            className={cn("w-full h-12 font-bold", themeStyles.primary, themeStyles.button)}
             onClick={() => {
               window.location.href = `/${slug}`
             }}
@@ -492,21 +514,21 @@ export default function BookingPage({
   }
 
   return (
-    <div className="min-h-screen bg-muted/30">
-      <header className="bg-card border-b sticky top-0 z-10">
+    <div className={cn("min-h-screen", themeStyles.bg, themeStyles.text)}>
+      <header className={cn("border-b sticky top-0 z-10", themeStyles.card, "bg-inherit/90 backdrop-blur-xl")}>
         <div className="max-w-2xl mx-auto px-4 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="icon" onClick={goBack}>
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3 flex-1">
-              <div className="h-10 w-10 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold uppercase">
+              <div className={cn("h-10 w-10 flex items-center justify-center font-bold uppercase", themeStyles.primary, themeStyles.button)}>
                 {salon?.name.charAt(0)}
               </div>
               <div>
                 <h2 className="font-semibold">{salon?.name}</h2>
 
-                <p className="text-sm text-muted-foreground">{t("newBooking")}</p>
+                <p className="text-sm opacity-60">{t("newBooking")}</p>
               </div>
             </div>
           </div>
@@ -524,7 +546,7 @@ export default function BookingPage({
                     ["service", "staff", "datetime", "info", "confirm"].indexOf(
                       step
                     ) >= index
-                      ? "bg-primary"
+                      ? themeStyles.primary.split(" ")[0]
                       : "bg-muted"
                   )}
                 />
@@ -539,12 +561,12 @@ export default function BookingPage({
           <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 duration-300">
             <div>
               <h2 className="text-xl font-semibold mb-1">{t("stepServiceTitle")}</h2>
-              <p className="text-muted-foreground">{t("stepServiceDesc")}</p>
+              <p className="opacity-70">{t("stepServiceDesc")}</p>
             </div>
 
             {Object.entries(groupedServices).map(([category, categoryServices]) => (
               <div key={category}>
-                <h3 className="font-medium text-muted-foreground mb-3 text-sm uppercase tracking-wider">
+                <h3 className="font-medium opacity-60 mb-3 text-sm uppercase tracking-wider">
                   {category}
                 </h3>
                 <div className="space-y-2">
@@ -552,8 +574,10 @@ export default function BookingPage({
                     <Card
                       key={service.id}
                       className={cn(
-                        "cursor-pointer transition-all hover:border-primary/50 overflow-hidden",
-                        selectedService?.id === service.id && "border-primary ring-2 ring-primary/20"
+                        "cursor-pointer transition-all overflow-hidden",
+                        themeStyles.card,
+                        themeStyles.text,
+                        selectedService?.id === service.id ? themeStyles.primary : "hover:opacity-80"
                       )}
                       onClick={() => {
                         setSelectedService(service)
@@ -577,15 +601,15 @@ export default function BookingPage({
                         <div className="flex-1">
                           <h4 className="font-medium">{service.name}</h4>
                           {service.description && (
-                            <p className="text-sm text-muted-foreground line-clamp-1">{service.description}</p>
+                            <p className="text-sm opacity-70 line-clamp-1">{service.description}</p>
                           )}
-                          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+                          <div className="flex items-center gap-3 mt-1 text-xs opacity-60">
                             <span className="flex items-center gap-1">
                               <Clock className="h-3 w-3" /> {service.duration_minutes} min
                             </span>
                           </div>
                         </div>
-                        <p className="text-lg font-bold text-primary ml-4">
+                        <p className={cn("text-lg font-bold ml-4", selectedService?.id === service.id ? "text-inherit" : themeStyles.accent)}>
                           {Number(service.price).toFixed(2)}€
                         </p>
                       </CardContent>
@@ -601,7 +625,7 @@ export default function BookingPage({
           <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
             <div>
               <h2 className="text-xl font-semibold mb-1">{t("stepStaffTitle")}</h2>
-              <p className="text-muted-foreground">{t("stepStaffDesc")}</p>
+              <p className="opacity-70">{t("stepStaffDesc")}</p>
             </div>
 
             <div className="grid gap-3">
@@ -609,8 +633,10 @@ export default function BookingPage({
                 <Card
                   key={member.id}
                   className={cn(
-                    "cursor-pointer transition-all hover:border-primary/50",
-                    selectedStaff?.id === member.id && "border-primary ring-2 ring-primary/20"
+                    "cursor-pointer transition-all",
+                    themeStyles.card,
+                    themeStyles.text,
+                    selectedStaff?.id === member.id ? themeStyles.primary : "hover:opacity-80"
                   )}
                   onClick={() => {
                     setSelectedStaff(member)
@@ -619,14 +645,14 @@ export default function BookingPage({
                 >
                   <CardContent className="p-4 flex items-center gap-4">
                     <div
-                      className="h-14 w-14 rounded-full flex items-center justify-center text-white text-lg font-bold shadow-inner"
+                      className={cn("h-14 w-14 flex items-center justify-center text-white text-lg font-bold shadow-inner", themeStyles.button)}
                       style={{ backgroundColor: member.color || "#ccc" }}
                     >
                       {member.name.charAt(0)}
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg">{member.name}</h4>
-                      <p className="text-sm text-muted-foreground">{t("team")} {salon?.name}</p>
+                      <p className="text-sm opacity-70">{t("team")} {salon?.name}</p>
                     </div>
                   </CardContent>
                 </Card>
@@ -639,12 +665,12 @@ export default function BookingPage({
           <div className="space-y-6 animate-in fade-in slide-in-from-right-2 duration-300">
             <div>
               <h2 className="text-xl font-semibold mb-1">{t("stepDateTitle")}</h2>
-              <p className="text-muted-foreground">{t("stepDateDesc")}</p>
+              <p className="opacity-70">{t("stepDateDesc")}</p>
             </div>
 
             <div>
               <h3 className="font-medium mb-3 flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-primary" /> {t("selectDay")}
+                <Calendar className={cn("h-4 w-4", themeStyles.accent)} /> {t("selectDay")}
               </h3>
               <div className="flex gap-2 overflow-x-auto pb-4 no-scrollbar">
                 {getAvailableDates().map((date) => {
@@ -653,8 +679,9 @@ export default function BookingPage({
                     <button
                       key={date.toISOString()}
                       className={cn(
-                        "flex-shrink-0 w-16 py-3 rounded-xl border text-center transition-all shadow-sm",
-                        isSelected ? "border-primary bg-primary text-white scale-105" : "border-border bg-card hover:border-primary/50"
+                        "flex-shrink-0 w-16 py-3 border text-center transition-all shadow-sm",
+                        themeStyles.button,
+                        isSelected ? themeStyles.primary : cn(themeStyles.card, "hover:opacity-80")
                       )}
                       onClick={() => setSelectedDate(date)}
                     >
@@ -671,12 +698,12 @@ export default function BookingPage({
             {selectedDate && (
               <div className="animate-in fade-in duration-500">
                 <h3 className="font-medium mb-3 flex items-center gap-2">
-                  <Clock className="h-4 w-4 text-primary" /> {t("availableTimes")}
+                  <Clock className={cn("h-4 w-4", themeStyles.accent)} /> {t("availableTimes")}
                 </h3>
                 {fetchingSlots ? (
                   <div className="flex flex-col items-center justify-center py-12 gap-3">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
-                    <span className="text-sm text-muted-foreground">{t("checkingAgenda")}</span>
+                    <span className="text-sm opacity-70">{t("checkingAgenda")}</span>
                   </div>
                 ) : (
                   <div className="grid grid-cols-4 gap-2">
@@ -684,8 +711,9 @@ export default function BookingPage({
                       <button
                         key={time}
                         className={cn(
-                          "py-3 rounded-lg border text-sm font-semibold transition-all shadow-sm",
-                          selectedTime === time ? "border-primary bg-primary text-white" : "border-border bg-card hover:border-primary/50"
+                          "py-3 border text-sm font-semibold transition-all shadow-sm",
+                          themeStyles.button,
+                          selectedTime === time ? themeStyles.primary : cn(themeStyles.card, "hover:opacity-80")
                         )}
                         onClick={() => {
                           setSelectedTime(time)
@@ -707,7 +735,7 @@ export default function BookingPage({
                     ))}
                     {getAvailableTimes().length === 0 && (
                       <div className="col-span-full py-12 text-center bg-muted/50 rounded-2xl border-2 border-dashed">
-                        <p className="text-muted-foreground text-sm">{t("noTimes")}</p>
+                        <p className="opacity-70 text-sm">{t("noTimes")}</p>
                       </div>
                     )}
                   </div>
@@ -723,55 +751,55 @@ export default function BookingPage({
               <h2 className="text-xl font-semibold mb-1">
                  {infoStepMode === "guest" ? t("yourDetails") : t("welcomeBack")}
               </h2>
-              <p className="text-muted-foreground">
+              <p className="opacity-70">
                  {infoStepMode === "guest" ? t("identifyBooking") : t("enterPassword")}
               </p>
             </div>
 
-            <Card className="border-2">
+            <Card className={cn("border-2", themeStyles.card, themeStyles.text)}>
               <CardContent className="p-6 space-y-5">
                 {infoStepMode === "guest" ? (
                    <>
                       <div className="space-y-2">
-                        <Label htmlFor="name" className="text-xs uppercase font-bold text-muted-foreground">{t("fullName")}</Label>
+                        <Label htmlFor="name" className="text-xs uppercase font-bold opacity-60">{t("fullName")}</Label>
                         <Input
                           id="name"
                           value={clientInfo.name}
                           onChange={(e) => setClientInfo({ ...clientInfo, name: e.target.value })}
                           placeholder="Ex: João Silva"
-                          className="h-12 border-2 focus-visible:ring-primary"
+                          className={cn("h-12 border-2", themeStyles.card)}
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="phone" className="text-xs uppercase font-bold text-muted-foreground">{t("phone")}</Label>
+                        <Label htmlFor="phone" className="text-xs uppercase font-bold opacity-60">{t("phone")}</Label>
                         <Input
                           id="phone"
                           value={clientInfo.phone}
                           onChange={(e) => setClientInfo({ ...clientInfo, phone: e.target.value })}
                           placeholder="9xx xxx xxx"
-                          className="h-12 border-2 focus-visible:ring-primary"
+                          className={cn("h-12 border-2", themeStyles.card)}
                         />
                       </div>
                    </>
                 ) : (
                    <div className="space-y-3">
-                      <div className="bg-primary/5 p-4 rounded-xl border border-primary/20 flex flex-col items-center">
+                      <div className={cn("p-4 border flex flex-col items-center", themeStyles.badge, themeStyles.button)}>
                          <p className="font-medium text-lg">{clientInfo.name}</p>
-                         <p className="text-sm opacity-60 text-muted-foreground">{clientInfo.phone}</p>
+                         <p className="text-sm opacity-60 opacity-60">{clientInfo.phone}</p>
                       </div>
                       <div className="space-y-2 pt-2">
-                         <Label htmlFor="password" className="text-xs uppercase font-bold text-muted-foreground">{t("password")}</Label>
+                         <Label htmlFor="password" className="text-xs uppercase font-bold opacity-60">{t("password")}</Label>
                          <Input
                            id="password"
                            type="password"
                            value={passwordInput}
                            onChange={(e) => setPasswordInput(e.target.value)}
-                           className="h-12 border-2 focus-visible:ring-primary"
+                           className={cn("h-12 border-2", themeStyles.card)}
                            autoFocus
                          />
                          {authError && <p className="text-red-500 text-sm font-medium pt-1">{authError}</p>}
                       </div>
-                      <Button variant="link" className="px-0 pt-0 text-muted-foreground" onClick={() => { setInfoStepMode("guest"); setPasswordInput(""); setAuthError("") }}>
+                      <Button variant="link" className="px-0 pt-0 opacity-60" onClick={() => { setInfoStepMode("guest"); setPasswordInput(""); setAuthError("") }}>
                          {t("useOtherContact")}
                       </Button>
                    </div>
@@ -780,7 +808,7 @@ export default function BookingPage({
             </Card>
 
             <Button
-              className="w-full h-14 text-lg font-bold rounded-xl shadow-lg"
+              className={cn("w-full h-14 text-lg font-bold shadow-lg", themeStyles.primary, themeStyles.button)}
               disabled={infoStepMode === "guest" ? (!clientInfo.name || !clientInfo.phone) : (!passwordInput)}
               onClick={handleInfoNext}
             >
@@ -793,28 +821,28 @@ export default function BookingPage({
           <div className="space-y-6 animate-in fade-in zoom-in-95 duration-300">
             <div>
               <h2 className="text-xl font-semibold mb-1">{t("confirmBooking")}</h2>
-              <p className="text-muted-foreground">{t("allSet")}</p>
+              <p className="opacity-70">{t("allSet")}</p>
             </div>
 
-            <Card className="border-2 border-primary/20 bg-primary/5 overflow-hidden">
-               <div className="bg-primary p-4 text-white text-center">
+            <Card className={cn("border-2 overflow-hidden", themeStyles.card, themeStyles.text)}>
+               <div className={cn("p-4 text-white text-center", themeStyles.primary)}>
                   <p className="text-xs uppercase font-bold opacity-80">{t("totalToPay")}</p>
                   <p className="text-3xl font-black">{Number(selectedService?.price).toFixed(2)}€</p>
                </div>
               <CardContent className="p-6 space-y-4">
                 <div className="space-y-3">
                   <div className="flex justify-between items-center text-sm border-b pb-2 border-dashed border-primary/20">
-                    <span className="text-muted-foreground font-medium">{t("service")}</span>
-                    <span className="font-bold text-primary text-right">{selectedService?.name}</span>
+                    <span className="opacity-60 font-medium">{t("service")}</span>
+                    <span className={cn("font-bold text-right", themeStyles.accent)}>{selectedService?.name}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm border-b pb-2 border-dashed border-primary/20">
-                    <span className="text-muted-foreground font-medium">{t("date")}</span>
+                    <span className="opacity-60 font-medium">{t("date")}</span>
                     <span className="font-bold text-right">
                       {selectedDate?.toLocaleDateString("pt-PT", { day: "numeric", month: "long" })} às {selectedTime}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
-                    <span className="text-muted-foreground font-medium">{t("team")}</span>
+                    <span className="opacity-60 font-medium">{t("team")}</span>
                     <span className="font-bold text-right">{selectedStaff?.name}</span>
                   </div>
                 </div>
@@ -822,7 +850,7 @@ export default function BookingPage({
             </Card>
 
             <Button
-              className="w-full h-16 text-xl font-black rounded-2xl shadow-xl hover:scale-[1.02] transition-transform"
+              className={cn("w-full h-16 text-xl font-black shadow-xl hover:scale-[1.02] transition-transform", themeStyles.primary, themeStyles.button)}
               onClick={handleSubmit}
               disabled={submitting}
             >
@@ -833,7 +861,7 @@ export default function BookingPage({
       </main>
 
       <footer className="py-8 text-center bg-transparent border-t mt-auto">
-          <p className="text-xs text-muted-foreground font-medium flex items-center justify-center gap-1 opacity-60">
+          <p className="text-xs opacity-60 font-medium flex items-center justify-center gap-1 opacity-60">
             {t("techProvider")} <Check className="h-3 w-3" />
           </p>
       </footer>

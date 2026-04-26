@@ -97,7 +97,7 @@ export async function getAllSalons() {
     },
     _count: { appointments: Number(app_count), clients: Number(cli_count) },
     total_revenue: Number(revenue || 0),
-    plan: s.plan || "free",
+    plan: s.plan || "minimo",
     status: s.status || "active"
   }))
 

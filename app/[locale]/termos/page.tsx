@@ -67,7 +67,7 @@ export default function TermsPage() {
                  Planos e Pagamentos
               </h2>
               <p>
-                 O AgendarPro opera sob um modelo de subscrição mensal ou anual. Os preços e limites de cada plano (Free, Basic, Premium) estão descritos na página principal. O não pagamento da subscrição resultará na suspensão do acesso aos dados até que a situação seja regularizada.
+                 O AgendarPro opera sob um modelo de subscrição mensal ou anual. Os preços e limites de cada plano (Mínimo, Basic, Premium) estão descritos na página principal. O não pagamento da subscrição resultará na suspensão do acesso aos dados até que a situação seja regularizada.
               </p>
            </section>
 

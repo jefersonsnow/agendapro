@@ -13,7 +13,7 @@ import { Globe, ShieldCheck, Zap, Copy, Save, Loader2, Sparkles, Megaphone, Cred
 export function SystemSettings() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
-  const [activePlanTab, setActivePlanTab] = useState("free")
+  const [activePlanTab, setActivePlanTab] = useState("minimo")
   const [config, setConfig] = useState<any>({
     landing_page: { 
       heroTitle1: "", heroTitle2: "", heroDesc: "",
@@ -21,11 +21,11 @@ export function SystemSettings() {
       plansTitle: "", plansDesc: "",
     },
     plans: {
-       free: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
+       minimo: { price: 0, appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false },
        basic: { price: 19, appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true },
        premium: { price: 39, appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true }
     },
-    stripe_configs: { secretKey: "", publishableKey: "", webhookSecret: "", productBasicId: "", productPremiumId: "" },
+    stripe_configs: { secretKey: "", publishableKey: "", webhookSecret: "", productMinimoId: "", productBasicId: "", productPremiumId: "" },
     kiwify_configs: { webhookSecret: "", productBasicId: "", productPremiumId: "" },
     sales_page_config: { headline: "", subheadline: "", videoUrl: "", timerDate: "", fbPixel: "", googlePixel: "" },
     welcome_email_config: { enableExtraContent: false, extraHtmlContent: "" }
@@ -65,6 +65,7 @@ export function SystemSettings() {
           secretKey: st.secretKey || "",
           publishableKey: st.publishableKey || "",
           webhookSecret: st.webhookSecret || "",
+          productMinimoId: st.productMinimoId || "",
           productBasicId: st.productBasicId || "",
           productPremiumId: st.productPremiumId || ""
         },
@@ -225,7 +226,7 @@ export function SystemSettings() {
                    <div className="space-y-2">
                       <Label className="text-[10px] font-black uppercase tracking-widest text-primary/80">Configuração de Planos SaaS</Label>
                       <div className="bg-muted p-1 rounded-2xl border flex gap-1">
-                         <Button size="sm" variant={activePlanTab === "free" ? "secondary" : "ghost"} className="flex-1 rounded-xl text-[10px] font-black" onClick={() => setActivePlanTab("free")}>FREE</Button>
+                         <Button size="sm" variant={activePlanTab === "minimo" ? "secondary" : "ghost"} className="flex-1 rounded-xl text-[10px] font-black" onClick={() => setActivePlanTab("minimo")}>MÍNIMO</Button>
                          <Button size="sm" variant={activePlanTab === "basic" ? "secondary" : "ghost"} className="flex-1 rounded-xl text-[10px] font-black" onClick={() => setActivePlanTab("basic")}>BASIC</Button>
                          <Button size="sm" variant={activePlanTab === "premium" ? "secondary" : "ghost"} className="flex-1 rounded-xl text-[10px] font-black" onClick={() => setActivePlanTab("premium")}>PREMIUM</Button>
                       </div>
@@ -319,7 +320,39 @@ export function SystemSettings() {
                     </div>
                  </div>
 
-                 <div className="grid grid-cols-2 gap-4 border-t pt-6">
+                 <div className="grid grid-cols-3 gap-4 border-t pt-6">
+                    <div className="space-y-2">
+                        <Label>Price ID (Mínimo)</Label>
+                        <Input 
+                          value={config.stripe_configs?.productMinimoId || ""} 
+                          onChange={(e) => setConfig({...config, stripe_configs: {...config.stripe_configs, productMinimoId: e.target.value}})}
+                          placeholder="price_..."
+                        />
+                        {config.stripe_configs?.productMinimoId?.startsWith('price_') && (
+                           <Button 
+                             size="sm" 
+                             variant="outline" 
+                             className="w-full text-[10px] mt-2 h-7"
+                             onClick={async () => {
+                               const toastId = toast.loading("Gerando link...")
+                               try {
+                                  const { generateStripePaymentLink } = await import('@/lib/actions/stripe')
+                                  const res = await generateStripePaymentLink(config.stripe_configs.productMinimoId)
+                                  if (res.error) throw new Error(res.error)
+                                  if (res.url) {
+                                     navigator.clipboard.writeText(res.url)
+                                     toast.success("Link copiado para a área de transferência!", { id: toastId })
+                                  }
+                               } catch (err: any) {
+                                  toast.error(err.message || "Erro ao gerar link", { id: toastId })
+                               }
+                             }}
+                           >
+                             <Copy className="h-3 w-3 mr-2" />
+                             Gerar Link de Pagamento
+                           </Button>
+                        )}
+                    </div>
                     <div className="space-y-2">
                         <Label>Price ID (Basic)</Label>
                         <Input 

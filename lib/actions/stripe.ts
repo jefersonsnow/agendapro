@@ -7,7 +7,7 @@ import { headers } from "next/headers"
 import { redirect } from "next/navigation"
 import { getGlobalConfigCache } from "@/lib/dal"
 
-export async function createCheckoutSession(planId: "basic" | "premium") {
+export async function createCheckoutSession(planId: "minimo" | "basic" | "premium") {
   try {
     const session = await auth()
     if (!session?.user?.id || !session?.user?.email) {
@@ -26,7 +26,11 @@ export async function createCheckoutSession(planId: "basic" | "premium") {
       : globalConfig.stripe_configs
 
     const secretKey = stripeConfigs.secretKey || process.env.STRIPE_SECRET_KEY
-    const priceId = planId === "basic" ? stripeConfigs.productBasicId : stripeConfigs.productPremiumId
+    const priceId = planId === "basic" 
+      ? stripeConfigs.productBasicId 
+      : planId === "premium" 
+        ? stripeConfigs.productPremiumId 
+        : stripeConfigs.productMinimoId
 
     if (!secretKey) {
       return { error: "Secret Key da Stripe não encontrada no painel administrativo." }

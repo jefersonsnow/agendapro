@@ -73,20 +73,20 @@ export default function TrialStatusBanner({ trialEndsAt, plan }: TrialStatusBann
 
   // Mostrar aviso de trial sempre
   return (
-    <div className="mb-6 rounded-2xl border border-primary/20 bg-primary/5 p-5 flex flex-col sm:flex-row items-center gap-5 shadow-sm border-dashed group transition-all hover:bg-primary/[0.08]">
-      <div className="h-12 w-12 rounded-2xl bg-primary/20 flex items-center justify-center shrink-0 border border-primary/30 relative">
-        <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-primary opacity-20"></span>
+    <div className="mb-6 rounded-2xl border border-primary/30 bg-primary/10 backdrop-blur-md p-5 flex flex-col sm:flex-row items-center gap-5 shadow-xl border-dashed group transition-all hover:bg-primary/[0.15]">
+      <div className="h-12 w-12 rounded-2xl bg-primary/30 flex items-center justify-center shrink-0 border border-primary/40 relative shadow-lg shadow-primary/10">
+        <span className="animate-ping absolute inline-flex h-4 w-4 rounded-full bg-primary opacity-30"></span>
         <Clock className="h-6 w-6 text-primary" />
       </div>
       <div className="flex-1 text-center sm:text-left">
         <h4 className="text-sm font-black text-primary uppercase tracking-tighter italic">Napp — Trial Ativo</h4>
-        <p className="text-sm font-bold text-muted-foreground">
+        <p className="text-sm font-bold text-foreground/80">
           O seu período de teste grátis termina em <span className="text-primary font-black">{daysRemaining} {daysRemaining === 1 ? 'dia' : 'dias'}</span>. 
           <span className="hidden md:inline ml-2 opacity-60 font-medium italic">Aproveite para explorar todas as funcionalidades exclusivas.</span>
         </p>
       </div>
       <Link href="/dashboard/configuracoes/planos" className="w-full sm:w-auto">
-        <Button size="sm" className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-primary/20 transition-all hover:scale-[1.02]">
+        <Button size="sm" className="w-full h-11 rounded-xl bg-primary hover:bg-primary/90 text-white font-black uppercase tracking-widest text-[10px] px-6 shadow-lg shadow-primary/30 transition-all hover:scale-[1.02]">
           Upgrade de Plano <Zap className="ml-2 h-3 w-3" />
         </Button>
       </Link>

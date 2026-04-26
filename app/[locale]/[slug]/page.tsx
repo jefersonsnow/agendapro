@@ -158,7 +158,17 @@ export default function SalonLandingPage({
     minimal: { bg: "bg-white text-black", heroBg: "bg-gray-50", primary: "bg-black text-white", card: "bg-white border-gray-100", accent: "text-black", badge: "bg-gray-100 text-black", button: "rounded-none", footer: "bg-gray-50 border-t" },
     retro: { bg: "bg-[#fdf8f4] text-[#4a3427]", heroBg: "bg-[#8b4513]/5", primary: "bg-[#8b4513] text-white", card: "bg-white/60 border-[#8b4513]/20 shadow-[4px_4px_0px_#8b4513]", accent: "text-[#8b4513]", badge: "bg-[#8b4513]/10 text-[#8b4513]", button: "rounded-none font-serif italic", footer: "bg-[#f4ebe1] border-t-2 border-[#8b4513]/20" },
     "feminine-modern": { bg: "bg-[#fffafa] text-[#5d4037]", heroBg: "bg-rose-50", primary: "bg-rose-400 text-white", card: "bg-white border-rose-50", accent: "text-rose-500", badge: "bg-rose-50 text-rose-600", button: "rounded-3xl", footer: "bg-rose-50/30 border-t-rose-100" },
-    luxury: { bg: "bg-[#050505] text-white", heroBg: "bg-black", primary: "bg-gradient-to-r from-stone-400 to-stone-100 text-black", card: "bg-[#0f0f0f] border-stone-800 shadow-[0_0_50px_rgba(255,255,255,0.02)]", accent: "text-stone-200", badge: "bg-stone-900 text-stone-100 border border-stone-800", button: "rounded-none uppercase tracking-[0.3em] font-black", footer: "bg-black border-t-stone-800" }
+    luxury: { bg: "bg-[#050505] text-white", heroBg: "bg-black", primary: "bg-gradient-to-r from-stone-400 to-stone-100 text-black", card: "bg-[#0f0f0f] border-stone-800 shadow-[0_0_50px_rgba(255,255,255,0.02)]", accent: "text-stone-200", badge: "bg-stone-900 text-stone-100 border border-stone-800", button: "rounded-none uppercase tracking-[0.3em] font-black", footer: "bg-black border-t-stone-800" },
+    safira: { bg: "bg-[#f0f4f8] text-[#102a43]", heroBg: "bg-blue-900/5", primary: "bg-[#243b53] text-white", card: "bg-white border-blue-100 shadow-[0_10px_30px_rgba(16,42,67,0.05)]", accent: "text-[#334e68]", badge: "bg-blue-100 text-blue-900", button: "rounded-2xl shadow-blue-900/20", footer: "bg-[#102a43] text-white border-t" },
+    imperial: { bg: "bg-[#f5f3f7] text-[#2d1b3d]", heroBg: "bg-purple-900/5", primary: "bg-[#4a1a4c] text-white", card: "bg-white border-purple-100 shadow-[0_20px_40px_rgba(74,26,76,0.08)]", accent: "text-[#702459]", badge: "bg-purple-100 text-purple-900", button: "rounded-xl border-b-4 border-[#2d1b3d] active:border-b-0", footer: "bg-[#2d1b3d] text-white border-t" },
+    oceano: { bg: "bg-[#f0fdfa] text-[#134e4a]", heroBg: "bg-teal-500/10", primary: "bg-[#0d9488] text-white", card: "bg-white border-teal-100 shadow-[10px_10px_0px_#ccfbf1]", accent: "text-[#0f766e]", badge: "bg-teal-100 text-teal-900", button: "rounded-full shadow-teal-500/20", footer: "bg-[#134e4a] text-white border-t" },
+    cyber: { bg: "bg-[#0a0a0f] text-white", heroBg: "bg-black", primary: "bg-[#00f2ff] text-black shadow-[0_0_20px_rgba(0,242,255,0.5)]", card: "bg-[#15151e] border-[#00f2ff]/20 shadow-[inset_0_0_20px_rgba(0,242,255,0.05)]", accent: "text-[#ff00ea]", badge: "bg-[#ff00ea]/10 text-[#ff00ea] border border-[#ff00ea]/30", button: "rounded-none uppercase italic font-black", footer: "bg-black border-t-[#00f2ff]/30" },
+    forest: { bg: "bg-[#f7fcf5] text-[#1a2e1a]", heroBg: "bg-green-900/5", primary: "bg-[#2d4d2d] text-white", card: "bg-white border-green-100", accent: "text-[#1a2e1a]", badge: "bg-green-100 text-green-900", button: "rounded-lg", footer: "bg-[#1a2e1a] text-white border-t" },
+    sunset: { bg: "bg-[#fff7ed] text-[#7c2d12]", heroBg: "bg-orange-500/10", primary: "bg-gradient-to-r from-orange-500 to-rose-500 text-white", card: "bg-white/80 backdrop-blur border-orange-100 shadow-xl", accent: "text-rose-600", badge: "bg-orange-100 text-orange-900", button: "rounded-[2rem]", footer: "bg-orange-50 border-t" },
+    arctic: { bg: "bg-slate-50 text-slate-900", heroBg: "bg-blue-500/5", primary: "bg-slate-900 text-white", card: "bg-white border-slate-200 shadow-[0_4px_12px_rgba(0,0,0,0.03)]", accent: "text-blue-600", badge: "bg-blue-50 text-blue-700", button: "rounded-sm", footer: "bg-slate-900 text-white border-t" },
+    onyx: { bg: "bg-[#121212] text-[#e0e0e0]", heroBg: "bg-black", primary: "bg-[#e0e0e0] text-black", card: "bg-[#1e1e1e] border-neutral-800 shadow-2xl", accent: "text-white", badge: "bg-neutral-800 text-white", button: "rounded-none font-bold tracking-tighter", footer: "bg-black border-t-neutral-800" },
+    lavender: { bg: "bg-[#f9f5ff] text-[#42307d]", heroBg: "bg-purple-500/5", primary: "bg-[#7f56d9] text-white", card: "bg-white border-purple-100 shadow-lg shadow-purple-500/5", accent: "text-[#6941c6]", badge: "bg-[#f4ebff] text-[#6941c6]", button: "rounded-xl", footer: "bg-[#f9f5ff] border-t" },
+    emerald: { bg: "bg-[#f0fdf4] text-[#064e3b]", heroBg: "bg-emerald-500/5", primary: "bg-[#059669] text-white", card: "bg-white border-emerald-100 shadow-[0_10px_25px_rgba(5,150,105,0.1)]", accent: "text-[#047857]", badge: "bg-emerald-100 text-emerald-900", button: "rounded-2xl", footer: "bg-[#064e3b] text-white border-t" }
   }
 
   const themeStyles = themes[theme] || themes.default
@@ -396,7 +406,7 @@ export default function SalonLandingPage({
              <div className="space-y-4 text-center md:text-left">
                 <h2 className={cn(
                    "text-3xl sm:text-5xl md:text-7xl font-black uppercase tracking-tighter leading-[0.9] italic",
-                   (theme === "dark" || theme === "luxury") ? "text-white" : "text-foreground"
+                   (theme === "dark" || theme === "luxury" || theme === "cyber" || theme === "onyx") ? "text-white" : "text-foreground"
                 )}>
                    {t("ourArtTitle")}
                 </h2>
@@ -404,7 +414,7 @@ export default function SalonLandingPage({
              </div>
              <p className={cn(
                   "max-w-md font-semibold text-center md:text-left uppercase text-[9px] md:text-xs tracking-[0.15em] leading-relaxed mx-auto md:mx-0",
-                  (theme === "dark" || theme === "luxury") ? "text-white/90 font-bold" : "opacity-60"
+                  (theme === "dark" || theme === "luxury" || theme === "cyber" || theme === "onyx") ? "text-white/90 font-bold" : "opacity-60"
               )}>
                 {(salon.settings as any)?.services_subtitles?.[locale] || t("ourArtSubtitle")}
              </p>
@@ -437,19 +447,19 @@ export default function SalonLandingPage({
                        <div className="flex-1 space-y-2 text-left">
                           <h3 className={cn(
                              "text-xl font-bold uppercase tracking-tight", 
-                             (theme === "luxury" || theme === "dark") ? "text-white" : "text-inherit"
+                             (theme === "luxury" || theme === "dark" || theme === "cyber" || theme === "onyx") ? "text-white" : "text-inherit"
                           )}>
                              {service.name}
                           </h3>
                           <p className={cn(
                              "text-sm line-clamp-2 italic transition-colors",
-                             (theme === "dark" || theme === "luxury") ? "text-white/80" : "opacity-60"
+                             (theme === "dark" || theme === "luxury" || theme === "cyber" || theme === "onyx") ? "text-white/80" : "opacity-60"
                           )}>
                              {service.description || "Técnica avançada para resultados extraordinários."}
                           </p>
                           <div className={cn(
                              "flex items-center gap-4 text-[10px] font-black uppercase tracking-widest pt-1",
-                             (theme === "dark" || theme === "luxury") ? "text-white/60" : "opacity-40"
+                             (theme === "dark" || theme === "luxury" || theme === "cyber" || theme === "onyx") ? "text-white/60" : "opacity-40"
                           )}>
                              <span className="flex items-center gap-1.5"><Clock className="h-3 w-3" /> {service.duration_minutes}m</span>
                           </div>
@@ -459,7 +469,7 @@ export default function SalonLandingPage({
                           <div className="flex items-start">
                              <span className={cn(
                                 "text-3xl font-black tracking-tighter leading-none", 
-                                (theme === "luxury" || theme === "dark") ? "text-white" : "text-inherit"
+                                (theme === "luxury" || theme === "dark" || theme === "cyber" || theme === "onyx") ? "text-white" : "text-inherit"
                              )}>
                                 {Number(service.price).toFixed(2)}
                              </span>
@@ -489,7 +499,7 @@ export default function SalonLandingPage({
                       <div className="w-full mb-6 md:mb-10 overflow-hidden px-2">
                          <h3 className={cn(
                             "text-2xl md:text-4xl font-black uppercase tracking-tighter leading-[0.9] break-words", 
-                            (theme === "luxury" || theme === "dark") ? "text-white" : "text-inherit"
+                            (theme === "luxury" || theme === "dark" || theme === "cyber" || theme === "onyx") ? "text-white" : "text-inherit"
                          )}>
                             {service.name}
                          </h3>
@@ -501,7 +511,7 @@ export default function SalonLandingPage({
                          <div className="flex items-start justify-center">
                             <span className={cn(
                                "text-4xl md:text-7xl font-black tracking-tighter leading-none", 
-                               (theme === "luxury" || theme === "dark") ? "text-white" : "text-inherit"
+                               (theme === "luxury" || theme === "dark" || theme === "cyber" || theme === "onyx") ? "text-white" : "text-inherit"
                             )}>
                                {Number(service.price).toFixed(2)}
                             </span>
@@ -523,7 +533,7 @@ export default function SalonLandingPage({
                       <div className="w-full pt-8 md:pt-10 border-t border-inherit/10 flex flex-col items-center gap-6 md:gap-8">
                          <div className={cn(
                              "flex items-center gap-10 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em]",
-                             (theme === "dark" || theme === "luxury") ? "text-white/60" : "opacity-40"
+                             (theme === "dark" || theme === "luxury" || theme === "cyber" || theme === "onyx") ? "text-white/60" : "opacity-40"
                           )}>
                             <span className="flex items-center gap-2"><Clock className="h-4 w-4" /> {service.duration_minutes}m</span>
                          </div>

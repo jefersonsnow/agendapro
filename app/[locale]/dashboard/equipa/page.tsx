@@ -78,7 +78,7 @@ export default function EquipaPage() {
   const [staff, setStaff] = useState<Staff[]>([])
   const [loading, setLoading] = useState(true)
   const [salonId, setSalonId] = useState<string | null>(null)
-  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "free" })
+  const [planCheck, setPlanCheck] = useState({ allowed: true, limit: -1, current: 0, plan: "minimo" })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [editingStaff, setEditingStaff] = useState<Staff | null>(null)
   const [formData, setFormData] = useState({

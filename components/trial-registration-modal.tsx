@@ -33,7 +33,7 @@ import {
   SelectValue 
 } from "@/components/ui/select"
 import { CheckCircle } from "lucide-react"
-import { signUpFreeTrial } from "@/lib/actions/auth"
+import { signUpWithDetails } from "@/lib/actions/auth"
 
 // NIF Validation for Portugal
 function validatePortugalNIF(nif: string) {
@@ -78,9 +78,10 @@ const EUROPEAN_COUNTRIES = [
 interface TrialRegistrationModalProps {
   isOpen: boolean
   onClose: () => void
+  plan: string
 }
 
-export function TrialRegistrationModal({ isOpen, onClose }: TrialRegistrationModalProps) {
+export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrationModalProps) {
   const t = useTranslations("Modal.trial")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -126,15 +127,22 @@ export function TrialRegistrationModal({ isOpen, onClose }: TrialRegistrationMod
     setIsLoading(true)
     try {
       const fullAddress = `${values.country}, ${values.street}, ${values.number}, ${values.zipCode}`
-      const result = await signUpFreeTrial({
+      const result = await signUpWithDetails({
         ...values,
-        address: fullAddress
+        address: fullAddress,
+        plan
       })
 
-      if (result.success) {
-        setIsSuccess(true)
-      } else {
-        toast.error(t("error"))
+      if (result.success && result.url) {
+        window.location.assign(result.url)
+      } else if (result.error) {
+        if (typeof result.error === 'object') {
+          Object.keys(result.error).forEach((key: any) => {
+             form.setError(key, { message: (result.error as any)[key][0] })
+          })
+        } else {
+          toast.error(result.error)
+        }
       }
     } catch (error: any) {
       toast.error(error.message || t("error"))

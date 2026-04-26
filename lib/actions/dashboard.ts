@@ -96,7 +96,7 @@ export async function upsertClient(id: string | null, data: any) {
 
 
   const salon = await (prisma as any).salon.findUnique({ where: { id: salonId }, select: { plan: true } })
-  const plan = salon?.plan || "free"
+  const plan = salon?.plan || "minimo"
   
   const config = await getGlobalConfigCache()
   const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
@@ -125,7 +125,7 @@ export async function upsertClient(id: string | null, data: any) {
   } else {
     // Validar limite de clientes
     const salon = await (prisma as any).salon.findUnique({ where: { id: salonId }, select: { plan: true, status: true } })
-    const plan = salon?.plan || "free"
+    const plan = salon?.plan || "minimo"
     const status = salon?.status || "active"
     
     const currentCount = await prisma.client.count({ where: { salon_id: salonId } })
@@ -159,7 +159,7 @@ export async function getServices() {
   if (!salonId) return []
 
   const salon = await prisma.salon.findUnique({ where: { id: salonId }, select: { plan: true, status: true } })
-  const plan = salon?.plan || "free"
+  const plan = salon?.plan || "minimo"
   const status = salon?.status || "active"
   
   const config = await getGlobalConfigCache()
@@ -213,7 +213,7 @@ export async function upsertService(id: string | null, data: any) {
      where: { id: salonId },
      select: { id: true, plan: true, status: true }
   })
-  const plan = salon?.plan || "free"
+  const plan = salon?.plan || "minimo"
 
   const config = await getGlobalConfigCache()
   const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
@@ -338,7 +338,7 @@ export async function getStaff() {
   if (!salonId) return []
 
   const salon = await prisma.salon.findUnique({ where: { id: salonId }, select: { plan: true, status: true } })
-  const plan = salon?.plan || "free"
+  const plan = salon?.plan || "minimo"
   const status = salon?.status || "active"
   
   const config = await getGlobalConfigCache()
@@ -398,7 +398,7 @@ export async function upsertStaff(id: string | null, data: any) {
      where: { id: salonId },
      select: { id: true, plan: true, status: true }
   })
-  const plan = salon?.plan || "free"
+  const plan = salon?.plan || "minimo"
 
   const config = await getGlobalConfigCache()
   const dynamicPlans = config?.landing_page ? JSON.parse(config.landing_page).plans : null
@@ -576,14 +576,15 @@ export async function getSalon() {
 
     // Processar dynamic plans
     let dynamicPlans = null
-    if ((config as any)?.[0]?.landing_page) {
+    if (config?.landing_page) {
        try {
-          const lp = JSON.parse((config as any)[0].landing_page)
+          const lp = JSON.parse(config.landing_page)
           dynamicPlans = lp.plans || null
        } catch(e) {
           console.error("Erro parse landing_page config:", e)
        }
     }
+
 
     return JSON.parse(JSON.stringify({
        ...salonData,
@@ -604,7 +605,7 @@ export async function updateSalonSettings(data: any) {
     where: { id: salonId },
     select: { plan: true, status: true }
   })
-  const plan = salonCheck?.plan || "free"
+  const plan = salonCheck?.plan || "minimo"
   const status = salonCheck?.status || "active"
 
   const updateData: any = {
@@ -621,6 +622,7 @@ export async function updateSalonSettings(data: any) {
       : data.settings,
     locale: data.locale,
     timezone: data.timezone,
+    color_palette: data.color_palette || "default",
   }
 
   // Só permite atualizar logo e cover se o plano permitir
@@ -639,13 +641,13 @@ export async function updateSalonSettings(data: any) {
   
   await logAction({ action: "update_salon_settings", entity: "salon", entityId: salonId, salonId })
   
-  revalidatePath("/dashboard/configuracoes")
-  revalidatePath(`/reservar/${salon.slug}`)
+  revalidatePath("/[locale]/[slug]/agendar")
+  revalidatePath("/[locale]/[slug]")
 }
 
 export async function getUserRole() {
   const session = await auth()
-  if (!session?.user?.id) return { role: "professional", name: "", image: null, status: "active", plan: "free", trialEndsAt: null }
+  if (!session?.user?.id) return { role: "professional", name: "", image: null, status: "active", plan: "minimo", trialEndsAt: null }
   
   try {
      // Buscar papel (role), nome e imagem diretamente na BD por ID ou Email
@@ -663,39 +665,23 @@ export async function getUserRole() {
 
      const salonId = await getSalonId()
      let status = "active"
-     let plan = "free"
+     let plan = "minimo"
      let trialEndsAt = null
      let salonSlug = ""
+      let colorPalette = "default"
      
      if (salonId) {
         const salon = await (prisma as any).salon.findUnique({
            where: { id: salonId },
-           select: { status: true, plan: true, trial_ends_at: true, slug: true }
+                       select: { status: true, plan: true, trial_ends_at: true, slug: true, color_palette: true }
         })
         
         status = salon?.status || "active"
-        plan = salon?.plan || "free"
+        plan = salon?.plan || "minimo"
         trialEndsAt = salon?.trial_ends_at
         salonSlug = (salon as any)?.slug || ""
-
-        // VERIFICAÇÃO DE EXPIRAÇÃO DE TRIAL (AUTO-DOWNGRADE)
-        if (status === 'trial' && trialEndsAt && isAfter(new Date(), new Date(trialEndsAt))) {
-           console.log(`Trial expirado para salon ${salonId}. Realizando auto-downgrade para FREE...`)
-           
-           // Realizar downgrade via Raw SQL para saltar lógicas de Prisma Client se necessário
-           await (prisma as any).$executeRawUnsafe(
-              `UPDATE salons SET plan = 'free', status = 'active' WHERE id = $1`,
-              salonId
-           )
-           
-           status = "active"
-           plan = "free"
-        }
-
-        // Regra de Ouro da NAPP: Trial = Premium (se não expirou)
-        if (status === 'trial') {
-           plan = 'premium'
-        }
+         colorPalette = (salon as any)?.color_palette || "default"
+        plan = salon?.plan || "minimo"
      }
 
      const result = { 
@@ -705,7 +691,8 @@ export async function getUserRole() {
        status: status,
        plan: plan,
        trialEndsAt: trialEndsAt,
-       salonSlug: salonSlug
+               salonSlug: salonSlug,
+        colorPalette: colorPalette
      }
 
 
@@ -713,7 +700,7 @@ export async function getUserRole() {
      return result
   } catch (err) {
      console.error("DEBUG: Error in getUserRole:", err)
-     return { role: "professional", name: session.user.name || "", image: session.user.image || null, status: "active", plan: "free", trialEndsAt: null }
+     return { role: "professional", name: session.user.name || "", image: session.user.image || null, status: "active", plan: "minimo", trialEndsAt: null }
   }
 }
 

@@ -173,7 +173,7 @@ export default async function DashboardPage({
                         {baseUrl}/{salon.slug}
                       </span>
                       <div className="flex gap-2">
-                        {isFeatureAllowed(salon.plan || "free", "qr_code", null, salon.status) ? (
+                        {isFeatureAllowed(salon.plan || "minimo", "qr_code", null, salon.status) ? (
                           <QRCodeModal 
                             url={`${baseUrl}/${salon.slug}`} 
                             salonName={salon.name} 

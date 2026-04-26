@@ -30,7 +30,7 @@ export default function HelpSupportPage() {
   const [tickets, setTickets] = useState<any[]>([])
   const [loading, setLoading] = useState(true)
   const [isSubmitting, setIsSubmitting] = useState(false)
-  const [userPlan, setUserPlan] = useState("free")
+  const [userPlan, setUserPlan] = useState("minimo")
   const router = useRouter()
   
   const [formData, setFormData] = useState({
@@ -89,7 +89,7 @@ export default function HelpSupportPage() {
   const faqs = [
     { q: "Como altero o logótipo do meu salão?", a: "Vá a Configurações > Identidade Visual e faça o upload da sua imagem. Recomendamos o formato PNG ou JPG com fundo transparente." },
     { q: "Posso ter mais do que um profissional?", a: "Sim! Dependendo do seu plano (Basic ou Premium), pode gerir vários profissionais na aba Equipa." },
-    { q: "O que acontece quando o período de trial termina?", a: "A sua conta passará automaticamente para o plano Free, a menos que subscreva um dos nossos planos pagos para manter as funcionalidades premium." },
+    { q: "O AgendarPro tem período de experiência?", a: "Não, o AgendarPro funciona num modelo de subscrição direta. Pode começar com o plano Mínimo e fazer upgrade conforme o seu negócio cresce." },
     { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendar.napp.pt/pt/seu-nome). Pode partilhar este link nas suas redes sociais ou via WhatsApp." }
   ]
 
@@ -205,7 +205,7 @@ export default function HelpSupportPage() {
                     <p className="text-sm text-muted-foreground">Envie a sua dúvida ou problema para a nossa equipa técnica.</p>
                  </div>
 
-                 {userPlan === 'free' ? (
+                 {userPlan === 'minimo' ? (
                     <div className="bg-primary/5 p-6 rounded-3xl border border-dashed border-primary/30 text-center space-y-4">
                        <LifeBuoy className="h-8 w-8 text-primary mx-auto opacity-50" />
                        <div className="space-y-1">

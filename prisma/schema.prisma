@@ -24,13 +24,14 @@ model Salon {
   settings         String?       @db.Text
   created_at       DateTime      @default(now())
   updated_at       DateTime      @updatedAt
-  plan             String        @default("free")
+  plan             String        @default("minimo")
   status           String        @default("active")
   locale           String        @default("pt")
   timezone         String        @default("Europe/Lisbon")
   translations     String?
   trial_ends_at    DateTime?
   nif              String?
+  color_palette    String        @default("default")
 
   appointments     Appointment[]
   cash_closings    CashClosing[]
@@ -355,3 +356,17 @@ model SupportTicket {
   @@map("support_tickets")
 }
 
+model PendingRegistration {
+  id             String   @id @default(uuid())
+  email          String
+  password       String
+  name           String
+  salon_name     String
+  address        String?
+  phone          String?
+  nif            String?
+  plan           String
+  created_at     DateTime @default(now())
+  
+  @@map("pending_registrations")
+}
