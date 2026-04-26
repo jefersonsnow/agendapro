@@ -21,7 +21,8 @@ import {
   Play,
   ArrowRight,
   Timer,
-  Star
+  Star,
+  Crown
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getTranslations } from "next-intl/server"
