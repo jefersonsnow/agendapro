@@ -61,7 +61,7 @@ export async function signUpWithDetails(formData: any) {
   const email = rawEmail.toLowerCase()
 
   // 1. Verificar se usuário já existe
-  const existingUser = await prisma.user.findUnique({
+  const existingUser = await prisma.user.findFirst({
     where: { email }
   })
 
