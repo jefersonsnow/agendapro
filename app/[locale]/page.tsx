@@ -148,7 +148,7 @@ export default async function HomePage({
     ]
 
     return (
-      <div className="min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/30">
+      <div className="theme-magenta min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/30">
         {/* Navbar com Banner Promocional */}
         <div className="flex flex-col">
           {isPromoActive && (

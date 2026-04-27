@@ -9,7 +9,7 @@ export default async function ContactPage() {
    const whatsapp = support?.whatsappNumber
 
    return (
-      <div className="min-h-screen bg-background">
+      <div className="theme-magenta min-h-screen bg-background">
          {/* Header Simples */}
          <header className="border-b bg-card h-20 flex items-center">
             <div className="container mx-auto px-4 flex justify-between items-center">

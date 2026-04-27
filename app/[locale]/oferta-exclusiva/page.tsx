@@ -134,7 +134,7 @@ export default async function SalesPage({
   const videoUrl = formatVideoUrl(salesPageConfig.videoUrl)
 
   return (
-    <div className="min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
+    <div className="theme-magenta min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
       {/* HEADER */}
       <header className="py-6 border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-[100]">
          <div className="container mx-auto px-4 flex items-center justify-between">
