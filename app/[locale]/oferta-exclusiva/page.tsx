@@ -22,7 +22,9 @@ import {
   ArrowRight,
   Timer,
   Star,
-  Crown
+  Crown,
+  MessageCircle,
+  Check
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getTranslations } from "next-intl/server"
@@ -137,8 +139,8 @@ export default async function SalesPage({
       <header className="py-6 border-b border-white/5 bg-black/40 backdrop-blur-xl sticky top-0 z-[100]">
          <div className="container mx-auto px-4 flex items-center justify-between">
             <Link href="/" className="flex items-center gap-2 group">
-               <div className="h-10 w-10 rounded-xl bg-gradient-to-br from-primary to-cyan-600 flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
-                  <Scissors className="h-5 w-5 text-white" />
+               <div className="h-10 w-10 rounded-lg overflow-hidden shadow-lg shadow-primary/20 transition-transform group-hover:scale-110">
+                  <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
                </div>
                <span className="font-black text-2xl tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-white to-white/60">AgendarPro</span>
             </Link>
@@ -146,6 +148,16 @@ export default async function SalesPage({
                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary animate-pulse">
                   <div className="h-2 w-2 rounded-full bg-primary" /> Oferta de Lançamento Ativa
                </div>
+               {/* WhatsApp Link */}
+               <a 
+                 href="https://wa.me/351910664744?text=Olá! Estou na página de Oferta Exclusiva e tenho uma dúvida."
+                 target="_blank"
+                 rel="noopener noreferrer"
+                 className="flex items-center justify-center h-10 w-10 rounded-xl bg-green-500 text-white shadow-lg shadow-green-500/20 hover:scale-110 transition-transform relative group"
+               >
+                 <MessageCircle className="h-6 w-6" />
+                 <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-black animate-pulse"></span>
+               </a>
             </div>
          </div>
       </header>
@@ -168,34 +180,38 @@ export default async function SalesPage({
                <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Oferta Exclusiva e Limitada</span>
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 italic animate-in fade-in slide-in-from-bottom-8 duration-1000 transform-gpu backface-hidden">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-white via-white to-white/20">{headline}</span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu inline-block pr-[0.1em]">
+                {headline}
+              </span>
             </h1>
             <p className="text-lg md:text-2xl text-white/60 max-w-3xl mx-auto mb-16 font-medium leading-relaxed animate-in fade-in slide-in-from-bottom-12 duration-1000 delay-200 transform-gpu backface-hidden">
               {subheadline}
             </p>
 
             {/* VSL VIDEO */}
-            <div className="relative group max-w-4xl mx-auto mb-20 animate-in fade-in zoom-in duration-1000">
-              <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-cyan-500/50 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
-              <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-black border border-white/10 shadow-2xl">
-                {videoUrl ? (
-                  <iframe 
-                    src={videoUrl} 
-                    className="w-full h-full absolute inset-0"
-                    allow="autoplay; fullscreen; picture-in-picture"
-                    allowFullScreen
-                  ></iframe>
-                ) : (
-                  <>
-                    <div className="h-24 w-24 rounded-full bg-white text-black flex items-center justify-center shadow-2xl group-hover/video:scale-110 transition-transform duration-500">
-                      <Play className="h-10 w-10 fill-current" />
-                    </div>
-                    <div className="mt-8 flex flex-col items-center gap-2 group/play">
-                      <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
-                    </div>
-                  </>
-                )}
-              </div>
+            <div className="relative group w-full max-w-4xl mx-auto mb-20">
+               <div className="w-full animate-in fade-in duration-1000">
+                  <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-secondary/50 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
+                  <div className="relative w-full h-0 pb-[56.25%] rounded-[2rem] overflow-hidden border-2 border-white/10 shadow-2xl bg-black">
+                    {videoUrl ? (
+                      <iframe 
+                        src={videoUrl} 
+                        className="absolute top-0 left-0 w-full h-full"
+                        allow="autoplay; fullscreen; picture-in-picture"
+                        allowFullScreen
+                      ></iframe>
+                    ) : (
+                      <>
+                        <div className="h-24 w-24 rounded-full bg-white text-black flex items-center justify-center shadow-2xl group-hover/video:scale-110 transition-transform duration-500">
+                          <Play className="h-10 w-10 fill-current" />
+                        </div>
+                        <div className="mt-8 flex flex-col items-center gap-2 group/play">
+                          <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+               </div>
             </div>
 
             <a href="#planos">
@@ -372,7 +388,9 @@ export default async function SalesPage({
       <footer className="py-12 border-t border-white/5 bg-black">
          <div className="container mx-auto px-4 text-center">
             <div className="flex items-center justify-center gap-2 mb-6 opacity-30">
-               <Scissors className="h-4 w-4" />
+               <div className="h-4 w-4 rounded-sm overflow-hidden">
+                  <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
+               </div>
                <span className="font-bold text-sm tracking-tight">AgendarPro</span>
             </div>
             <p className="text-[10px] uppercase font-black tracking-[0.4em] text-white/20">

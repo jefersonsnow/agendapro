@@ -18,7 +18,9 @@ import {
   ChevronRight,
   Scissors,
   Percent,
-  X
+  X,
+  MessageCircle,
+  Timer
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { getTranslations } from "next-intl/server"
@@ -150,7 +152,7 @@ export default async function HomePage({
         {/* Navbar com Banner Promocional */}
         <div className="flex flex-col">
           {isPromoActive && (
-            <div className="bg-gradient-to-r from-primary via-cyan-600 to-primary bg-[length:200%_auto] animate-gradient-x text-white py-2 text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg relative z-[60]">
+            <div className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x text-white py-2 text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg relative z-[60]">
               <div className="container mx-auto px-4 flex items-center justify-center gap-3">
                 <Sparkles className="h-4 w-4 animate-pulse" />
                 <span>{promoText}</span>
@@ -161,15 +163,39 @@ export default async function HomePage({
           <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
               <div className="flex items-center gap-2 group cursor-pointer">
-                <div className="h-9 w-9 rounded-xl bg-gradient-to-br from-primary to-secondary flex items-center justify-center shadow-lg shadow-primary/20 transition-transform group-hover:scale-105">
-                  <Scissors className="h-5 w-5 text-white" />
+                <div className="h-9 w-9 rounded-lg overflow-hidden shadow-lg transition-transform group-hover:scale-105">
+                  <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-bold text-xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
                   AgendarPro
                 </span>
               </div>
+              <nav className="hidden md:flex items-center gap-8 absolute left-1/2 -translate-x-1/2">
+                <Link href="#planos" className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
+                  {t("navPlans") || "Planos"}
+                </Link>
+                <Link href="./contacto" className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
+                  {t("navContact") || "Contacto"}
+                </Link>
+              </nav>
 
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-4">
+                {/* WhatsApp Link */}
+                <a 
+                  href="https://wa.me/351910664744?text=Olá! Gostaria de saber mais sobre o AgendarPro."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center h-10 w-10 rounded-xl bg-green-500 text-white shadow-lg shadow-green-500/20 hover:scale-110 transition-transform relative group"
+                >
+                  <MessageCircle className="h-6 w-6" />
+                  <span className="absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full border-2 border-background animate-pulse"></span>
+                  
+                  {/* Tooltip */}
+                  <div className="absolute top-full mt-3 right-0 bg-slate-900 text-white text-[10px] font-black uppercase tracking-widest px-3 py-1.5 rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap shadow-xl">
+                    Suporte WhatsApp
+                  </div>
+                </a>
+
                 {/* Language Switcher */}
                 <div className="relative group">
                   <button className="flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-primary transition-colors px-3 py-2 rounded-xl hover:bg-primary/5 bg-muted/30 border border-border/50">
@@ -205,8 +231,7 @@ export default async function HomePage({
         </div>
 
         <main className="relative">
-          {/* Hero Section */}
-          <section className="relative pt-20 pb-20 lg:pt-32 lg:pb-32 overflow-hidden">
+          <section id="inicio" className="relative pt-20 pb-20 lg:pt-32 lg:pb-32">
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
             <div className="absolute top-[-10%] left-[-10%] -z-10 w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] opacity-40"></div>
             <div className="absolute bottom-0 right-[-5%] -z-10 w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[100px] opacity-30"></div>
@@ -219,8 +244,11 @@ export default async function HomePage({
                 </div>
 
                 <h1 className="text-5xl md:text-7xl lg:text-8xl font-black tracking-tighter mb-8 max-w-5xl leading-[0.9] animate-in fade-in slide-in-from-bottom-4 duration-1000 transform-gpu backface-hidden">
-                  {dynamicHeroTitle1} <br className="hidden md:block" />
-                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-cyan-400 to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu">
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu inline-block pr-[0.1em]">
+                    {dynamicHeroTitle1}
+                  </span> 
+                  <br className="hidden md:block" />
+                  <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu inline-block pr-[0.1em]">
                     {dynamicHeroTitle2}
                   </span>
                 </h1>
@@ -246,44 +274,44 @@ export default async function HomePage({
 
               {/* Dashboard Mockup Display */}
               <div className="relative max-w-6xl mx-auto mt-12 animate-in fade-in zoom-in-95 duration-1000 delay-300">
-                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-cyan-500/30 rounded-[2.5rem] blur-2xl opacity-50"></div>
-                 <div className="relative bg-card border-[8px] border-card rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
-                    <img 
-                      src="/official_dashboard_mockup.png" 
-                      alt="AgendarPro Official Dashboard" 
-                      className="w-full h-auto object-cover"
-                    />
-                 </div>
+                <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-[2.5rem] blur-2xl opacity-50"></div>
+                <div className="relative bg-card border-[8px] border-card rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
+                  <img 
+                    src="/official_dashboard_mockup.png" 
+                    alt="AgendarPro Official Dashboard" 
+                    className="w-full h-auto object-cover"
+                  />
+                </div>
+              </div>
                  
-                 <div className="hidden lg:grid grid-cols-3 gap-6 absolute -bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl">
-                    <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
-                       <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
-                          <Users className="h-6 w-6" />
-                       </div>
-                       <div>
-                          <p className="text-xl font-black leading-none">{t("statSalons")}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Status</p>
-                       </div>
-                    </div>
-                    <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
-                       <div className="h-12 w-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-600">
-                          <Calendar className="h-6 w-6" />
-                       </div>
-                       <div>
-                          <p className="text-xl font-black leading-none">{t("statBookings")}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Disponibilidade</p>
-                       </div>
-                    </div>
-                    <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
-                       <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600">
-                          <TrendingUp className="h-6 w-6" />
-                       </div>
-                       <div>
-                          <p className="text-xl font-black leading-none">{t("statWhatsapp")}</p>
-                          <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Precisão</p>
-                       </div>
-                    </div>
-                 </div>
+              <div className="hidden lg:grid grid-cols-3 gap-6 absolute -bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl z-10">
+                <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
+                    <Users className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black leading-none">{t("statSalons")}</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Status</p>
+                  </div>
+                </div>
+                <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div className="h-12 w-12 rounded-2xl bg-cyan-500/10 flex items-center justify-center text-cyan-600">
+                    <Calendar className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black leading-none">{t("statBookings")}</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Disponibilidade</p>
+                  </div>
+                </div>
+                <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
+                  <div className="h-12 w-12 rounded-2xl bg-orange-500/10 flex items-center justify-center text-orange-600">
+                    <TrendingUp className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xl font-black leading-none">{t("statWhatsapp")}</p>
+                    <p className="text-[10px] uppercase font-bold text-muted-foreground tracking-widest mt-1">Precisão</p>
+                  </div>
+                </div>
               </div>
             </div>
           </section>
@@ -461,12 +489,6 @@ export default async function HomePage({
                   <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
                 </div>
                 <span className="font-bold text-xl tracking-tight">AgendarPro</span>
-              </div>
-
-              <div className="flex items-center gap-6 text-sm text-muted-foreground font-medium">
-                <Link href="/admin" className="hover:text-primary transition-colors">Administrador</Link>
-                <Link href="/auth/login" className="hover:text-primary transition-colors">Cliente</Link>
-                <Link href="/dashboard" className="hover:text-primary transition-colors">Painel de Gestão</Link>
               </div>
 
               <div className="flex items-center gap-6 text-sm text-muted-foreground font-medium">
