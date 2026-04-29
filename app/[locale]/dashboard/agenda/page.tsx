@@ -34,6 +34,7 @@ import {
   Check,
   AlertTriangle,
   BellRing,
+  Coffee,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations, useLocale } from "next-intl"
@@ -1087,9 +1088,42 @@ export default function AgendaPage() {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogContent className={cn(
           "max-w-[95vw] sm:max-w-md transition-all duration-500 rounded-3xl overflow-hidden p-0 border-none shadow-2xl",
-          formData.client_id && "max-w-[95vw] md:max-w-5xl sm:max-w-2xl"
+          formData.client_id && !selectedAppointment?.is_break && "max-w-[95vw] md:max-w-5xl sm:max-w-2xl"
         )}>
-          <div className="flex flex-col md:flex-row h-full max-h-[90vh] md:max-h-[85vh] w-full overflow-y-auto md:overflow-hidden">
+          {selectedAppointment?.is_break ? (
+            <div className="w-full bg-background p-6 md:p-8">
+              <DialogHeader className="mb-6">
+                <DialogTitle className="text-2xl font-black uppercase tracking-tighter flex items-center gap-2">
+                  <Coffee className="h-6 w-6 text-muted-foreground" /> Pausa Programada
+                </DialogTitle>
+                <DialogDescription className="text-base mt-2">
+                  Este horário está bloqueado para <span className="font-bold text-foreground">{selectedAppointment.staff?.name}</span>.
+                </DialogDescription>
+              </DialogHeader>
+
+              <div className="flex flex-col gap-3 pt-6">
+                {(userRole === "owner" || userRole === "manager") && (
+                  <Button
+                    type="button"
+                    variant="destructive"
+                    className="h-12 rounded-xl w-full shadow-lg shadow-destructive/20 font-bold"
+                    onClick={handleDelete}
+                  >
+                    Remover Pausa
+                  </Button>
+                )}
+                <Button
+                  type="button"
+                  variant="outline"
+                  className="h-12 rounded-xl w-full font-bold"
+                  onClick={() => setIsDialogOpen(false)}
+                >
+                  Fechar
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <div className="flex flex-col md:flex-row h-full max-h-[90vh] md:max-h-[85vh] w-full overflow-y-auto md:overflow-hidden">
             {/* Perfil do Cliente (CRM) - Visível apenas se houver um cliente selecionado */}
             {formData.client_id ? (
               <div className="w-full md:flex-1 min-w-0 order-2 md:order-1 animate-in slide-in-from-left duration-500 bg-muted/5 border-b md:border-b-0 md:border-r">
@@ -1341,6 +1375,7 @@ export default function AgendaPage() {
               </form>
             </div>
           </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
