@@ -35,11 +35,27 @@ export async function signUp(formData: any) {
 
       const slug = salonName.toLowerCase().replace(/ /g, "-")
       
-      await tx.salon.create({
+      const salon = await tx.salon.create({
         data: {
           name: salonName,
           slug,
           owner_id: user.id,
+        }
+      })
+      
+      await tx.user.update({
+        where: { id: user.id },
+        data: { salon_id: salon.id }
+      })
+
+      await tx.staff.create({
+        data: {
+          salon_id: salon.id,
+          user_id: user.id,
+          name: "Proprietário",
+          email: email,
+          role: "owner",
+          is_active: true
         }
       })
     })

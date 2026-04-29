@@ -65,6 +65,18 @@ export async function createSalonWithOwner(data: any) {
       data: { salon_id: salon.id }
     })
 
+    // 4. Criar o Perfil de Profissional (Staff) para o Proprietário
+    await tx.staff.create({
+      data: {
+        salon_id: salon.id,
+        user_id: user.id,
+        name: name || "Proprietário",
+        email: email,
+        role: "owner",
+        is_active: true
+      }
+    })
+
     return { user, salon }
   })
   

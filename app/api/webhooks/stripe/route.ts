@@ -94,6 +94,19 @@ export async function POST(request: Request) {
               data: { salon_id: salon.id }
             })
 
+            // C.2. Criar Perfil de Staff para o Proprietário
+            await prisma.staff.create({
+              data: {
+                salon_id: salon.id,
+                user_id: user.id,
+                name: pending.name || "Proprietário",
+                email: pending.email,
+                phone: pending.phone,
+                role: "owner",
+                is_active: true
+              }
+            })
+
             // D. Enviar E-mail de Boas-vindas
             try {
                const config = await getGlobalConfigCache()
