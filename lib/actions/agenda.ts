@@ -60,7 +60,8 @@ export async function getAgendaInitialData() {
         staff: undefined
       })),
       clients: JSON.parse(JSON.stringify(clients)),
-      isProfessional
+      isProfessional,
+      userRole: session?.user?.role || "owner"
     }
   } catch (err) {
     console.error("Erro ao carregar dados iniciais da agenda:", err)
@@ -73,7 +74,8 @@ export async function getAgendaInitialData() {
         price: Number(s.price)
       })),
       clients: JSON.parse(JSON.stringify(clients)),
-      isProfessional
+      isProfessional,
+      userRole: session?.user?.role || "owner"
     }
   }
 }
@@ -351,6 +353,13 @@ export async function upsertAppointment(id: string | null, data: any) {
 }
 
 export async function deleteAppointment(id: string) {
+  const session = await auth()
+  const role = session?.user?.role
+
+  if (role === "professional" || role === "receptionist") {
+     return { success: false, error: "Apenas gerentes e proprietários podem excluir agendamentos." }
+  }
+
   const salonId = await getSalonId()
   if (!salonId) return { success: false, error: "Não autorizado" }
 

@@ -186,6 +186,7 @@ export default function AgendaPage() {
   const [clients, setClients] = useState<Client[]>([])
   const [loading, setLoading] = useState(true)
   const [isProfessional, setIsProfessional] = useState(false)
+  const [userRole, setUserRole] = useState<string>("owner")
   const [salonId, setSalonId] = useState<string | null>(null)
   const [workingHours, setWorkingHours] = useState<any>(null)
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -245,6 +246,7 @@ export default function AgendaPage() {
         setServices(data.services || [])
         setClients(data.clients || [])
         setIsProfessional(data.isProfessional || false)
+        setUserRole(data.userRole || "owner")
       }
     } catch (error) {
       console.error("Erro ao carregar dados iniciais da agenda:", error)
@@ -1325,7 +1327,7 @@ export default function AgendaPage() {
                       <X className="h-5 w-5" />
                     </Button>
                   </div>
-                  {selectedAppointment && (
+                  {selectedAppointment && (userRole === "owner" || userRole === "manager") && (
                     <Button
                       type="button"
                       variant="ghost"
