@@ -892,8 +892,8 @@ export default function AgendaPage() {
                                 </span>
                                 
                                 {(() => {
-                                  const isOverdue = (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
-                                  const isUnconfirmedSoon = apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
+                                  const isOverdue = !apt.is_break && (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
+                                  const isUnconfirmedSoon = !apt.is_break && apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
                                   
                                   if (isOverdue) return (
                                     <div className={cn(
@@ -1033,8 +1033,8 @@ export default function AgendaPage() {
                            </span>
                            
                            {(() => {
-                                const isOverdue = (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
-                                const isUnconfirmedSoon = apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
+                                 const isOverdue = !apt.is_break && (apt.status !== 'completed' && apt.status !== 'cancelled') && end < now
+                                 const isUnconfirmedSoon = !apt.is_break && apt.status === 'pending' && start > now && start < new Date(now.getTime() + 60 * 60 * 1000)
                                 
                                 if (isOverdue) return (
                                   <div className="flex items-center bg-red-500 rounded-full p-1 animate-pulse shadow-lg ml-auto shrink-0 z-30">
