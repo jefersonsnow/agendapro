@@ -24,6 +24,19 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover"
+import {
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command"
+import {
   ChevronLeft,
   ChevronRight,
   Plus,
@@ -35,6 +48,7 @@ import {
   AlertTriangle,
   BellRing,
   Coffee,
+  ChevronsUpDown,
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations, useLocale } from "next-intl"
@@ -195,6 +209,9 @@ export default function AgendaPage() {
   const [filteredStaffForModal, setFilteredStaffForModal] = useState<Staff[]>([])
   const [selectedAppointment, setSelectedAppointment] =
     useState<Appointment | null>(null)
+  const [isClientComboboxOpen, setIsClientComboboxOpen] = useState(false)
+  const [clientSearchQuery, setClientSearchQuery] = useState("")
+
   const [formData, setFormData] = useState({
     staff_id: "",
     service_id: "",
@@ -1175,41 +1192,84 @@ export default function AgendaPage() {
                   </div>
                 )}
                 {!selectedAppointment && (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="client-id" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("client")}</Label>
-                      <Select
-                        value={formData.client_id}
-                        onValueChange={(value) =>
-                          setFormData({ ...formData, client_id: value, quick_name: "" })
-                        }
-                      >
-                        <SelectTrigger id="client-id" className="h-12 rounded-xl">
-                          <SelectValue placeholder={t("selectClient")} />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {clients.map((client) => (
-                            <SelectItem key={client.id} value={client.id}>
-                              <div className="flex items-center gap-2">
-                                <User className="h-4 w-4" />
-                                {client.name}
-                              </div>
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="quick_name" className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Nome (Novo Cliente)</Label>
-                      <Input
-                        id="quick_name"
-                        placeholder="Ou digite um nome rápido..."
-                        value={formData.quick_name}
-                        autoComplete="off"
-                        onChange={(e) => setFormData({ ...formData, quick_name: e.target.value, client_id: "" })}
-                        className="h-12 rounded-xl border-dashed"
-                      />
+                  <div className="flex flex-col gap-4">
+                    <div className="space-y-2 flex flex-col">
+                      <Label className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">{t("client")} / Nome</Label>
+                      <Popover open={isClientComboboxOpen} onOpenChange={setIsClientComboboxOpen}>
+                        <PopoverTrigger asChild>
+                          <Button
+                            variant="outline"
+                            role="combobox"
+                            aria-expanded={isClientComboboxOpen}
+                            className="w-full justify-between h-12 rounded-xl text-left font-normal border-dashed shadow-none"
+                          >
+                            {formData.client_id
+                              ? clients.find((c) => c.id === formData.client_id)?.name
+                              : formData.quick_name
+                                ? formData.quick_name
+                                : "Pesquisar ou digitar novo..."}
+                            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                          </Button>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-[calc(100vw-48px)] sm:w-[460px] p-0" align="start">
+                          <Command filter={(value, search) => {
+                             if (!search) return 1
+                             const terms = search.toLowerCase().split(" ")
+                             const content = value.toLowerCase()
+                             return terms.every(term => content.includes(term)) ? 1 : 0
+                          }}>
+                            <CommandInput 
+                              placeholder="Procurar nome ou telefone..." 
+                              value={clientSearchQuery}
+                              onValueChange={setClientSearchQuery}
+                            />
+                            <CommandList>
+                              <CommandEmpty className="p-2 text-center text-sm">
+                                <p className="text-muted-foreground mb-4 mt-2">Nenhum cliente encontrado.</p>
+                                <Button
+                                  type="button"
+                                  className="w-full h-10 bg-primary/10 text-primary hover:bg-primary/20"
+                                  onClick={() => {
+                                    setFormData({ ...formData, quick_name: clientSearchQuery, client_id: "" })
+                                    setIsClientComboboxOpen(false)
+                                    setClientSearchQuery("")
+                                  }}
+                                >
+                                  <Plus className="mr-2 h-4 w-4" />
+                                  Adicionar "{clientSearchQuery}"
+                                </Button>
+                              </CommandEmpty>
+                              <CommandGroup heading="Clientes Existentes">
+                                {clients.map((client) => (
+                                  <CommandItem
+                                    key={client.id}
+                                    value={`${client.name} ${client.phone || ""}`}
+                                    onSelect={() => {
+                                      setFormData({ ...formData, client_id: client.id, quick_name: "" })
+                                      setIsClientComboboxOpen(false)
+                                      setClientSearchQuery("")
+                                    }}
+                                    className="flex flex-col items-start py-3"
+                                  >
+                                    <div className="flex items-center gap-2">
+                                      <Check
+                                        className={cn(
+                                          "mr-1 h-4 w-4",
+                                          formData.client_id === client.id ? "opacity-100 text-primary" : "opacity-0"
+                                        )}
+                                      />
+                                      <span className="font-bold">{client.name}</span>
+                                    </div>
+                                    {client.phone && (
+                                      <span className="text-[11px] text-muted-foreground ml-7 font-mono">📱 {client.phone}</span>
+                                    )}
+                                  </CommandItem>
+                                ))}
+                              </CommandGroup>
+                            </CommandList>
+                          </Command>
+                        </PopoverContent>
+                      </Popover>
                     </div>
                   </div>
                 )}
