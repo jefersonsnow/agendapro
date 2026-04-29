@@ -502,8 +502,17 @@ export async function upsertStaff(id: string | null, data: any) {
       ? JSON.stringify(data.working_hours) 
       : data.working_hours,
     is_active: data.is_active ?? true,
+    avatar_url: data.avatar_url || null,
     salon_id: salonId,
     user_id: userId
+  }
+
+  // Sincronizar avatar com a tabela User se aplicável
+  if (userId && data.avatar_url) {
+    await prisma.user.update({
+      where: { id: userId },
+      data: { image: data.avatar_url }
+    })
   }
 
   if (id) {

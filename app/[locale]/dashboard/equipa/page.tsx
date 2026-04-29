@@ -29,7 +29,10 @@ import { Switch } from "@/components/ui/switch"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { cn } from "@/lib/utils"
 import Link from "next/link"
-import { Plus, Pencil, Trash2, Mail, Phone, Users, Lock, AlertCircle } from "lucide-react"
+import { Plus, Pencil, Trash2, Mail, Phone, Users, Lock, AlertCircle, Camera, Upload, Loader2 } from "lucide-react"
+import { uploadFile } from "@/lib/actions/upload"
+import { toast } from "sonner"
+import { useRef } from "react"
 
 interface Staff {
   id: string
@@ -92,10 +95,35 @@ export default function EquipaPage() {
     has_custom_hours: false,
     working_hours: {} as Record<string, { open: string; close: string; enabled: boolean; hasBreak?: boolean; breakStart?: string; breakEnd?: string }>,
     password: "",
-    user_id: null as string | null
+    user_id: null as string | null,
+    avatar_url: ""
   })
 
-  // const supabase = createClient() // Removido
+  const [uploading, setUploading] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
+
+  async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    const formDataUpload = new FormData()
+    formDataUpload.append("file", file)
+
+    try {
+      const res = await uploadFile(formDataUpload)
+      if (res?.url) {
+        setFormData(prev => ({ ...prev, avatar_url: res.url }))
+        toast.success("Foto carregada!")
+      } else if (res?.error) {
+        toast.error(res.error)
+      }
+    } catch (err: any) {
+      toast.error("Erro ao carregar imagem")
+    } finally {
+      setUploading(false)
+    }
+  }
 
   const [user, setUser] = useState({ role: "professional", name: "" })
 
@@ -129,7 +157,8 @@ export default function EquipaPage() {
       has_custom_hours: false,
       working_hours: {},
       password: "",
-      user_id: null
+      user_id: null,
+      avatar_url: ""
     })
     setIsDialogOpen(true)
   }
@@ -147,7 +176,8 @@ export default function EquipaPage() {
       has_custom_hours: !!member.working_hours,
       working_hours: member.working_hours || {},
       password: "",
-      user_id: member.user_id || null
+      user_id: member.user_id || null,
+      avatar_url: member.avatar_url || ""
     })
     setIsDialogOpen(true)
   }
@@ -235,17 +265,50 @@ export default function EquipaPage() {
                 </DialogDescription>
               </DialogHeader>
               <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="name">Nome Completo</Label>
-                  <Input
-                    id="name"
-                    value={formData.name}
-                    onChange={(e) =>
-                      setFormData({ ...formData, name: e.target.value })
-                    }
-                    placeholder="Ex: João Silva"
-                    required
-                  />
+                <div className="flex flex-col sm:flex-row gap-6">
+                  <div className="flex flex-col items-center justify-center gap-2 mt-2">
+                    <div className="relative group/avatar">
+                      <div className="h-24 w-24 bg-muted rounded-full flex items-center justify-center text-muted-foreground font-black shadow-sm overflow-hidden border">
+                        {uploading ? (
+                          <Loader2 className="h-6 w-6 animate-spin" />
+                        ) : formData.avatar_url ? (
+                          <img src={formData.avatar_url} alt="Avatar" className="h-full w-full object-cover" />
+                        ) : (
+                          <Camera className="h-8 w-8 opacity-20" />
+                        )}
+                      </div>
+                      <button 
+                        type="button"
+                        onClick={() => fileInputRef.current?.click()}
+                        className="absolute bottom-0 right-0 h-8 w-8 bg-background border shadow-sm rounded-full flex items-center justify-center text-muted-foreground hover:text-primary transition-all hover:scale-110 active:scale-95"
+                        title="Alterar foto"
+                      >
+                        <Camera className="h-4 w-4" />
+                      </button>
+                    </div>
+                    <input 
+                      type="file" 
+                      ref={fileInputRef} 
+                      className="hidden" 
+                      accept="image/*"
+                      onChange={handleFileChange}
+                    />
+                  </div>
+                  
+                  <div className="flex-1 space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome Completo</Label>
+                      <Input
+                        id="name"
+                        value={formData.name}
+                        onChange={(e) =>
+                          setFormData({ ...formData, name: e.target.value })
+                        }
+                        placeholder="Ex: João Silva"
+                        required
+                      />
+                    </div>
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
