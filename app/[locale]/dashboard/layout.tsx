@@ -167,8 +167,8 @@ export default function DashboardLayout({
       >
         <div className="flex h-16 items-center justify-between px-6 border-b">
           <Link href="/dashboard" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary">
-              <Calendar className="h-5 w-5 text-primary-foreground" />
+            <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden shadow-md">
+              <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
             </div>
             <span className="font-bold text-lg tracking-tight uppercase">AgendarPro</span>
           </Link>
@@ -243,8 +243,8 @@ export default function DashboardLayout({
       )}>
         <div className="flex h-16 items-center justify-between px-6 border-b shrink-0">
           <Link href="/dashboard" className="flex items-center gap-2 overflow-hidden">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary">
-              <Calendar className="h-5 w-5 text-primary-foreground" />
+            <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden shadow-md">
+              <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
             </div>
             {!collapsed && <span className="font-bold text-lg tracking-tight uppercase whitespace-nowrap">AgendarPro</span>}
           </Link>
