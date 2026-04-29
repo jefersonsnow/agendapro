@@ -750,11 +750,13 @@ export async function getStaffStats(startDate?: Date, endDate?: Date) {
     return sum + (commissionMap.get(apt.service_id) ?? 0)
   }, 0)
   const appointmentCount = appointments.length
+  const commissionRate = totalRevenue > 0 ? (totalCommission / totalRevenue) * 100 : 0
 
   return {
     totalRevenue,
     totalCommission,
     appointmentCount,
+    commissionRate,
     appointments: JSON.parse(JSON.stringify(appointments)).map((apt: any) => ({
       ...apt,
       commission: commissionMap.get(apt.service_id) ?? 0

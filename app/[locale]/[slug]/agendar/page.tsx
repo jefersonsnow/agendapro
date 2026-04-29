@@ -522,8 +522,12 @@ export default function BookingPage({
               <ChevronLeft className="h-5 w-5" />
             </Button>
             <div className="flex items-center gap-3 flex-1">
-              <div className={cn("h-10 w-10 flex items-center justify-center font-bold uppercase", themeStyles.primary, themeStyles.button)}>
-                {salon?.name.charAt(0)}
+              <div className={cn("h-10 w-10 flex items-center justify-center font-bold uppercase overflow-hidden", themeStyles.primary, themeStyles.button)}>
+                {salon?.logo_url ? (
+                  <img src={salon.logo_url} alt={salon?.name} className="h-full w-full object-cover" />
+                ) : (
+                  salon?.name.charAt(0)
+                )}
               </div>
               <div>
                 <h2 className="font-semibold">{salon?.name}</h2>
@@ -645,10 +649,14 @@ export default function BookingPage({
                 >
                   <CardContent className="p-4 flex items-center gap-4">
                     <div
-                      className={cn("h-14 w-14 flex items-center justify-center text-white text-lg font-bold shadow-inner", themeStyles.button)}
-                      style={{ backgroundColor: member.color || "#ccc" }}
+                      className={cn("h-14 w-14 flex items-center justify-center text-white text-lg font-bold shadow-inner overflow-hidden", themeStyles.button)}
+                      style={{ backgroundColor: !member.avatar_url ? (member.color || "#ccc") : undefined }}
                     >
-                      {member.name.charAt(0)}
+                      {member.avatar_url ? (
+                        <img src={member.avatar_url} alt={member.name} className="h-full w-full object-cover" />
+                      ) : (
+                        member.name.charAt(0)
+                      )}
                     </div>
                     <div>
                       <h4 className="font-semibold text-lg">{member.name}</h4>

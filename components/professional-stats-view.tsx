@@ -67,7 +67,7 @@ export default function ProfessionalStatsView() {
     },
     {
       name: "Sua Taxa",
-      value: `${stats?.commissionRate || 0}%`,
+      value: `${(stats?.commissionRate || 0).toFixed(0)}%`,
       icon: TrendingUp,
       color: "text-orange-600",
       bgColor: "bg-orange-100",
@@ -155,7 +155,7 @@ export default function ProfessionalStatsView() {
                     <td className="px-6 py-4 text-right font-medium">{Number(apt.price).toFixed(2)}€</td>
                     <td className="px-6 py-4 text-right">
                       <span className="font-bold text-primary">
-                        {(Number(apt.price) * (stats.commissionRate / 100)).toFixed(2)}€
+                        {Number(apt.commission).toFixed(2)}€
                       </span>
                     </td>
                   </tr>
