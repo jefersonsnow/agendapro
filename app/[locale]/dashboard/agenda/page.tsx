@@ -1,7 +1,7 @@
 // <title> <meta name="description" content="SEO" /> <Head>
 "use client"
 
-import { useState, useEffect, useMemo } from "react"
+import { useState, useEffect, useMemo, useRef } from "react"
 import { getAgendaInitialData, getAppointments, upsertAppointment, deleteAppointment } from "@/lib/actions/agenda"
 import ClientProfileView from "@/components/client-profile-view"
 import { Button } from "@/components/ui/button"
@@ -176,6 +176,7 @@ function MonthlyView({ currentDate, appointments, onDayClick }: {
 export default function AgendaPage() {
   const t = useTranslations("Agenda")
   const locale = useLocale()
+  const fetchCount = useRef(0)
   const [currentDate, setCurrentDate] = useState<Date>(new Date(2024, 0, 1)) // Data dummy para hidratação
   const [selectedMobileDate, setSelectedMobileDate] = useState<Date>(new Date(2024, 0, 1))
   const [view, setView] = useState<"day" | "week" | "month">("week")
@@ -254,6 +255,8 @@ export default function AgendaPage() {
 
   async function fetchAppointments() {
     if (!salonId) return
+    
+    const currentFetchId = ++fetchCount.current
 
     try {
       let startDate: Date;
@@ -270,6 +273,9 @@ export default function AgendaPage() {
       }
 
       const data = await getAppointments(startDate, endDate, selectedStaffFilter)
+      
+      if (currentFetchId !== fetchCount.current) return
+      
       // APENAS atualiza se recebermos um array válido. 
       // Se data for null ou undefined (erro no servidor), preservamos os dados atuais.
       if (Array.isArray(data)) {

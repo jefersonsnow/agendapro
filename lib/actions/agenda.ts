@@ -2,7 +2,7 @@
 
 import { auth } from "@/auth"
 import prisma from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { revalidatePath, unstable_noStore as noStore } from "next/cache"
 
 import { logAction } from "@/lib/audit"
 import { getPlanLimits } from "@/lib/plan-limits"
@@ -10,6 +10,7 @@ import { getPlanLimits } from "@/lib/plan-limits"
 import { getSalonId, getGlobalConfigCache } from "@/lib/dal"
 
 export async function getAgendaInitialData() {
+  noStore()
   const salonId = await getSalonId()
   if (!salonId) return null
 
@@ -78,6 +79,7 @@ export async function getAgendaInitialData() {
 }
 
 export async function getAppointments(startDate: Date, endDate: Date, filterStaffId?: string) {
+  noStore()
   const salonId = await getSalonId()
   if (!salonId) return []
 
@@ -340,7 +342,7 @@ export async function upsertAppointment(id: string | null, data: any) {
       await syncClientStats(clientId, clientPointChange)
     }
     
-    revalidatePath("/dashboard/agenda")
+    revalidatePath("/", "layout")
     return { success: true }
   } catch (error) {
     console.error("Erro ao guardar agendamento:", error)
@@ -370,7 +372,7 @@ export async function deleteAppointment(id: string) {
        await syncClientStats(appointment.client_id, pointChange)
     }
 
-    revalidatePath("/dashboard/agenda")
+    revalidatePath("/", "layout")
     return { success: true }
   } catch (error) {
     console.error("Erro ao excluir agendamento:", error)
