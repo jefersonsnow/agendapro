@@ -81,7 +81,7 @@ const statusColors: Record<string, string> = {
   confirmed: "bg-primary/10 border-primary/30 text-primary",
   completed: "bg-green-100 border-green-300 text-green-800",
   cancelled: "bg-red-100 border-red-300 text-red-800",
-  break: "bg-black border-slate-950 text-white opacity-100",
+  break: "bg-[#929292] border-[#7a7a7a] text-white opacity-100",
 }
 
 function MonthlyView({ currentDate, appointments, onDayClick }: { 
@@ -879,7 +879,7 @@ export default function AgendaPage() {
                                 height: `${height}px`,
                                 left: `${apt.left}%`,
                                 width: `${apt.width - 1}%`,
-                                borderLeftColor: apt.is_break ? "#000000" : (apt.staff?.color || "#0D9488"),
+                                borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488"),
                               }}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -1014,7 +1014,7 @@ export default function AgendaPage() {
                             width: `${apt.width}%`,
                             top: `${top + 4}px`, 
                             height: `${height - 8}px`, 
-                            borderLeftColor: apt.is_break ? "#000000" : (apt.staff?.color || "#0D9488")
+                            borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488")
                          }}
                      >
                         <div className={cn(
