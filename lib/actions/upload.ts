@@ -23,7 +23,7 @@ export async function uploadFile(formData: FormData) {
 
     // --- Configurações de Limites e Otimização ---
     const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"]
-    const MAX_INPUT_SIZE = 5 * 1024 * 1024 // Aceitamos até 5MB para processar
+    const MAX_INPUT_SIZE = 10 * 1024 * 1024 // Aceitamos até 10MB para processar
 
     const fileExtension = file.name.split(".").pop()?.toLowerCase() || ""
     if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
@@ -31,7 +31,7 @@ export async function uploadFile(formData: FormData) {
     }
 
     if (file.size > MAX_INPUT_SIZE) {
-      return { error: "O ficheiro original é demasiado grande. Limite máximo: 5MB." }
+      return { error: "O ficheiro original é demasiado grande. Limite máximo: 10MB." }
     }
 
     // 1. Converter File para Buffer para o Sharp processar
