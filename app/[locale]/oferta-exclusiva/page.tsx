@@ -17,7 +17,9 @@ import {
   MessageCircle,
   TrendingUp,
   Percent,
-  X
+  X,
+  Check,
+  ShieldCheck
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
