@@ -1,106 +1,81 @@
+"use client"
+
 export const dynamic = "force-dynamic"
 
+import { useState, useEffect } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { TrialButton } from "@/components/trial-button"
 import {
-  Calendar,
-  Users,
-  BarChart3,
-  Clock,
   CheckCircle,
-  Smartphone,
   Sparkles,
-  TrendingUp,
-  ShieldCheck,
   Zap,
-  ChevronRight,
-  Scissors,
-  Percent,
-  X,
-  Play,
   ArrowRight,
   Timer,
   Star,
   Crown,
   MessageCircle,
-  Check
+  TrendingUp,
+  Percent,
+  X
 } from "lucide-react"
 import { cn } from "@/lib/utils"
-import { getTranslations } from "next-intl/server"
-import { routing } from "@/i18n/routing"
-import prisma from "@/lib/prisma"
+import { useTranslations } from "next-intl"
 
-export default async function SalesPage({
-  params,
-}: {
-  params: Promise<{ locale: string }> | { locale: string }
-}) {
-  const resolvedParams = await Promise.resolve(params)
-  const locale = resolvedParams?.locale || routing.defaultLocale
+// COMPONENTE DE CONTAGEM DECRESCENTE
+function CountdownTimer() {
+  const [timeLeft, setTimeLeft] = useState({
+    hours: 2,
+    minutes: 47,
+    seconds: 52
+  })
 
-  let t: any
-  try {
-    t = await getTranslations({ locale, namespace: "Home" })
-  } catch (e) {
-    console.error("Translation error:", e)
-    t = (key: string) => key
-  }
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev.seconds > 0) return { ...prev, seconds: prev.seconds - 1 }
+        if (prev.minutes > 0) return { ...prev, minutes: prev.minutes - 1, seconds: 59 }
+        if (prev.hours > 0) return { hours: prev.hours - 1, minutes: 59, seconds: 59 }
+        return prev
+      })
+    }, 1000)
+    return () => clearInterval(timer)
+  }, [])
 
-  // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT
-  let landingPageData: any = {}
-  let salesPageConfig: any = {}
-  
-  try {
-    const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-    
-    if (configs && configs.length > 0) {
-      const globalConfig = configs[0]
-      
-      if (globalConfig.landing_page) {
-        try {
-          landingPageData = typeof globalConfig.landing_page === 'string' 
-            ? JSON.parse(globalConfig.landing_page) 
-            : globalConfig.landing_page
-        } catch (e) {
-          console.error("Error parsing landing_page JSON:", e)
-        }
-      }
+  const format = (n: number) => n.toString().padStart(2, '0')
 
-      if (globalConfig.sales_page_config) {
-        try {
-          salesPageConfig = typeof globalConfig.sales_page_config === 'string'
-            ? JSON.parse(globalConfig.sales_page_config)
-            : globalConfig.sales_page_config
-        } catch (e) {
-          console.error("Error parsing sales_page_config JSON:", e)
-        }
-      }
-    }
-  } catch (error) {
-    console.error("Error fetching global configs:", error)
-  }
+  return (
+    <div className="flex gap-2 font-mono text-2xl md:text-4xl font-black">
+      <div className="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10 min-w-[60px] md:min-w-[80px]">
+        {format(timeLeft.hours)}<span className="text-[10px] block font-sans text-white/40 uppercase tracking-tighter">Horas</span>
+      </div>
+      <div className="flex items-center text-primary">:</div>
+      <div className="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10 min-w-[60px] md:min-w-[80px]">
+        {format(timeLeft.minutes)}<span className="text-[10px] block font-sans text-white/40 uppercase tracking-tighter">Minutos</span>
+      </div>
+      <div className="flex items-center text-primary">:</div>
+      <div className="bg-white/10 backdrop-blur-md px-3 py-2 rounded-lg border border-white/10 min-w-[60px] md:min-w-[80px]">
+        {format(timeLeft.seconds)}<span className="text-[10px] block font-sans text-white/40 uppercase tracking-tighter">Segundos</span>
+      </div>
+    </div>
+  )
+}
 
-  const dynamicPlansTitle = landingPageData.plansTitle || t("plansTitle")
-  const dynamicPriceMinimo = landingPageData.plans?.minimo?.price ?? 0
-  const dynamicPriceBasic = landingPageData.plans?.basic?.price ?? (landingPageData.priceBasic || "19")
-  const dynamicPricePremium = landingPageData.plans?.premium?.price ?? (landingPageData.pricePremium || "49")
+export default function SalesPage() {
+  const t = useTranslations("Home")
 
   const planConfigs = {
     minimo: { 
-      price: dynamicPriceMinimo ?? 0, 
-      appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false,
-      ...(landingPageData.plans?.minimo || {}) 
+      price: 0, 
+      appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false
     },
     basic: { 
-      price: dynamicPriceBasic ?? 19, 
-      appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
-      ...(landingPageData.plans?.basic || {}) 
+      price: 19, 
+      appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true
     },
     premium: { 
-      price: dynamicPricePremium ?? 49, 
-      appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
-      ...(landingPageData.plans?.premium || {}) 
+      price: 49, 
+      appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true
     }
   }
 
@@ -117,21 +92,10 @@ export default async function SalesPage({
     ["Backup & Exportação Profissional", p.professional_export],
   ]
 
-  const headline = salesPageConfig.headline || "PARE DE PERDER DINHEIRO COM AGENDAS MANUAIS NO WHATSAPP"
-  const subheadline = salesPageConfig.subheadline || "A solução definitiva para donos de salões que querem liberdade, controlo total e uma agenda que trabalha sozinha 24/7."
-  const formatVideoUrl = (url: string) => {
-    if (!url) return null
-    // Converter links do YouTube para formato embed se necessário
-    if (url.includes("youtu.be/")) {
-      return url.replace("youtu.be/", "www.youtube.com/embed/")
-    }
-    if (url.includes("watch?v=")) {
-      return url.replace("watch?v=", "embed/")
-    }
-    return url
-  }
+  const headline = "QUER TER O DOBRO DOS RESULTADOS PAGANDO METADE DO PREÇO?"
+  const subheadline = "Aproveite a nossa maior oferta de sempre. 50% de DESCONTO no primeiro mês do Plano Premium para os próximos subscritores. A sua agenda merece o melhor."
 
-  const videoUrl = formatVideoUrl(salesPageConfig.videoUrl)
+  const videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ" // Exemplo de VSL
 
   return (
     <div className="theme-magenta min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
@@ -148,7 +112,6 @@ export default async function SalesPage({
                <div className="flex items-center gap-2 text-xs font-black uppercase tracking-widest text-primary animate-pulse">
                   <div className="h-2 w-2 rounded-full bg-primary" /> Oferta de Lançamento Ativa
                </div>
-               {/* WhatsApp Link */}
                <a 
                  href="https://wa.me/351910664744?text=Olá! Estou na página de Oferta Exclusiva e tenho uma dúvida."
                  target="_blank"
@@ -163,10 +126,13 @@ export default async function SalesPage({
       </header>
 
       {/* URGENCY BAR */}
-      <div className="bg-primary/10 border-b border-primary/20 py-3 text-center overflow-hidden relative">
-        <div className="flex items-center justify-center gap-4 text-sm font-black uppercase tracking-widest text-primary transform-gpu">
-          <Timer className="h-4 w-4" />
-          <span>OFERTA EXCLUSIVA: AS VAGAS PARA ESTE PREÇO ESTÃO A TERMINAR</span>
+      <div className="bg-primary/20 border-b border-primary/40 py-4 text-center overflow-hidden relative">
+        <div className="container mx-auto flex flex-col md:flex-row items-center justify-center gap-6 text-sm font-black uppercase tracking-widest">
+          <div className="flex items-center gap-2 text-primary">
+            <Timer className="h-5 w-5" />
+            <span>ESTA OFERTA EXPIRA EM:</span>
+          </div>
+          <CountdownTimer />
         </div>
       </div>
 
@@ -175,12 +141,12 @@ export default async function SalesPage({
         <section className="relative pt-32 pb-20 px-4 overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-transparent to-transparent -z-10"></div>
           <div className="max-w-6xl mx-auto text-center">
-            <div className="inline-flex items-center gap-2 bg-white/5 backdrop-blur-md px-6 py-2 rounded-full border border-white/10 mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
-               <span className="h-2 w-2 rounded-full bg-primary animate-pulse"></span>
-               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60">Oferta Exclusiva e Limitada</span>
+            <div className="inline-flex items-center gap-2 bg-primary/20 backdrop-blur-md px-6 py-2 rounded-full border border-primary/30 mb-8 animate-in fade-in slide-in-from-top-4 duration-1000">
+               <Percent className="h-4 w-4 text-primary" />
+               <span className="text-[10px] font-black uppercase tracking-[0.3em] text-white">50% DESCONTO NO 1º MÊS</span>
             </div>
             <h1 className="text-5xl md:text-8xl font-black tracking-tighter leading-[0.9] mb-8 italic animate-in fade-in slide-in-from-bottom-8 duration-1000 transform-gpu backface-hidden">
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu inline-block pr-[0.1em]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary via-white to-primary bg-[length:200%_auto] animate-gradient-x transform-gpu inline-block pr-[0.1em]">
                 {headline}
               </span>
             </h1>
@@ -193,36 +159,25 @@ export default async function SalesPage({
                <div className="w-full animate-in fade-in duration-1000">
                   <div className="absolute -inset-1 bg-gradient-to-r from-primary/50 to-secondary/50 rounded-[2.5rem] blur opacity-20 group-hover:opacity-40 transition duration-1000"></div>
                   <div className="relative w-full h-0 pb-[56.25%] rounded-[2rem] overflow-hidden border-2 border-white/10 shadow-2xl bg-black">
-                    {videoUrl ? (
-                      <iframe 
-                        src={videoUrl} 
-                        className="absolute top-0 left-0 w-full h-full"
-                        allow="autoplay; fullscreen; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    ) : (
-                      <>
-                        <div className="h-24 w-24 rounded-full bg-white text-black flex items-center justify-center shadow-2xl group-hover/video:scale-110 transition-transform duration-500">
-                          <Play className="h-10 w-10 fill-current" />
-                        </div>
-                        <div className="mt-8 flex flex-col items-center gap-2 group/play">
-                          <span className="font-black uppercase tracking-[0.4em] text-xs text-white/80 group-hover/play:text-white transition-colors">Assista e Descubra</span>
-                        </div>
-                      </>
-                    )}
+                    <iframe 
+                      src={videoUrl} 
+                      className="absolute top-0 left-0 w-full h-full"
+                      allow="autoplay; fullscreen; picture-in-picture"
+                      allowFullScreen
+                    ></iframe>
                   </div>
                </div>
             </div>
 
             <a href="#planos">
               <Button className="h-20 px-12 text-xl font-black uppercase tracking-tighter rounded-2xl bg-white text-black hover:bg-primary hover:text-white transition-all duration-500 shadow-2xl shadow-white/10 hover:shadow-primary/40">
-                Garantir o Meu Acesso Agora <ArrowRight className="ml-2 h-6 w-6" />
+                Garantir 50% de Desconto Agora <ArrowRight className="ml-2 h-6 w-6" />
               </Button>
             </a>
           </div>
         </section>
 
-        {/* PRICING - EXACTLY LIKE HOME */}
+        {/* PRICING */}
         <section id="planos" className="py-32 bg-slate-950 text-white relative overflow-hidden">
           <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-10"></div>
           <div className="absolute top-0 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-[150px]"></div>
@@ -230,22 +185,22 @@ export default async function SalesPage({
           <div className="container mx-auto px-4 relative z-10">
             <div className="text-center mb-24">
               <div className="inline-flex items-center gap-2 bg-primary/20 text-primary-foreground text-[10px] font-black uppercase tracking-[0.2em] px-5 py-2 rounded-full mb-8 border border-primary/30 backdrop-blur-md">
-                <Zap className="h-4 w-4" /> {t("plansTag")}
+                <Zap className="h-4 w-4" /> OFERTA LIMITADA
               </div>
-              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic">{dynamicPlansTitle}</h2>
-              <p className="text-xl text-slate-400 max-w-2xl mx-auto font-medium">{t("plansDesc")}</p>
+              <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic">ESCOLHA O SEU PLANO</h2>
+              <p className="text-xl text-slate-400 max-w-2xl mx-auto font-medium">Economize 50% no primeiro mês do Plano Premium usando o código LIMITADO50.</p>
             </div>
 
             <div className="grid md:grid-cols-3 gap-8 max-w-7xl mx-auto items-stretch">
               {/* MINIMO */}
               <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border border-slate-800 flex flex-col h-full hover:bg-slate-900 transition-all duration-500 group">
                 <div className="mb-10">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">{t("planFreeLabel")}</p>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">INICIAL</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">{planConfigs.minimo?.price ?? 0}€</span>
+                    <span className="text-5xl font-black">0€</span>
                     <span className="text-slate-500 font-bold">/mês</span>
                   </div>
-                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planFreeDesc")}</p>
+                  <p className="text-slate-400 text-sm mt-4 font-medium">Para profissionais que estão a começar.</p>
                 </div>
                 <div className="h-px bg-slate-800 w-full mb-10" />
                 <ul className="space-y-4 mb-12 flex-1">
@@ -258,8 +213,8 @@ export default async function SalesPage({
                     </li>
                   ))}
                 </ul>
-                <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
-                  Assinar Agora
+                <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-slate-800 hover:bg-slate-700 text-white transition-all">
+                  Começar Grátis
                 </TrialButton>
               </div>
 
@@ -268,10 +223,10 @@ export default async function SalesPage({
                 <div className="mb-10">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-4">⚡ BASIC</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">{planConfigs.basic?.price ?? 19}€</span>
+                    <span className="text-5xl font-black">19€</span>
                     <span className="text-slate-500 font-bold">/mês</span>
                   </div>
-                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planBasicDesc")}</p>
+                  <p className="text-slate-400 text-sm mt-4 font-medium">O essencial para o seu salão crescer.</p>
                 </div>
                 <div className="h-px bg-slate-800 w-full mb-10" />
                 <ul className="space-y-4 mb-12 flex-1">
@@ -289,16 +244,20 @@ export default async function SalesPage({
                 </TrialButton>
               </div>
 
-              {/* PREMIUM */}
-              <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border-2 border-primary/40 flex flex-col h-full hover:bg-slate-900 transition-all duration-500 relative group scale-105 shadow-2xl shadow-primary/20">
-                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-primary px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl text-white">RECOMENDADO</div>
+              {/* PREMIUM - WITH 50% DISCOUNT */}
+              <div className="bg-slate-900/50 backdrop-blur-xl rounded-[2.5rem] p-10 border-2 border-primary flex flex-col h-full hover:bg-slate-900 transition-all duration-500 relative group scale-105 shadow-2xl shadow-primary/40">
+                <div className="absolute -top-5 left-1/2 -translate-x-1/2 bg-gradient-to-r from-amber-400 to-amber-600 px-6 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-xl text-black">CUPÃO LIMITADO50 ATIVO</div>
                 <div className="mb-10">
-                  <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">💎 PREMIUM</p>
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">{planConfigs.premium?.price ?? 49}€</span>
-                    <span className="text-slate-500 font-bold">/mês</span>
+                  <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">💎 PREMIUM (ILIMITADO)</p>
+                  <div className="flex flex-col">
+                    <span className="text-slate-500 line-through text-2xl font-bold">49€</span>
+                    <div className="flex items-baseline gap-1">
+                      <span className="text-6xl font-black text-white">24</span>
+                      <span className="text-3xl font-black text-white">,50€</span>
+                      <span className="text-slate-500 font-bold ml-1">/1º mês</span>
+                    </div>
                   </div>
-                  <p className="text-slate-400 text-sm mt-4 font-medium">{t("planPremiumDesc")}</p>
+                  <p className="text-cyan-400/80 text-xs mt-4 font-black uppercase tracking-widest animate-pulse">Pague metade agora e tenha tudo ilimitado!</p>
                 </div>
                 <div className="h-px bg-slate-800 w-full mb-10" />
                 <ul className="space-y-4 mb-12 flex-1">
@@ -311,10 +270,15 @@ export default async function SalesPage({
                     </li>
                   ))}
                 </ul>
-                <TrialButton plan="premium" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all">
-                  <Sparkles className="mr-2 h-5 w-5" />
-                  Assinar Agora
+                <TrialButton 
+                  plan="premium" 
+                  customRedirectUrl="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
+                  className="w-full h-20 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/40 transition-all scale-110"
+                >
+                  <Sparkles className="mr-2 h-6 w-6" />
+                  Garantir 50% de Desconto
                 </TrialButton>
+                <p className="text-[9px] text-center mt-6 text-white/40 font-bold uppercase tracking-widest">Preço normal de 49€ após o primeiro mês.</p>
               </div>
             </div>
           </div>
@@ -369,17 +333,20 @@ export default async function SalesPage({
         <section className="py-40 bg-gradient-to-t from-primary/10 to-transparent border-t border-white/5 text-center px-4">
           <div className="max-w-4xl mx-auto">
             <Crown className="h-16 w-16 text-amber-400 mx-auto mb-8 animate-bounce" />
-            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic uppercase leading-none">PRONTO PARA O <br/><span className="text-primary italic">PRÓXIMO NÍVEL?</span></h2>
+            <h2 className="text-5xl md:text-7xl font-black tracking-tighter mb-8 italic uppercase leading-none">ÚLTIMA OPORTUNIDADE DE <br/><span className="text-primary italic">POUPAR 50%</span></h2>
             <p className="text-white/60 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
-              Não deixe para amanhã a organização que o seu negócio precisa hoje. 
-              Junte-se à elite dos salões de beleza.
+              Clique abaixo, preencha os seus dados e garanta o Plano Premium pelo preço de um almoço. Oferta válida apenas para hoje.
             </p>
-            <TrialButton plan="premium" size="lg" className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white">
-              Assinar Agora
+            <TrialButton 
+              plan="premium" 
+              customRedirectUrl="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
+              className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white"
+            >
+              Quero os meus 50% de Desconto
               <Sparkles className="ml-4 h-8 w-8" />
             </TrialButton>
             <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">
-              Garantia de Satisfação Total • Suporte Especializado • Ativação Imediata
+              Pagamento Seguro via Stripe • Sem Fidelização • Cancele quando quiser
             </p>
           </div>
         </section>

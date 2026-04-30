@@ -7,9 +7,10 @@ import { TrialRegistrationModal } from "./trial-registration-modal"
 interface TrialButtonProps extends ButtonProps {
   children: React.ReactNode
   plan?: string
+  customRedirectUrl?: string
 }
 
-export function TrialButton({ children, plan = "minimo", ...props }: TrialButtonProps) {
+export function TrialButton({ children, plan = "minimo", customRedirectUrl, ...props }: TrialButtonProps) {
   const [isOpen, setIsOpen] = useState(false)
 
   return (
@@ -21,6 +22,7 @@ export function TrialButton({ children, plan = "minimo", ...props }: TrialButton
         isOpen={isOpen} 
         onClose={() => setIsOpen(false)} 
         plan={plan}
+        customRedirectUrl={customRedirectUrl}
       />
     </>
   )

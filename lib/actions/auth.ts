@@ -73,7 +73,7 @@ export async function signUpWithDetails(formData: any) {
     return { error: validatedFields.error.flatten().fieldErrors }
   }
 
-  const { email: rawEmail, password, name, salonName, address, phone, nif, plan } = validatedFields.data
+  const { email: rawEmail, password, name, salonName, address, phone, nif, plan, customRedirectUrl } = formData
   const email = rawEmail.toLowerCase()
 
   // 1. Verificar se usuário já existe
@@ -101,6 +101,13 @@ export async function signUpWithDetails(formData: any) {
       plan
     }
   })
+
+  // 3.1 Se houver um URL customizado (Promoção), usamos esse com o ID de referência
+  if (customRedirectUrl) {
+    const separator = customRedirectUrl.includes('?') ? '&' : '?'
+    const finalUrl = `${customRedirectUrl}${separator}client_reference_id=${pending.id}&customer_email=${encodeURIComponent(email)}`
+    return { success: true, url: finalUrl }
+  }
 
   // 4. Obter Configurações do Stripe
   const config = await getGlobalConfigCache()

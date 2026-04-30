@@ -79,9 +79,10 @@ interface TrialRegistrationModalProps {
   isOpen: boolean
   onClose: () => void
   plan: string
+  customRedirectUrl?: string
 }
 
-export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrationModalProps) {
+export function TrialRegistrationModal({ isOpen, onClose, plan, customRedirectUrl }: TrialRegistrationModalProps) {
   const t = useTranslations("Modal.trial")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -130,7 +131,8 @@ export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrat
       const result = await signUpWithDetails({
         ...values,
         address: fullAddress,
-        plan
+        plan,
+        customRedirectUrl
       })
 
       if (result.success && result.url) {
