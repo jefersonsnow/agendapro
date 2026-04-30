@@ -278,10 +278,44 @@ export default function SalesPage() {
                   <Sparkles className="mr-2 h-6 w-6" />
                   Garantir 50% de Desconto
                 </TrialButton>
-                <p className="text-[9px] text-center mt-6 text-white/40 font-bold uppercase tracking-widest">Preço normal de 49€ após o primeiro mês.</p>
+                <div className="mt-8 flex flex-col items-center gap-2">
+                   <p className="text-[10px] text-center text-white/40 font-bold uppercase tracking-widest">Preço normal de 49€ após o primeiro mês.</p>
+                   <div className="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
+                      <ShieldCheck className="h-3 w-3 text-green-400" />
+                      <span className="text-[9px] font-black uppercase tracking-widest text-green-400">SEM FIDELIZAÇÃO • CANCELE QUANDO QUISER</span>
+                   </div>
+                </div>
               </div>
             </div>
           </div>
+        </section>
+
+        {/* NO FIDELITY / GUARANTEE SECTION */}
+        <section className="py-20 bg-black/40 border-y border-white/5">
+           <div className="max-w-4xl mx-auto px-4">
+              <div className="flex flex-col md:flex-row items-center gap-10 bg-gradient-to-r from-primary/10 to-transparent p-10 rounded-[3rem] border border-primary/20">
+                 <div className="h-24 w-24 shrink-0 rounded-3xl bg-primary/20 flex items-center justify-center text-primary">
+                    <ShieldCheck className="h-12 w-12" />
+                 </div>
+                 <div>
+                    <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter mb-4 italic">ZERO RISCO. LIBERDADE TOTAL.</h3>
+                    <p className="text-white/60 leading-relaxed font-medium">
+                       Ao contrário de outros sistemas, no AgendarPro **não acreditamos em contratos de fidelização**. Queremos que fique connosco porque o sistema traz resultados, não porque está preso a um contrato.
+                    </p>
+                    <div className="flex flex-wrap gap-4 mt-6">
+                       <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+                          <Check className="h-3 w-3 text-primary" /> Sem Taxas de Cancelamento
+                       </span>
+                       <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+                          <Check className="h-3 w-3 text-primary" /> Sem Fidelização
+                       </span>
+                       <span className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-white/80 bg-white/5 px-4 py-2 rounded-lg border border-white/10">
+                          <Check className="h-3 w-3 text-primary" /> Sem Letras Pequenas
+                       </span>
+                    </div>
+                 </div>
+              </div>
+           </div>
         </section>
 
         {/* PROOF SECTION */}
@@ -346,7 +380,7 @@ export default function SalesPage() {
               <Sparkles className="ml-4 h-8 w-8" />
             </TrialButton>
             <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">
-              Pagamento Seguro via Stripe • Sem Fidelização • Cancele quando quiser
+              Sem Contratos de Fidelização • Sem Taxas de Saída • Liberdade Total
             </p>
           </div>
         </section>
