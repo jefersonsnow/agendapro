@@ -35,10 +35,14 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
   const seo = config?.seo_config ? JSON.parse(config.seo_config) : {}
 
   return {
+    metadataBase: new URL('https://agendar.napp.pt'),
     title: seo.metaTitle || 'agendar.pro - Sistema de Agendamento para Salões',
     description: seo.metaDescription || 'Plataforma completa de gestão e agendamento para salões de beleza e barbearias. Calendário inteligente, gestão de equipa e clientes.',
     keywords: seo.metaKeywords || 'agenda, salão, barbearia, gestão, marcações',
     generator: 'v0.app',
+    alternates: {
+      canonical: '/',
+    },
     openGraph: {
       title: seo.metaTitle || 'agendar.pro',
       description: seo.metaDescription,

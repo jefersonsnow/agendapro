@@ -2,6 +2,7 @@
 
 import { createClient } from "@supabase/supabase-js"
 import { auth } from "@/auth"
+import sharp from "sharp"
 
 export async function uploadFile(formData: FormData) {
   try {
@@ -20,28 +21,42 @@ export async function uploadFile(formData: FormData) {
     const file = formData.get("file") as File
     if (!file) return { error: "Nenhum ficheiro recebido." }
 
-    // --- SEC-005 & SEC-006: Validação de Segurança ---
+    // --- Configurações de Limites e Otimização ---
     const ALLOWED_EXTENSIONS = ["jpg", "jpeg", "png", "webp", "gif"]
-    const MAX_SIZE = 1 * 1024 * 1024 // 1MB
+    const MAX_INPUT_SIZE = 5 * 1024 * 1024 // Aceitamos até 5MB para processar
 
     const fileExtension = file.name.split(".").pop()?.toLowerCase() || ""
     if (!ALLOWED_EXTENSIONS.includes(fileExtension)) {
       return { error: "Extensão de ficheiro não permitida. Use apenas imagens (JPG, PNG, WEBP)." }
     }
 
-    if (file.size > MAX_SIZE) {
-      return { error: "O ficheiro excede o limite de 1MB permitido." }
+    if (file.size > MAX_INPUT_SIZE) {
+      return { error: "O ficheiro original é demasiado grande. Limite máximo: 5MB." }
     }
 
-    const bytes = await file.arrayBuffer()
-    const buffer = Buffer.from(bytes)
+    // 1. Converter File para Buffer para o Sharp processar
+    const arrayBuffer = await file.arrayBuffer()
+    const inputBuffer = Buffer.from(arrayBuffer)
 
-    const filename = `salon-media/${session.user.id}-${Date.now()}.${fileExtension}`
+    // 2. Processamento com SHARP
+    // - Redimensionar (máximo 1200px de largura/altura mantendo proporção)
+    // - Converter para WebP (formato mais eficiente da web)
+    // - Comprimir qualidade para 80% (equilíbrio perfeito entre peso e visual)
+    const optimizedBuffer = await sharp(inputBuffer)
+      .resize(1200, 1200, {
+        fit: "inside",
+        withoutEnlargement: true // Não aumenta se a imagem for pequena
+      })
+      .webp({ quality: 80 })
+      .toBuffer()
+
+    // 3. Nome do ficheiro (sempre .webp agora)
+    const filename = `salon-media/${session.user.id}-${Date.now()}.webp`
 
     const { error: uploadError } = await supabase.storage
       .from("uploads")
-      .upload(filename, buffer, {
-        contentType: file.type,
+      .upload(filename, optimizedBuffer, {
+        contentType: "image/webp",
         upsert: true
       })
 
@@ -55,6 +70,7 @@ export async function uploadFile(formData: FormData) {
 
     return { url: publicUrl }
   } catch (err: any) {
-    return { error: "Erro crítico: " + (err.message || "Erro interno") }
+    console.error("[UPLOAD_ERROR]", err)
+    return { error: "Erro ao processar imagem: " + (err.message || "Erro interno") }
   }
 }

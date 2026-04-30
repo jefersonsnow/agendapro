@@ -182,13 +182,13 @@ export default function ConfiguracoesPage() {
 
   async function handleFileUpload(file: File, type: "logo" | "cover") {
     console.log("DEBUG: File upload detected", { name: file.name, size: file.size, type })
-    if (file.size > 1024 * 1024) {
+    if (file.size > 5 * 1024 * 1024) {
       const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2)
       toast.error("Imagem demasiado grande!", {
-        description: `O ficheiro tem ${fileSizeMB}MB. O limite máximo permitido é 1.00MB.`,
+        description: `O ficheiro tem ${fileSizeMB}MB. O limite máximo permitido para envio é 5.00MB (o sistema irá comprimi-lo automaticamente).`,
         duration: 5000,
       })
-      console.warn(`[UPLOAD] Blokced file ${file.name}: ${fileSizeMB}MB > 1MB`)
+      console.warn(`[UPLOAD] Blocked file ${file.name}: ${fileSizeMB}MB > 5MB`)
       return
     }
 
@@ -791,8 +791,8 @@ export default function ConfiguracoesPage() {
                          onChange={async (e) => {
                             const file = e.target.files?.[0]
                             if (file) {
-                               if (file.size > 1024 * 1024) {
-                                   toast.error("Imagem demasiado grande! O limite para a galeria é de 1MB.")
+                               if (file.size > 5 * 1024 * 1024) {
+                                   toast.error("Imagem demasiado grande! O limite para a galeria é de 5MB.")
                                    return
                                 }
                                 toast.loading("Enviando imagem...", { id: `up-${i}` })
