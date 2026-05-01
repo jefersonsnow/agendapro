@@ -199,7 +199,7 @@ export default function SalesPage() {
                 <div className="mb-10">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-slate-500 mb-4">INICIAL</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">0€</span>
+                    <span className="text-5xl font-black">{planConfigs.minimo.price}€</span>
                     <span className="text-slate-500 font-bold">/mês</span>
                   </div>
                   <p className="text-slate-400 text-sm mt-4 font-medium">Para profissionais que estão a começar.</p>
@@ -225,7 +225,7 @@ export default function SalesPage() {
                 <div className="mb-10">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-primary mb-4">⚡ BASIC</p>
                   <div className="flex items-baseline gap-1">
-                    <span className="text-5xl font-black">19€</span>
+                    <span className="text-5xl font-black">{planConfigs.basic.price}€</span>
                     <span className="text-slate-500 font-bold">/mês</span>
                   </div>
                   <p className="text-slate-400 text-sm mt-4 font-medium">O essencial para o seu salão crescer.</p>
