@@ -68,15 +68,15 @@ export default function SalesPage() {
 
   const planConfigs = {
     minimo: { 
-      price: 0, 
+      price: 19, 
       appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false
     },
     basic: { 
-      price: 19, 
+      price: 29, 
       appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true
     },
     premium: { 
-      price: 49, 
+      price: 39, 
       appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true
     }
   }
@@ -215,8 +215,8 @@ export default function SalesPage() {
                     </li>
                   ))}
                 </ul>
-                <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-slate-800 hover:bg-slate-700 text-white transition-all">
-                  Começar Grátis
+                <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
+                  Assinar Agora
                 </TrialButton>
               </div>
 
@@ -252,9 +252,9 @@ export default function SalesPage() {
                 <div className="mb-10">
                   <p className="text-xs font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">💎 PREMIUM (ILIMITADO)</p>
                   <div className="flex flex-col">
-                    <span className="text-slate-500 line-through text-2xl font-bold">49€</span>
+                    <span className="text-slate-500 line-through text-2xl font-bold">39€</span>
                     <div className="flex items-baseline gap-1">
-                      <span className="text-6xl font-black text-white">24</span>
+                      <span className="text-6xl font-black text-white">19</span>
                       <span className="text-3xl font-black text-white">,50€</span>
                       <span className="text-slate-500 font-bold ml-1">/1º mês</span>
                     </div>
@@ -281,7 +281,7 @@ export default function SalesPage() {
                   Garantir 50% de Desconto
                 </TrialButton>
                 <div className="mt-8 flex flex-col items-center gap-2">
-                   <p className="text-[10px] text-center text-white/40 font-bold uppercase tracking-widest">Preço normal de 49€ após o primeiro mês.</p>
+                   <p className="text-[10px] text-center text-white/40 font-bold uppercase tracking-widest">Preço normal de 39€ após o primeiro mês.</p>
                    <div className="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
                       <ShieldCheck className="h-3 w-3 text-green-400" />
                       <span className="text-[9px] font-black uppercase tracking-widest text-green-400">SEM FIDELIZAÇÃO • CANCELE QUANDO QUISER</span>

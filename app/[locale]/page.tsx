@@ -97,23 +97,23 @@ export default async function HomePage({
     const dynamicHeroDesc = landingPageData.heroDesc || t("heroDesc")
     const dynamicFeaturesTitle = landingPageData.featuresTitle || t("featuresTitle")
     const dynamicPlansTitle = landingPageData.plansTitle || t("plansTitle")
-    const dynamicPriceMinimo = landingPageData.plans?.minimo?.price ?? 0
-    const dynamicPriceBasic = landingPageData.plans?.basic?.price ?? (landingPageData.priceBasic || "19")
-    const dynamicPricePremium = landingPageData.plans?.premium?.price ?? (landingPageData.pricePremium || "49")
+    const dynamicPriceMinimo = landingPageData.plans?.minimo?.price ?? 19
+    const dynamicPriceBasic = landingPageData.plans?.basic?.price ?? (landingPageData.priceBasic || "29")
+    const dynamicPricePremium = landingPageData.plans?.premium?.price ?? (landingPageData.pricePremium || "39")
 
     const planConfigs = {
       minimo: { 
-        price: dynamicPriceMinimo ?? 0, 
+        price: dynamicPriceMinimo ?? 19, 
         appointments_per_month: 50, staff: 1, clients: 100, services: 3, qr_code: false, logo: false, cover: false, reports: false, commissions: false, professional_export: false,
         ...(landingPageData.plans?.minimo || {}) 
       },
       basic: { 
-        price: dynamicPriceBasic ?? 19, 
+        price: dynamicPriceBasic ?? 29, 
         appointments_per_month: -1, staff: 5, clients: 500, services: 20, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
         ...(landingPageData.plans?.basic || {}) 
       },
       premium: { 
-        price: dynamicPricePremium ?? 49, 
+        price: dynamicPricePremium ?? 39, 
         appointments_per_month: -1, staff: -1, clients: -1, services: -1, qr_code: true, logo: true, cover: true, reports: true, commissions: true, professional_export: true,
         ...(landingPageData.plans?.premium || {}) 
       }
