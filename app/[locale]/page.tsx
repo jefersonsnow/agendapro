@@ -401,7 +401,6 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="minimo" 
-                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=19"
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
                     {t("planFreeBtn")}
@@ -431,7 +430,6 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="basic" 
-                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=29"
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
                     {t("planBasicBtn")}
@@ -462,7 +460,6 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="premium" 
-                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=39"
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all"
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
