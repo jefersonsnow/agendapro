@@ -399,7 +399,11 @@ export default async function HomePage({
                       </li>
                     ))}
                   </ul>
-                  <TrialButton plan="minimo" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
+                  <TrialButton 
+                    plan="minimo" 
+                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=19"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
+                  >
                     {t("planFreeBtn")}
                   </TrialButton>
                 </div>
@@ -425,7 +429,11 @@ export default async function HomePage({
                       </li>
                     ))}
                   </ul>
-                  <TrialButton plan="basic" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all">
+                  <TrialButton 
+                    plan="basic" 
+                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=29"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
+                  >
                     {t("planBasicBtn")}
                   </TrialButton>
                 </div>
@@ -452,7 +460,11 @@ export default async function HomePage({
                       </li>
                     ))}
                   </ul>
-                  <TrialButton plan="premium" className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all">
+                  <TrialButton 
+                    plan="premium" 
+                    customRedirectUrl="https://agendar.napp.pt/pagamento-sucesso?valor=39"
+                    className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all"
+                  >
                     <Sparkles className="mr-2 h-5 w-5" />
                     {t("planPremiumBtn")}
                   </TrialButton>

@@ -9,6 +9,7 @@ import { sendMail } from "@/lib/mail"
 import crypto from "crypto"
 import { signUpSchema, signUpWithDetailsSchema, loginSchema } from "@/lib/validations/auth"
 import Stripe from "stripe"
+import { headers } from "next/headers"
 
 export async function signUp(formData: any) {
   const validatedFields = signUpSchema.safeParse(formData)
@@ -131,7 +132,10 @@ export async function signUpWithDetails(formData: any) {
   }
 
   // 6. Criar Sessão de Checkout
-  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"
+  const headersList = await headers()
+  const host = headersList.get("host")
+  const protocol = host?.includes("localhost") ? "http" : "https"
+  const baseUrl = `${protocol}://${host}`
   
   try {
     const session = await stripe.checkout.sessions.create({
@@ -143,7 +147,7 @@ export async function signUpWithDetails(formData: any) {
         },
       ],
       mode: "subscription",
-      success_url: `${baseUrl}/auth/login?success_registration=true`,
+      success_url: `${baseUrl}/pagamento-sucesso?valor=${plan === 'minimo' ? '19' : plan === 'basic' ? '29' : '39'}`,
       cancel_url: `${baseUrl}/?canceled_registration=true`,
       client_reference_id: pending.id,
       customer_email: email,

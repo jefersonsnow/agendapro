@@ -61,7 +61,7 @@ export async function createCheckoutSession(planId: "minimo" | "basic" | "premiu
       tax_id_collection: {
         enabled: true,
       },
-      success_url: `${baseUrl}/dashboard/configuracoes/planos?success=true`,
+      success_url: `${baseUrl}/pagamento-sucesso?valor=${planId === 'minimo' ? '19' : planId === 'basic' ? '29' : '39'}`,
       cancel_url: `${baseUrl}/dashboard/configuracoes/planos?canceled=true`,
       metadata: {
         userId: session.user.id,

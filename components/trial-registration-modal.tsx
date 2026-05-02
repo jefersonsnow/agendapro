@@ -136,6 +136,11 @@ export function TrialRegistrationModal({ isOpen, onClose, plan, customRedirectUr
       })
 
       if (result.success && result.url) {
+        // Facebook Pixel Lead Event
+        if (typeof window !== "undefined" && (window as any).fbq) {
+          (window as any).fbq('track', 'Lead');
+        }
+        
         window.location.assign(result.url)
       } else if (result.error) {
         if (typeof result.error === 'object') {
