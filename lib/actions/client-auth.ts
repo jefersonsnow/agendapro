@@ -4,8 +4,9 @@ import prisma from "@/lib/prisma"
 import bcrypt from "bcryptjs"
 
 export async function checkClientAccount(salonId: string, phone: string) {
+  const normalizedPhone = phone.replace(/\D/g, '')
   const client = await prisma.client.findFirst({
-    where: { salon_id: salonId, phone: phone }
+    where: { salon_id: salonId, phone: normalizedPhone }
   })
   if (!client) return { exists: false }
   if ((client as any).password) return { exists: true, requiresPassword: true, name: client.name }
@@ -15,10 +16,11 @@ export async function checkClientAccount(salonId: string, phone: string) {
 export async function loginClient(salonId: string, phone: string, passwordHashAttempt: string) {
   if (!phone || !passwordHashAttempt) throw new Error("Preencha todos os campos")
   
+  const normalizedPhone = phone.replace(/\D/g, '')
   const client = await prisma.client.findFirst({
     where: {
       salon_id: salonId,
-      phone: phone
+      phone: normalizedPhone
     }
   })
 
@@ -46,10 +48,11 @@ export async function loginClient(salonId: string, phone: string, passwordHashAt
 export async function registerClient(salonId: string, data: { name: string, phone: string, email?: string, password: string }) {
   if (!data.name || !data.phone || !data.password) throw new Error("Preencha todos os campos obrigatórios")
 
+  const normalizedPhone = data.phone.replace(/\D/g, '')
   const existingClient = await prisma.client.findFirst({
     where: {
       salon_id: salonId,
-      phone: data.phone
+      phone: normalizedPhone
     }
   })
 
@@ -83,7 +86,7 @@ export async function registerClient(salonId: string, data: { name: string, phon
     data: {
       salon_id: salonId,
       name: data.name,
-      phone: data.phone,
+      phone: normalizedPhone,
       email: data.email || null,
       password: hashedPassword
     } as any

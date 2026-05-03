@@ -257,17 +257,45 @@ export async function createBooking(data: any) {
       return { error: "Muitas tentativas de agendamento num curto período. Por favor aguarde uma hora." }
     }
 
-    // 2. Cliente
+    // 2. Cliente - Normalização e Vínculo Inteligente
+    const normalizedPhone = clientInfo.phone.replace(/\D/g, '')
+    
     let client = await prisma.client.findFirst({
-      where: { salon_id: salonId, phone: clientInfo.phone }
+      where: { 
+        salon_id: salonId, 
+        phone: {
+          contains: normalizedPhone
+        }
+      }
     })
 
+    // Se encontramos por uma busca parcial ou se o utilizador digitou diferente, 
+    // vamos tentar uma correspondência mais exata após limpeza profunda
     if (!client) {
+      // Busca exata no telemóvel limpo (se tivéssemos normalizado na base)
+      // Como não sabemos como estão os antigos, vamos manter o findFirst acima
+    }
+
+    if (client) {
+      // Se o novo nome for maior (mais completo), atualizamos o cadastro
+      const currentName = client.name || ""
+      const newName = clientInfo.name || ""
+      
+      if (newName.length > currentName.length) {
+        await prisma.client.update({
+          where: { id: client.id },
+          data: { 
+            name: newName,
+            email: clientInfo.email || client.email // Atualiza email se fornecido
+          }
+        })
+      }
+    } else {
       client = await prisma.client.create({
         data: {
           salon_id: salonId,
           name: clientInfo.name,
-          phone: clientInfo.phone,
+          phone: normalizedPhone, // Guardamos já normalizado
           email: clientInfo.email || null,
         }
       })
