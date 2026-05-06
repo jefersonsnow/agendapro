@@ -50,9 +50,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     icons: {
       icon: [
-        { url: '/favicon.png?v=1' },
+        { url: '/favicon.png?v=2', type: 'image/png' },
       ],
-      apple: '/favicon.png?v=1',
+      apple: '/favicon.png?v=2',
     },
   }
 }
