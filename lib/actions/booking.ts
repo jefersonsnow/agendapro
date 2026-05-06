@@ -3,6 +3,8 @@
 import prisma from "@/lib/prisma"
 import { translateText } from "@/lib/translator"
 import { getPlanLimits } from "@/lib/plan-limits"
+import crypto from "crypto"
+import { sendMail } from "@/lib/mail"
 
 export async function getSalonBySlug(slug: string, requestedLocale?: string) {
   const salon = await prisma.salon.findUnique({
@@ -111,7 +113,7 @@ export async function getBusySlots(staffId: string, date: Date) {
   const appointments = await prisma.appointment.findMany({
     where: {
       staff_id: staffId,
-      status: { not: "cancelled" },
+      status: { notIn: ["cancelled", "unconfirmed"] },
       starts_at: { gte: startOfDay, lte: endOfDay }
     },
     select: { starts_at: true, ends_at: true }
@@ -135,7 +137,7 @@ export async function createBooking(data: any) {
     // 1. Validar Salon e Quota
     const salon = await prisma.salon.findUnique({ 
       where: { id: salonId }, 
-      select: { plan: true, working_hours: true, timezone: true } 
+      select: { name: true, plan: true, working_hours: true, timezone: true, requires_email_confirmation: true } 
     })
     
     if (!salon) return { error: "Salão não encontrado." }
@@ -269,13 +271,6 @@ export async function createBooking(data: any) {
       }
     })
 
-    // Se encontramos por uma busca parcial ou se o utilizador digitou diferente, 
-    // vamos tentar uma correspondência mais exata após limpeza profunda
-    if (!client) {
-      // Busca exata no telemóvel limpo (se tivéssemos normalizado na base)
-      // Como não sabemos como estão os antigos, vamos manter o findFirst acima
-    }
-
     if (client) {
       // Se o novo nome for maior (mais completo), atualizamos o cadastro
       const currentName = client.name || ""
@@ -323,8 +318,11 @@ export async function createBooking(data: any) {
 
     if (collision) return { error: "Horário ocupado. Por favor tente outro momento." }
 
+      
     // 4. Gravar Agendamento
-    // targetService já foi validado acima
+    const requiresConfirmation = salon.requires_email_confirmation || false
+    const confirmationToken = requiresConfirmation ? crypto.randomUUID() : null
+    const initialStatus = requiresConfirmation ? "unconfirmed" : "pending"
 
     const appointment = await prisma.appointment.create({
       data: {
@@ -335,17 +333,72 @@ export async function createBooking(data: any) {
         starts_at: startsAtDate,
         ends_at: endsAtDate,
         price: targetService.price,
-        status: "pending",
-        source: "online"
+        status: initialStatus,
+        source: "online",
+        confirmation_token: confirmationToken
+      }
+    })
+
+    // 5. Enviar E-mail de Confirmação se necessário
+    if (requiresConfirmation && client.email) {
+      const confirmLink = `${process.env.NEXT_PUBLIC_APP_URL}/confirmar-agendamento?token=${confirmationToken}`
+      await sendMail({
+        to: client.email,
+        subject: `Confirme o seu agendamento em ${salon.name}`,
+        html: `
+          <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #0D9488;">Olá ${client.name}!</h2>
+            <p>Recebemos o seu pedido de agendamento para <strong>${targetService.name}</strong> no salão <strong>${salon.name}</strong>.</p>
+            <p>Para garantir a sua reserva, por favor clique no botão abaixo para confirmar o seu e-mail:</p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${confirmLink}" style="background-color: #0D9488; color: white; padding: 12px 24px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">CONFIRMAR AGENDAMENTO</a>
+            </div>
+            <p style="font-size: 12px; color: #666;">Se não realizou este pedido, pode ignorar este e-mail.</p>
+            <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;">
+            <p style="font-size: 10px; color: #999; text-align: center;">Powered by AgendarPro</p>
+          </div>
+        `
+      })
+    }
+
+    return { 
+      success: true, 
+      appointmentId: appointment.id,
+      requiresConfirmation
+    }
+  } catch (err: any) {
+    console.error("BOOKING CRASH:", err)
+    return { error: "Erro interno no servidor. Por favor contacte o suporte." }
+  }
+}
+
+export async function confirmAppointmentByToken(token: string) {
+  if (!token) return { error: "Token inválido." }
+
+  try {
+    const appointment = await prisma.appointment.findUnique({
+      where: { confirmation_token: token },
+      include: { salon: { select: { name: true, slug: true } } }
+    })
+
+    if (!appointment) return { error: "Agendamento não encontrado ou link expirado." }
+    if (appointment.status !== "unconfirmed") return { success: true, salonSlug: appointment.salon.slug }
+
+    await prisma.appointment.update({
+      where: { id: appointment.id },
+      data: { 
+        status: "pending", // Move para pendente para o salão ver
+        confirmation_token: null // Limpa o token após uso
       }
     })
 
     return { 
       success: true, 
-      appointmentId: appointment.id 
+      salonName: appointment.salon.name,
+      salonSlug: appointment.salon.slug
     }
-  } catch (err: any) {
-    console.error("BOOKING CRASH:", err)
-    return { error: "Erro interno no servidor. Por favor contacte o suporte." }
+  } catch (err) {
+    console.error("CONFIRMATION ERROR:", err)
+    return { error: "Erro ao confirmar agendamento." }
   }
 }

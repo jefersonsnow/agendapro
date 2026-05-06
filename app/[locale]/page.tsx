@@ -55,43 +55,6 @@ export default async function HomePage({
 
     // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT (Safe Raw Query)
     let landingPageData: any = {}
-    let promotionConfig = { enabled: false, trial_days: 30, promo_text: "" }
-
-    try {
-      const configs = await (prisma as any).$queryRawUnsafe(`SELECT * FROM global_configs WHERE id = 'singleton' LIMIT 1`).catch(() => [])
-      
-      if (configs && configs.length > 0) {
-        const globalConfig = configs[0]
-        
-        if (globalConfig.landing_page) {
-          try {
-            landingPageData = typeof globalConfig.landing_page === 'string' 
-              ? JSON.parse(globalConfig.landing_page) 
-              : globalConfig.landing_page
-          } catch (e) {
-            console.error("Error parsing landing_page JSON:", e)
-          }
-        }
-        
-        if (globalConfig.promotion_config) {
-          try {
-            const dbPromo = typeof globalConfig.promotion_config === 'string'
-              ? JSON.parse(globalConfig.promotion_config)
-              : globalConfig.promotion_config
-            if (dbPromo) promotionConfig = dbPromo
-          } catch (e) {
-            console.error("Error parsing promotion_config JSON:", e)
-          }
-        }
-      }
-    } catch (error) {
-      console.error("Critical error fetching global configs, using defaults:", error)
-    }
-
-    const isPromoActive = promotionConfig.enabled
-    const promoText = promotionConfig.promo_text || "30 Dias de Premium GRÁTIS - Promoção de Lançamento!"
-    const promoDays = promotionConfig.trial_days || 30
-
     const dynamicHeroTitle1 = landingPageData.heroTitle1 || t("heroTitle1")
     const dynamicHeroTitle2 = landingPageData.heroTitle2 || t("heroTitle2")
     const dynamicHeroDesc = landingPageData.heroDesc || t("heroDesc")
@@ -151,15 +114,7 @@ export default async function HomePage({
       <div className="theme-magenta min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/30">
         {/* Navbar com Banner Promocional */}
         <div className="flex flex-col">
-          {isPromoActive && (
-            <div className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x text-white py-2 text-center text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] shadow-lg relative z-[60]">
-              <div className="container mx-auto px-4 flex items-center justify-center gap-3">
-                <Sparkles className="h-4 w-4 animate-pulse" />
-                <span>{promoText}</span>
-                <Sparkles className="h-4 w-4 animate-pulse ml-1" />
-              </div>
-            </div>
-          )}
+
           <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
               <div className="flex items-center gap-2 group cursor-pointer">

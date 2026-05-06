@@ -452,7 +452,7 @@ export async function upsertStaff(id: string | null, data: any) {
     }
     
     if (!userId) {
-       // Verifica se já existe um user com este email (contexto global ou deste salão)
+       // Verifica se já existe um user with this email (contexto global ou deste salão)
        const existingUser = await prisma.user.findFirst({ where: { email: data.email } })
        if (existingUser) {
            // Se já existe, só vinculamos se ele já for deste salão (prevenir roubo de contas)
@@ -632,6 +632,7 @@ export async function updateSalonSettings(data: any) {
     locale: data.locale,
     timezone: data.timezone,
     color_palette: data.color_palette || "default",
+    requires_email_confirmation: !!data.requires_email_confirmation,
   }
 
   // Só permite atualizar logo e cover se o plano permitir
@@ -653,67 +654,45 @@ export async function updateSalonSettings(data: any) {
   revalidatePath("/[locale]/[slug]/agendar")
   revalidatePath("/[locale]/[slug]")
 }
-
-export async function getUserRole() {
+export const getUserRole = cache(async function getUserRole() {
   const session = await auth()
-  if (!session?.user?.id) return { role: "professional", name: "", image: null, status: "active", plan: "minimo", trialEndsAt: null }
-  
-  try {
-     // Buscar papel (role), nome e imagem diretamente na BD por ID ou Email
-     const user = await prisma.user.findFirst({
-       where: { 
-         OR: [
-           { id: session.user.id },
-           { email: session.user.email as string }
-         ]
-       },
-       select: { role: true, name: true, image: true, email: true }
-     })
-
-     console.log("DEBUG: User in DB:", user?.email, "Role:", user?.role)
-
-     const salonId = await getSalonId()
-     let status = "active"
-     let plan = "minimo"
-     let trialEndsAt = null
-     let salonSlug = ""
-      let colorPalette = "default"
-     
-     if (salonId) {
-        const salon = await (prisma as any).salon.findUnique({
-           where: { id: salonId },
-                       select: { status: true, plan: true, trial_ends_at: true, slug: true, color_palette: true }
-        })
-        
-        status = salon?.status || "active"
-        plan = salon?.plan || "minimo"
-        trialEndsAt = salon?.trial_ends_at
-        salonSlug = (salon as any)?.slug || ""
-         colorPalette = (salon as any)?.color_palette || "default"
-        plan = salon?.plan || "minimo"
-     }
-
-     const result = { 
-       role: user?.role || "professional", 
-       name: user?.name || session.user.name || "",
-       image: user?.image || session.user.image || null,
-       status: status,
-       plan: plan,
-       trialEndsAt: trialEndsAt,
-               salonSlug: salonSlug,
-        colorPalette: colorPalette
-     }
-
-
-     
-     return result
-  } catch (err) {
-     console.error("DEBUG: Error in getUserRole:", err)
-     return { role: "professional", name: session.user.name || "", image: session.user.image || null, status: "active", plan: "minimo", trialEndsAt: null }
+  if (!session?.user?.id) {
+    return { role: "professional", name: "", image: null, status: "active", plan: "minimo", trialEndsAt: null, salonSlug: "", colorPalette: "default" }
   }
-}
+
+  try {
+    const user = await prisma.user.findFirst({
+      where: { OR: [{ id: session.user.id }, { email: session.user.email as string }] },
+      select: { role: true, name: true, image: true, ownedSalons: { select: { status: true, plan: true, trial_ends_at: true, slug: true, color_palette: true }, take: 1 } }
+    })
+
+    let salon: any = user?.ownedSalons?.[0] || null
+    if (!salon) {
+      const staffMember = await prisma.staff.findFirst({
+        where: { OR: [{ user_id: session.user.id }, { email: session.user.email as string }] },
+        select: { salon: { select: { status: true, plan: true, trial_ends_at: true, slug: true, color_palette: true } } }
+      })
+      salon = staffMember?.salon || null
+    }
+
+    return {
+      role: user?.role || "professional",
+      name: user?.name || session.user.name || "",
+      image: user?.image || session.user.image || null,
+      status: salon?.status || "active",
+      plan: salon?.plan || "minimo",
+      trialEndsAt: salon?.trial_ends_at || null,
+      salonSlug: salon?.slug || "",
+      colorPalette: salon?.color_palette || "default"
+    }
+  } catch (err) {
+    console.error("Error in getUserRole:", err)
+    return { role: "professional", name: session.user.name || "", image: session.user.image || null, status: "active", plan: "minimo", trialEndsAt: null, salonSlug: "", colorPalette: "default" }
+  }
+})
 
 export async function getStaffStats(startDate?: Date, endDate?: Date) {
+
   const session = await auth()
   if (!session?.user?.id) return null
 

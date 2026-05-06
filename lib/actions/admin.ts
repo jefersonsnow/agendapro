@@ -259,7 +259,7 @@ export async function getGlobalConfig() {
   return JSON.parse(JSON.stringify(config))
 }
 
-export async function updateGlobalConfig(data: { landing_page?: any, kiwify_configs?: any, stripe_configs?: any, support_config?: any, promotion_config?: any, seo_config?: any, sales_page_config?: any, welcome_email_config?: any }) {
+export async function updateGlobalConfig(data: { landing_page?: any, kiwify_configs?: any, stripe_configs?: any, support_config?: any, seo_config?: any, sales_page_config?: any, welcome_email_config?: any, promotion_config?: any }) {
   await checkAdmin()
   
   const updateData: any = {
@@ -269,10 +269,11 @@ export async function updateGlobalConfig(data: { landing_page?: any, kiwify_conf
   if (data.kiwify_configs) updateData.kiwify_configs = JSON.stringify(data.kiwify_configs)
   if (data.stripe_configs) updateData.stripe_configs = JSON.stringify(data.stripe_configs)
   if (data.support_config) updateData.support_config = JSON.stringify(data.support_config)
-  if (data.promotion_config) updateData.promotion_config = JSON.stringify(data.promotion_config)
+
   if (data.seo_config) updateData.seo_config = JSON.stringify(data.seo_config)
   if (data.sales_page_config) updateData.sales_page_config = JSON.stringify(data.sales_page_config)
   if (data.welcome_email_config) updateData.welcome_email_config = JSON.stringify(data.welcome_email_config)
+  if (data.promotion_config) updateData.promotion_config = JSON.stringify(data.promotion_config)
 
   await (prisma as any).globalConfig.upsert({
     where: { id: 'singleton' },
@@ -284,7 +285,6 @@ export async function updateGlobalConfig(data: { landing_page?: any, kiwify_conf
       kiwify_configs: updateData.kiwify_configs || '{}',
       stripe_configs: updateData.stripe_configs || '{}',
       support_config: updateData.support_config || '{}',
-      promotion_config: updateData.promotion_config || '{}',
       seo_config: updateData.seo_config || '{}',
       sales_page_config: updateData.sales_page_config || '{}',
       welcome_email_config: updateData.welcome_email_config || '{}'

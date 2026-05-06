@@ -69,9 +69,9 @@
     "welcomeBack": "Bem-vindo de volta!",
     "identifyBooking": "Como podemos identificar o seu agendamento?",
     "enterPassword": "Por favor, digite a sua palavra-passe para confirmar.",
-    "fullName": "Nome Completo",
     "phone": "Telemóvel",
-    "password": "Palavra-passe",
+    "email": "E-mail",
+    "fullName": "Nome Completo",
     "useOtherContact": "Usar outro contacto",
     "verify": "A verificar...",
     "viewSummary": "Ver Resumo",
@@ -85,6 +85,9 @@
     "saveBooking": "GUARDAR AGENDAMENTO",
     "bookingConfirmed": "Reserva Confirmada!",
     "bookingSuccessDesc": "A sua reserva foi registada com sucesso.",
+    "confirmationPending": "Confirmação Pendente",
+    "confirmationPendingDesc": "Enviámos um link de confirmação para o seu e-mail. Por favor, clique no link para validar a sua reserva.",
+    "checkSpam": "Não se esqueça de verificar a sua caixa de SPAM.",
     "backToHome": "Voltar ao Início",
     "salonNotFound": "Salão não encontrado",
     "salonNotFoundDesc": "O salão que procura não existe ou foi removido.",
@@ -149,6 +152,7 @@
     "amTheme": "Cor do Tema Principal",
     "services": "Modo de Apresentação dos Serviços",
     "servicesDesc": "Como os tratamentos são exibidos na página",
+    "status": "Estado",
     "servLayout": "Estrutura",
     "servGrid": "Grelha Clássica (Ideal para Desktop)",
     "servCarousel": "Carrossel de Cartões (Otimizado Mobile)",
@@ -185,7 +189,6 @@
     "slot15": "A cada 15 minutos",
     "slot30": "A cada 30 minutos",
     "model": "Modelo Geral",
-
     "socialTitle": "Links Sociais",
     "monday": "Segunda-feira",
     "tuesday": "Terça-feira",
@@ -207,7 +210,11 @@
     "exportItems": "O que será exportado: Base de Clientes, Serviços, Agendamentos e Fluxo de Caixa.",
     "exportBtn": "GERAR PLANILHA EXCEL (XLSX)",
     "exportSuccess": "Planilha gerada com sucesso!",
-    "exportError": "Erro ao gerar planilha. Tente novamente."
+    "exportError": "Erro ao gerar planilha. Tente novamente.",
+    "securitySection": "Segurança e Confirmação",
+    "securityDesc": "Controle como a autenticidade dos agendamentos é garantida",
+    "requiresEmailConfirmation": "Double Opt-in (Verificação por E-mail)",
+    "requiresEmailConfirmationDesc": "Quando ativado, o agendamento só será confirmado após o cliente clicar no link enviado para o e-mail dele. Ideal para evitar reservas falsas ou acidentais."
   },
   "Home": {
     "navFeatures": "Recursos",
@@ -273,7 +280,7 @@
   },
   "Modal": {
     "trial": {
-    "title": "Criar Conta AgendarPro",
+      "title": "Criar Conta AgendarPro",
       "subtitle": "Após preencher os dados, será redirecionado para o pagamento seguro via Cartão de Crédito.",
       "successTitle": "Registo Efetuado!",
       "success": "Os seus dados de acesso foram enviados para o e-mail cadastrado. Verifique também a sua caixa de SPAM.",

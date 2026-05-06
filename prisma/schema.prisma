@@ -32,6 +32,7 @@ model Salon {
   trial_ends_at    DateTime?
   nif              String?
   color_palette    String        @default("default")
+  requires_email_confirmation Boolean @default(false)
 
   appointments     Appointment[]
   cash_closings    CashClosing[]
@@ -235,6 +236,7 @@ model Appointment {
   notes        String?       @db.Text
   source       String        @default("online")
   is_break     Boolean       @default(false)
+  confirmation_token String? @unique
   created_at   DateTime      @default(now())
   updated_at   DateTime      @updatedAt
   client       Client?       @relation(fields: [client_id], references: [id])

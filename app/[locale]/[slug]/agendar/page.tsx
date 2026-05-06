@@ -2,6 +2,7 @@
 "use client"
 
 import { useState, useEffect, use } from "react"
+import { toast } from "sonner"
 import { getSalonBySlug, getBusySlots, createBooking } from "@/lib/actions/booking"
 import { checkClientAccount, loginClient } from "@/lib/actions/client-auth"
 import { Button } from "@/components/ui/button"
@@ -9,6 +10,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Calendar, Clock, Check, ChevronLeft, User, Phone, Mail, MapPin, MessageCircle } from "lucide-react"
+
+
 import { cn } from "@/lib/utils"
 import { useTranslations } from "next-intl"
 
@@ -24,6 +27,7 @@ interface Salon {
   working_hours: any
   settings: any
   timezone: string | null
+  requires_email_confirmation: boolean
 }
 
 interface Service {
@@ -74,9 +78,10 @@ export default function BookingPage({
   const [checkLoading, setCheckLoading] = useState(false)
   const [passwordInput, setPasswordInput] = useState("")
   const [submitting, setSubmitting] = useState(false)
-  const [bookingComplete, setBookingComplete] = useState(false)
-  const [busySlots, setBusySlots] = useState<{ start: Date; end: Date }[]>([])
   const [fetchingSlots, setFetchingSlots] = useState(false)
+  const [bookingComplete, setBookingComplete] = useState(false)
+  const [requiresConfirmation, setRequiresConfirmation] = useState(false)
+  const [busySlots, setBusySlots] = useState<{ start: Date; end: Date }[]>([])
 
   useEffect(() => {
     fetchSalonData()
@@ -115,15 +120,11 @@ export default function BookingPage({
     setFetchingSlots(true)
     try {
       const rawSlots = await getBusySlots(selectedStaff.id, selectedDate)
-      console.log("Slots brutos recebidos:", rawSlots); // Debug
-      
       const parsedSlots = (rawSlots || []).map((slotItem: any) => {
         const processDateMethod = (d: any) => {
           if (!d) return new Date();
           const dateObj = new Date(d);
           if (isNaN(dateObj.getTime())) return new Date();
-          
-          // Extraímos os componentes de tempo literal (UTC) para criar a data "Wall Clock" local
           return new Date(
             dateObj.getUTCFullYear(),
             dateObj.getUTCMonth(),
@@ -132,13 +133,11 @@ export default function BookingPage({
             dateObj.getUTCMinutes()
           );
         };
-
         return {
           start: processDateMethod(slotItem.start),
           end: processDateMethod(slotItem.end)
         };
       })
-
       setBusySlots(parsedSlots)
     } catch (error) {
       console.error("Erro crítico na agenda:", error)
@@ -348,17 +347,21 @@ export default function BookingPage({
         endsAt: endsAt.toISOString(),
         clientInfo
       })
-
       if (res?.error) {
-         alert("Erro no Agendamento: " + res.error)
-         return
+        alert("Erro no Agendamento: " + res.error)
+        return
       }
 
       if (res?.success) {
-         setBookingComplete(true)
+        setBookingComplete(true)
+        if (res.requiresConfirmation) {
+           setRequiresConfirmation(true)
+        }
+        toast.success("Reserva realizada com sucesso!")
       } else {
-         alert("Ocorreu um problema inesperado ao finalizar a reserva.")
+        alert("Ocorreu um problema inesperado ao finalizar a reserva.")
       }
+
     } catch (error: any) {
       console.error("Erro ao criar agendamento:", error)
       const errorMsg = error.message || "Ocorreu um erro ao fazer a reserva. Tente novamente."
@@ -457,10 +460,13 @@ export default function BookingPage({
           <div className={cn("w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4", themeStyles.badge)}>
             <Check className="h-8 w-8" />
           </div>
-          <h2 className="text-2xl font-bold mb-2">{t("bookingConfirmed")}</h2>
-
-          <p className="opacity-60 mb-6">
-            {t("bookingSuccessDesc")}
+          <h2 className="text-2xl font-bold mb-2">
+            {requiresConfirmation ? "Agendamento pré-confirmado!" : "Agendamento Realizado!"}
+          </h2>
+          <p className="text-muted-foreground mb-6">
+            {requiresConfirmation 
+              ? "Enviamos um e-mail para você. Por favor, clique no link de confirmação para garantir sua reserva."
+              : "Sua reserva foi confirmada e já está na agenda do profissional."}
           </p>
           <div className="bg-muted/50 rounded-lg p-4 text-left space-y-2 mb-6 text-sm">
             <div className="flex justify-between">
@@ -788,6 +794,19 @@ export default function BookingPage({
                           className={cn("h-12 border-2", themeStyles.card)}
                         />
                       </div>
+                      {salon?.requires_email_confirmation && (
+                        <div className="space-y-2">
+                          <Label htmlFor="email" className="text-xs uppercase font-bold opacity-60">{t("email")}</Label>
+                          <Input
+                            id="email"
+                            type="email"
+                            value={clientInfo.email}
+                            onChange={(e) => setClientInfo({ ...clientInfo, email: e.target.value })}
+                            placeholder="exemplo@email.com"
+                            className={cn("h-12 border-2", themeStyles.card)}
+                          />
+                        </div>
+                      )}
                    </>
                 ) : (
                    <div className="space-y-3">
@@ -817,7 +836,7 @@ export default function BookingPage({
 
             <Button
               className={cn("w-full h-14 text-lg font-bold shadow-lg", themeStyles.primary, themeStyles.button)}
-              disabled={infoStepMode === "guest" ? (!clientInfo.name || !clientInfo.phone) : (!passwordInput)}
+              disabled={infoStepMode === "guest" ? (!clientInfo.name || !clientInfo.phone || (salon?.requires_email_confirmation && !clientInfo.email)) : (!passwordInput)}
               onClick={handleInfoNext}
             >
               {checkLoading ? t("verify") : (infoStepMode === "guest" ? t("viewSummary") : t("authAndContinue"))}

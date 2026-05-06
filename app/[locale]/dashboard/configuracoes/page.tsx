@@ -92,24 +92,20 @@ export default function ConfiguracoesPage() {
     social_facebook: "",
     social_whatsapp: "",
     about_link: "",
-    // Amenidades Config
     amenities_layout: "grid",
     amenities_style: "card",
     amenities_color: "theme",
-    // SERVIÇOS Config (Novo!)
-    services_layout: "grid", // grid, carousel, list
-    services_style: "card", // card, compact
-    services_subtitles: {} as Record<string, string>, // Novo objeto de traduções
+    services_layout: "grid",
+    services_style: "card",
+    services_subtitles: {} as Record<string, string>,
     logo_url: "",
-
-
     cover_url: "",
     locale: "pt",
     timezone: "Europe/Lisbon",
     slot_interval: 15,
     color_palette: "default",
+    requires_email_confirmation: false,
   })
-  
   const [galleryUrls, setGalleryUrls] = useState(["", "", "", ""])
   const [selectedAmenities, setSelectedAmenities] = useState<string[]>([])
   const [workingHours, setWorkingHours] = useState<
@@ -153,10 +149,10 @@ export default function ConfiguracoesPage() {
         services_subtitles: settings.services_subtitles || {},
         locale: data.locale || "pt",
         timezone: data.timezone || "Europe/Lisbon",
-        slot_interval: settings.slot_interval || 15,
-        color_palette: (data as any).color_palette || "default",
+        slot_interval: data.slot_interval || 15,
+        color_palette: data.color_palette || "default",
+        requires_email_confirmation: !!data.requires_email_confirmation,
       })
-      
       if (settings.gallery_urls) setGalleryUrls(settings.gallery_urls)
       if (settings.amenities) setSelectedAmenities(settings.amenities)
 
@@ -1084,7 +1080,6 @@ export default function ConfiguracoesPage() {
         </Card>
       </div>
 
-      {/* NOVO: CONFIGURAÇÃO DE AGENDAMENTO */}
       <Card className="border-2 border-primary/10 bg-primary/5">
         <CardHeader>
           <CardTitle className="text-lg flex items-center gap-2"> <MousePointer2 className="h-5 w-5 text-primary" /> {t("bookingConfig")} </CardTitle>
@@ -1102,6 +1097,25 @@ export default function ConfiguracoesPage() {
                     <SelectItem value="30">{t("slot30")}</SelectItem>
                  </SelectContent>
               </Select>
+           </div>
+        </CardContent>
+      </Card>
+
+      <Card className="border-2 border-amber-500/10 bg-amber-500/5">
+        <CardHeader>
+          <CardTitle className="text-lg flex items-center gap-2"> <ShieldCheck className="h-5 w-5 text-amber-500" /> {t("securitySection")} </CardTitle>
+          <CardDescription>{t("securityDesc")}</CardDescription>
+        </CardHeader>
+        <CardContent>
+           <div className="flex items-center justify-between p-4 border-2 rounded-xl bg-background shadow-sm">
+              <div className="space-y-0.5">
+                 <Label className="text-base font-bold">{t("requiresEmailConfirmation")}</Label>
+                 <p className="text-sm text-muted-foreground max-w-[400px] leading-relaxed">{t("requiresEmailConfirmationDesc")}</p>
+              </div>
+              <Switch 
+                checked={formData.requires_email_confirmation} 
+                onCheckedChange={(checked) => setFormData({ ...formData, requires_email_confirmation: checked })} 
+              />
            </div>
         </CardContent>
       </Card>

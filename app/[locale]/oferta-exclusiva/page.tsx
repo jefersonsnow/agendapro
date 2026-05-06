@@ -274,7 +274,6 @@ export default function SalesPage() {
                 </ul>
                 <TrialButton 
                   plan="premium" 
-                  customRedirectUrl="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
                   className="w-full h-20 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/40 transition-all scale-110"
                 >
                   <Sparkles className="mr-2 h-6 w-6" />
@@ -375,7 +374,6 @@ export default function SalesPage() {
             </p>
             <TrialButton 
               plan="premium" 
-              customRedirectUrl="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
               className="rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white"
             >
               Quero os meus 50% de Desconto

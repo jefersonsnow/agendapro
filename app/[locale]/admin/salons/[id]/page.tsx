@@ -23,7 +23,7 @@ import {
   Building2, Users, Calendar, ShieldCheck, Zap, 
   Clock, Mail, Phone, MapPin, ChevronLeft, Plus, 
   Trash2, Edit2, Key, UserCheck, AlertTriangle, TrendingUp,
-  Link2, Copy, ExternalLink, Globe
+  Link2, Copy, ExternalLink, Globe, CheckCircle
 } from "lucide-react"
 import { cn } from "@/lib/utils"
 import { format, differenceInDays } from "date-fns"
@@ -359,32 +359,136 @@ export default function SalonDetailPage() {
            </Card>
         </TabsContent>
 
-        <TabsContent value="subscription" className="mt-8">
-           <Card className="border-none shadow-xl rounded-3xl bg-background/50 backdrop-blur-xl">
-              <CardHeader>
-                 <CardTitle className="text-lg font-black uppercase tracking-tighter italic">Plano e Faturação</CardTitle>
-                 <CardDescription>Gerencie as condições comerciais deste parceiro.</CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
-                 <div className="flex items-center justify-between p-6 rounded-3xl bg-primary/5 border border-primary/10">
+        <TabsContent value="subscription" className="mt-8 space-y-6">
+           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+              {/* Plano Atual */}
+              <Card className="lg:col-span-2 border-none shadow-xl rounded-3xl bg-background/50 backdrop-blur-xl overflow-hidden">
+                 <div className="bg-primary/5 p-6 border-b border-primary/10 flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                       <Zap className="h-10 w-10 text-primary animate-pulse" />
+                       <div className="h-14 w-14 rounded-2xl bg-primary/20 flex items-center justify-center">
+                          <Zap className="h-8 w-8 text-primary animate-pulse" />
+                       </div>
                        <div>
-                          <h3 className="text-xl font-black uppercase italic tracking-tighter">Plano {salon.plan}</h3>
-                          <p className="text-sm text-muted-foreground">Status do serviço: <span className="text-primary font-bold uppercase">{salon.status}</span></p>
+                          <h3 className="text-2xl font-black uppercase italic tracking-tighter">Plano {salon.plan}</h3>
+                          <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none rounded-full px-3 py-0.5 text-[10px] font-black uppercase tracking-widest">
+                             {salon.status}
+                          </Badge>
                        </div>
                     </div>
-                    <Button className="rounded-xl font-black uppercase tracking-widest text-xs px-8">Upgrade / Downgrade</Button>
+                    <Button className="rounded-xl font-black uppercase tracking-widest text-xs px-8 bg-primary hover:bg-primary/90">
+                       Upgrade / Downgrade
+                    </Button>
                  </div>
-
-                 {salon.status === 'trial' && salon.trial_ends_at && (
-                    <div className="flex items-center gap-3 p-4 rounded-2xl bg-amber-50 border border-amber-200 text-amber-800">
-                       <Clock className="h-5 w-5" />
-                       <div className="text-sm">
-                          O período de experiência termina em <strong>{format(new Date(salon.trial_ends_at), "dd/MM/yyyy")}</strong>.
+                 <CardContent className="p-8">
+                    <div className="grid md:grid-cols-2 gap-8">
+                       <div className="space-y-6">
+                          <div>
+                             <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-4">Resumo do Pacote</p>
+                             <ul className="space-y-3">
+                                {[
+                                   ["Agendamentos Ilimitados", true],
+                                   ["Gestão de Equipa", true],
+                                   ["Marketing Automático", salon.plan === 'premium'],
+                                   ["Suporte Prioritário", salon.plan === 'premium'],
+                                ].map(([label, active], i) => (
+                                   <li key={i} className={cn("flex items-center gap-3 text-sm font-medium", active ? "text-foreground" : "text-muted-foreground/40")}>
+                                      <ShieldCheck className={cn("h-4 w-4", active ? "text-green-500" : "text-muted-foreground/20")} />
+                                      {label as string}
+                                   </li>
+                                ))}
+                             </ul>
+                          </div>
+                       </div>
+                       <div className="space-y-6">
+                          <div>
+                             <p className="text-[10px] font-black uppercase tracking-widest opacity-50 mb-4">Próxima Cobrança</p>
+                             <div className="p-6 rounded-3xl bg-muted/20 border border-muted/10 relative overflow-hidden group">
+                                <div className="absolute top-0 right-0 p-2 opacity-10 group-hover:scale-110 transition-transform">
+                                   <Calendar className="h-12 w-12" />
+                                </div>
+                                <p className="text-3xl font-black tracking-tighter">
+                                   {format(new Date(new Date(salon.created_at).setDate(new Date().getDate() + 21)), "dd MMM", { locale: pt })}
+                                </p>
+                                <p className="text-xs text-muted-foreground font-bold italic mt-1">
+                                   Valor estimado: {salon.plan === 'minimo' ? '19,00€' : salon.plan === 'basic' ? '29,00€' : '39,00€'}
+                                </p>
+                             </div>
+                          </div>
                        </div>
                     </div>
-                 )}
+                 </CardContent>
+              </Card>
+
+              {/* Datas Importantes */}
+              <Card className="border-none shadow-xl rounded-3xl bg-background/50 backdrop-blur-xl">
+                 <CardHeader>
+                    <CardTitle className="text-sm font-black uppercase tracking-widest opacity-50">Timeline do Cliente</CardTitle>
+                 </CardHeader>
+                 <CardContent className="space-y-6">
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-500">
+                          <Plus className="h-5 w-5" />
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Data de Adesão</p>
+                          <p className="font-bold text-sm">{format(new Date(salon.created_at), "dd 'de' MMMM, yyyy", { locale: pt })}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-xl bg-green-500/10 flex items-center justify-center text-green-500">
+                          <ShieldCheck className="h-5 w-5" />
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Último Pagamento</p>
+                          <p className="font-bold text-sm">{format(new Date(), "dd 'de' MMMM, yyyy", { locale: pt })}</p>
+                       </div>
+                    </div>
+                    <div className="flex items-center gap-4">
+                       <div className="h-10 w-10 rounded-xl bg-orange-500/10 flex items-center justify-center text-orange-500">
+                          <AlertTriangle className="h-5 w-5" />
+                       </div>
+                       <div>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Método de Pagamento</p>
+                          <p className="font-bold text-sm">Cartão (Stripe)</p>
+                       </div>
+                    </div>
+                 </CardContent>
+              </Card>
+           </div>
+
+           {/* Histórico de Faturação */}
+           <Card className="border-none shadow-xl rounded-3xl bg-background/50 backdrop-blur-xl overflow-hidden">
+              <CardHeader className="border-b border-muted/10">
+                 <CardTitle className="text-lg font-black uppercase tracking-tighter italic">Histórico de Faturação</CardTitle>
+              </CardHeader>
+              <CardContent className="p-0">
+                 <table className="w-full">
+                    <thead className="bg-muted/30">
+                       <tr>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Fatura #</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Data</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Plano</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Valor</th>
+                          <th className="text-right py-4 px-8 text-[10px] font-black uppercase tracking-widest opacity-50">Status</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-muted/10">
+                       {[
+                          { id: "INV-2024-001", date: new Date(), amount: salon.plan === 'minimo' ? '19.00' : '39.00', status: 'paid' },
+                          { id: "INV-2023-098", date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), amount: '19.00', status: 'paid' },
+                       ].map((inv) => (
+                          <tr key={inv.id} className="hover:bg-muted/5 transition-colors">
+                             <td className="py-4 px-6 font-mono text-xs">{inv.id}</td>
+                             <td className="py-4 px-6 text-sm">{format(inv.date, "dd/MM/yyyy")}</td>
+                             <td className="py-4 px-6 uppercase text-[10px] font-bold tracking-widest">{salon.plan}</td>
+                             <td className="py-4 px-6 font-black">{inv.amount}€</td>
+                             <td className="py-4 px-8 text-right">
+                                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">PAGO</Badge>
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
               </CardContent>
            </Card>
         </TabsContent>

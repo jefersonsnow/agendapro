@@ -52,14 +52,14 @@ export async function getAgendaInitialData() {
     return {
       salonId,
       workingHours: salon?.working_hours ? (typeof salon.working_hours === 'string' ? JSON.parse(salon.working_hours) : salon.working_hours) : null,
-      staff: JSON.parse(JSON.stringify(staff)),
-      services: JSON.parse(JSON.stringify(services)).map((s: any) => ({
+      staff,
+      services: services.map((s: any) => ({
         ...s,
         price: Number(s.price),
         staffIds: (s.staff || []).map((ss: any) => ss.staff_id),
         staff: undefined
       })),
-      clients: JSON.parse(JSON.stringify(clients)),
+      clients,
       isProfessional,
       userRole: session?.user?.role || "owner"
     }
@@ -68,12 +68,12 @@ export async function getAgendaInitialData() {
     return {
       salonId,
       workingHours: null,
-      staff: JSON.parse(JSON.stringify(staff)),
-      services: JSON.parse(JSON.stringify(services)).map((s: any) => ({
+      staff,
+      services: services.map((s: any) => ({
         ...s,
         price: Number(s.price)
       })),
-      clients: JSON.parse(JSON.stringify(clients)),
+      clients,
       isProfessional,
       userRole: session?.user?.role || "owner"
     }
@@ -103,7 +103,8 @@ export async function getAppointments(startDate: Date, endDate: Date, filterStaf
     where: {
       salon_id: salonId,
       starts_at: { gte: startDate, lt: endDate },
-      staff_id: staffId
+      staff_id: staffId,
+      status: { not: "unconfirmed" },
     },
     include: {
       staff: { select: { id: true, name: true, color: true } },
@@ -113,7 +114,7 @@ export async function getAppointments(startDate: Date, endDate: Date, filterStaf
     orderBy: { starts_at: "asc" }
   })
 
-  return JSON.parse(JSON.stringify(appointments)).map((apt: any) => ({
+  return appointments.map((apt: any) => ({
     ...apt,
     price: Number(apt.price),
     service: apt.service ? { ...apt.service, price: Number(apt.service.price) } : null
@@ -344,7 +345,7 @@ export async function upsertAppointment(id: string | null, data: any) {
       await syncClientStats(clientId, clientPointChange)
     }
     
-    revalidatePath("/", "layout")
+    revalidatePath("/dashboard/agenda")
     return { success: true }
   } catch (error) {
     console.error("Erro ao guardar agendamento:", error)
@@ -381,7 +382,7 @@ export async function deleteAppointment(id: string) {
        await syncClientStats(appointment.client_id, pointChange)
     }
 
-    revalidatePath("/", "layout")
+    revalidatePath("/dashboard/agenda")
     return { success: true }
   } catch (error) {
     console.error("Erro ao excluir agendamento:", error)

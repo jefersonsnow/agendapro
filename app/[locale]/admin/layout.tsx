@@ -1,10 +1,9 @@
 // <title> <meta name="description" content="SEO" /> <Head>
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
-import { Calendar, Building2, Users, LayoutDashboard, Settings, LogOut, ShieldCheck, MessageSquare } from "lucide-react"
-import { logoutAdmin } from "@/lib/actions/auth"
 import Link from "next/link"
-import { Button } from "@/components/ui/button"
+import { Calendar, Building2, Users, LayoutDashboard, Settings, LogOut, ShieldCheck, MessageSquare } from "lucide-react"
+import { AdminSidebarFooter } from "./sidebar-footer"
 
 export default async function AdminLayout({
   children,
@@ -15,6 +14,13 @@ export default async function AdminLayout({
 
   if (!session?.user || session.user.role !== "admin") {
       redirect("/dashboard")
+  }
+
+  const adminUser = {
+    id: session.user.id || "",
+    name: session.user.name,
+    email: session.user.email,
+    role: session.user.role
   }
 
   return (
@@ -36,9 +42,8 @@ export default async function AdminLayout({
             {[
               { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
               { icon: Building2, label: "Salões", href: "/admin/salons" },
-              { icon: Users, label: "Utilizadores", href: "/admin/users" },
+              { icon: Settings, label: "Gestão de Configurações", href: "/admin/users" },
               { icon: MessageSquare, label: "Tickets Suporte", href: "/admin/tickets" },
-              { icon: Settings, label: "Sistema", href: "/admin/system" },
             ].map((item) => (
               <Link
                 key={item.href}
@@ -52,23 +57,7 @@ export default async function AdminLayout({
           </nav>
         </div>
 
-        <div className="absolute bottom-0 w-64 p-4 border-t">
-          <div className="flex items-center gap-3 mb-4 px-2">
-            <div className="h-8 w-8 rounded-full bg-muted flex items-center justify-center text-xs font-bold">
-              SA
-            </div>
-            <div className="flex-1 overflow-hidden">
-              <p className="text-sm font-medium truncate">{session.user.name || "Admin"}</p>
-              <p className="text-xs text-muted-foreground truncate">{session.user.email}</p>
-            </div>
-          </div>
-          <form action={logoutAdmin}>
-             <Button variant="ghost" type="submit" className="w-full justify-start text-muted-foreground hover:text-foreground">
-                <LogOut className="h-4 w-4 mr-2" />
-                Sair
-             </Button>
-          </form>
-        </div>
+        <AdminSidebarFooter user={adminUser} />
       </aside>
 
       {/* Main Content */}
