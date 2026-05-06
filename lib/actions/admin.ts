@@ -8,7 +8,6 @@ import { getGlobalConfigCache } from "@/lib/dal"
 
 async function checkAdmin() {
   const session = await auth()
-  console.log("Admin Check Session:", session?.user?.email, "Role:", session?.user?.role)
   if (session?.user?.role !== "admin") {
     throw new Error("Não autorizado. Apenas administradores podem realizar esta ação.")
   }
