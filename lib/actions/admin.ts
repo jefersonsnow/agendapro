@@ -363,6 +363,9 @@ export async function getSalonFullDetails(idOrSlug: string) {
           clients: true,
           services: true
         }
+      },
+      saas_invoices: {
+        orderBy: { created_at: "desc" }
       }
     }
   })

@@ -46,6 +46,7 @@ model Salon {
   audit_logs       AuditLog[]
   support_tickets  SupportTicket[]
   related_users    User[]        @relation("UserToSalon")
+  saas_invoices    SaaSInvoice[]
 
   @@index([owner_id])
   @@map("salons")
@@ -371,4 +372,20 @@ model PendingRegistration {
   created_at     DateTime @default(now())
   
   @@map("pending_registrations")
+}
+
+model SaaSInvoice {
+  id              String   @id @default(uuid())
+  salon_id        String
+  stripe_invoice_id String?
+  amount          Decimal  @db.Decimal(10, 2)
+  plan            String
+  status          String   @default("paid")
+  payment_method  String   @default("stripe")
+  created_at      DateTime @default(now())
+  
+  salon           Salon    @relation(fields: [salon_id], references: [id], onDelete: Cascade)
+
+  @@index([salon_id])
+  @@map("saas_invoices")
 }

@@ -530,13 +530,44 @@ export default function SalonDetailPage() {
               <CardHeader className="border-b border-muted/10">
                  <CardTitle className="text-lg font-black uppercase tracking-tighter italic">Histórico de Faturação</CardTitle>
               </CardHeader>
-              <CardContent className="p-10 text-center">
-                 <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4 opacity-50" />
-                 <h3 className="font-bold text-lg mb-2">Faturas Automáticas em Breve</h3>
-                 <p className="text-muted-foreground text-sm max-w-md mx-auto">
-                   Atualmente, o sistema gere ativamente o acesso e o plano via webhook da Stripe, mas o histórico detalhado de faturas emitidas ainda não é sincronizado com a base de dados. <br/><br/>
-                   Salões criados manualmente através da Central Core (como este) <b>não</b> geram pagamentos automáticos na Stripe. Para gerir a sua assinatura, use o botão "Gerir Assinatura" acima.
-                 </p>
+              <CardContent className="p-0">
+                {salon.saas_invoices && salon.saas_invoices.length > 0 ? (
+                 <table className="w-full">
+                    <thead className="bg-muted/30">
+                       <tr>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">ID Stripe</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Data</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Plano</th>
+                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Valor</th>
+                          <th className="text-right py-4 px-8 text-[10px] font-black uppercase tracking-widest opacity-50">Status</th>
+                       </tr>
+                    </thead>
+                    <tbody className="divide-y divide-muted/10">
+                       {salon.saas_invoices.map((inv: any) => (
+                          <tr key={inv.id} className="hover:bg-muted/5 transition-colors">
+                             <td className="py-4 px-6 font-mono text-xs">{inv.stripe_invoice_id || "-"}</td>
+                             <td className="py-4 px-6 text-sm">{format(new Date(inv.created_at), "dd/MM/yyyy", { locale: pt })}</td>
+                             <td className="py-4 px-6 uppercase text-[10px] font-bold tracking-widest">{inv.plan}</td>
+                             <td className="py-4 px-6 font-black">{Number(inv.amount).toFixed(2)}€</td>
+                             <td className="py-4 px-8 text-right">
+                                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">
+                                   {inv.status === 'paid' ? 'PAGO' : inv.status}
+                                </Badge>
+                             </td>
+                          </tr>
+                       ))}
+                    </tbody>
+                 </table>
+                ) : (
+                 <div className="p-10 text-center">
+                   <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4 opacity-50" />
+                   <h3 className="font-bold text-lg mb-2">Sem histórico de faturas</h3>
+                   <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                     Não foram encontradas faturas emitidas pela Stripe para este salão. <br/>
+                     Salões criados manualmente na Central Core não geram histórico automático na Stripe.
+                   </p>
+                 </div>
+                )}
               </CardContent>
            </Card>
         </TabsContent>

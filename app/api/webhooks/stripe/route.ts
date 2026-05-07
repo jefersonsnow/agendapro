@@ -209,6 +209,46 @@ export async function POST(request: Request) {
         break
       }
       
+      // Ocorre quando um pagamento recorrente é processado com sucesso (renovação ou primeira vez)
+      case 'invoice.payment_succeeded': {
+        const invoice = event.data.object as Stripe.Invoice
+        if (!invoice.customer) break;
+        
+        const customerId = invoice.customer as string
+        const customer = await stripe.customers.retrieve(customerId)
+        
+        if (!customer.deleted && "email" in customer && customer.email) {
+           const email = customer.email
+           const salon = await prisma.salon.findFirst({
+             where: { email: email }
+           })
+           
+           if (salon) {
+             const amount = invoice.amount_paid / 100 // Convert cents to euros
+             
+             // Identificar plano pelo priceId
+             let planCharged = salon.plan
+             const priceId = invoice.lines?.data?.[0]?.price?.id
+             if (priceId === stripeConfigs.productBasicId) planCharged = "basic"
+             else if (priceId === stripeConfigs.productMinimoId) planCharged = "minimo"
+             // Caso existam outros planos, manterá o do salão atual
+             
+             await prisma.saaSInvoice.create({
+               data: {
+                 salon_id: salon.id,
+                 stripe_invoice_id: invoice.id,
+                 amount: amount,
+                 plan: planCharged,
+                 status: "paid",
+                 payment_method: "stripe"
+               }
+             })
+             console.log(`Stripe Webhook: Fatura ${invoice.id} (${amount}€) registada para o salão ${salon.name}.`)
+           }
+        }
+        break
+      }
+      
       // Pode mapear outros alertas (ex: 'invoice.payment_failed') para enviar emails se quiser
     }
 
