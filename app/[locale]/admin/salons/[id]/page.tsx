@@ -38,6 +38,12 @@ export default function SalonDetailPage() {
   const [loading, setLoading] = useState(true)
   const [activeTab, setActiveTab] = useState("overview")
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false)
+  const [isSaaSDialogOpen, setIsSaaSDialogOpen] = useState(false)
+  const [saasFormData, setSaasFormData] = useState({
+    plan: "minimo",
+    status: "active",
+    trial_ends_at: ""
+  })
   const [editFormData, setEditFormData] = useState({
     name: "",
     email: "",
@@ -56,6 +62,11 @@ export default function SalonDetailPage() {
     try {
       const data = await getSalonFullDetails(id as string)
       setSalon(data)
+      setSaasFormData({
+        plan: data.plan || "minimo",
+        status: data.status || "active",
+        trial_ends_at: data.trial_ends_at ? new Date(data.trial_ends_at).toISOString().split('T')[0] : ""
+      })
       setEditFormData({
         name: data.name || "",
         email: data.email || "",
@@ -113,6 +124,18 @@ export default function SalonDetailPage() {
       fetchSalon()
     } catch (error: any) {
       toast.error("Erro ao atualizar: " + error.message)
+    }
+  }
+
+  async function handleUpdateSaaS(e: React.FormEvent) {
+    e.preventDefault()
+    try {
+      await updateSalonSaaS(salon.id, saasFormData)
+      toast.success("Assinatura atualizada com sucesso!")
+      setIsSaaSDialogOpen(false)
+      fetchSalon()
+    } catch (error: any) {
+      toast.error("Erro ao atualizar assinatura: " + error.message)
     }
   }
 
@@ -375,9 +398,55 @@ export default function SalonDetailPage() {
                           </Badge>
                        </div>
                     </div>
-                    <Button className="rounded-xl font-black uppercase tracking-widest text-xs px-8 bg-primary hover:bg-primary/90">
-                       Upgrade / Downgrade
-                    </Button>
+                    <Dialog open={isSaaSDialogOpen} onOpenChange={setIsSaaSDialogOpen}>
+                      <DialogTrigger asChild>
+                        <Button className="rounded-xl font-black uppercase tracking-widest text-xs px-8 bg-primary hover:bg-primary/90">
+                           Gerir Assinatura
+                        </Button>
+                      </DialogTrigger>
+                      <DialogContent className="sm:max-w-[425px] rounded-3xl">
+                        <DialogHeader>
+                          <DialogTitle className="text-xl font-black uppercase tracking-tighter italic">Gerir Assinatura</DialogTitle>
+                          <DialogDescription>
+                            Altere o plano, o status e a data de validade da assinatura do salão.
+                          </DialogDescription>
+                        </DialogHeader>
+                        <form onSubmit={handleUpdateSaaS} className="space-y-4 pt-4">
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-50">Plano</Label>
+                            <select 
+                               value={saasFormData.plan} 
+                               onChange={(e) => setSaasFormData({...saasFormData, plan: e.target.value})} 
+                               className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                               <option value="minimo">Mínimo</option>
+                               <option value="basic">Basic</option>
+                               <option value="premium">Premium</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-50">Status</Label>
+                            <select 
+                               value={saasFormData.status} 
+                               onChange={(e) => setSaasFormData({...saasFormData, status: e.target.value})} 
+                               className="w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            >
+                               <option value="active">Ativo (Active)</option>
+                               <option value="trial">Período de Teste (Trial)</option>
+                               <option value="expired">Expirado (Expired)</option>
+                               <option value="cancelled">Cancelado (Cancelled)</option>
+                            </select>
+                          </div>
+                          <div className="space-y-2">
+                            <Label className="text-[10px] font-black uppercase tracking-widest opacity-50">Acesso Válido Até (Deixe em branco p/ infinito)</Label>
+                            <Input type="date" value={saasFormData.trial_ends_at} onChange={(e) => setSaasFormData({...saasFormData, trial_ends_at: e.target.value})} className="rounded-xl" />
+                          </div>
+                          <DialogFooter className="pt-4">
+                            <Button type="submit" className="w-full rounded-xl font-black uppercase tracking-widest text-xs h-12">Guardar Assinatura</Button>
+                          </DialogFooter>
+                        </form>
+                      </DialogContent>
+                    </Dialog>
                  </div>
                  <CardContent className="p-8">
                     <div className="grid md:grid-cols-2 gap-8">
@@ -407,10 +476,10 @@ export default function SalonDetailPage() {
                                    <Calendar className="h-12 w-12" />
                                 </div>
                                 <p className="text-3xl font-black tracking-tighter">
-                                   {format(new Date(new Date(salon.created_at).setDate(new Date().getDate() + 21)), "dd MMM", { locale: pt })}
+                                   {salon.trial_ends_at ? format(new Date(salon.trial_ends_at), "dd MMM yyyy", { locale: pt }) : "Sem limite"}
                                 </p>
                                 <p className="text-xs text-muted-foreground font-bold italic mt-1">
-                                   Valor estimado: {salon.plan === 'minimo' ? '19,00€' : salon.plan === 'basic' ? '29,00€' : '39,00€'}
+                                   {salon.trial_ends_at ? "Gerido manualmente" : "Renovação Stripe"}
                                 </p>
                              </div>
                           </div>
@@ -439,8 +508,8 @@ export default function SalonDetailPage() {
                           <ShieldCheck className="h-5 w-5" />
                        </div>
                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Último Pagamento</p>
-                          <p className="font-bold text-sm">{format(new Date(), "dd 'de' MMMM, yyyy", { locale: pt })}</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Acesso Válido Até</p>
+                          <p className="font-bold text-sm">{salon.trial_ends_at ? format(new Date(salon.trial_ends_at), "dd 'de' MMMM, yyyy", { locale: pt }) : "Gestão Automática Stripe"}</p>
                        </div>
                     </div>
                     <div className="flex items-center gap-4">
@@ -448,8 +517,8 @@ export default function SalonDetailPage() {
                           <AlertTriangle className="h-5 w-5" />
                        </div>
                        <div>
-                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Método de Pagamento</p>
-                          <p className="font-bold text-sm">Cartão (Stripe)</p>
+                          <p className="text-[10px] font-black uppercase tracking-widest opacity-40">Método de Gestão</p>
+                          <p className="font-bold text-sm">{salon.trial_ends_at ? "Manual (Central Core)" : "Automático (Stripe)"}</p>
                        </div>
                     </div>
                  </CardContent>
@@ -461,34 +530,13 @@ export default function SalonDetailPage() {
               <CardHeader className="border-b border-muted/10">
                  <CardTitle className="text-lg font-black uppercase tracking-tighter italic">Histórico de Faturação</CardTitle>
               </CardHeader>
-              <CardContent className="p-0">
-                 <table className="w-full">
-                    <thead className="bg-muted/30">
-                       <tr>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Fatura #</th>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Data</th>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Plano</th>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest opacity-50">Valor</th>
-                          <th className="text-right py-4 px-8 text-[10px] font-black uppercase tracking-widest opacity-50">Status</th>
-                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-muted/10">
-                       {[
-                          { id: "INV-2024-001", date: new Date(), amount: salon.plan === 'minimo' ? '19.00' : '39.00', status: 'paid' },
-                          { id: "INV-2023-098", date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000), amount: '19.00', status: 'paid' },
-                       ].map((inv) => (
-                          <tr key={inv.id} className="hover:bg-muted/5 transition-colors">
-                             <td className="py-4 px-6 font-mono text-xs">{inv.id}</td>
-                             <td className="py-4 px-6 text-sm">{format(inv.date, "dd/MM/yyyy")}</td>
-                             <td className="py-4 px-6 uppercase text-[10px] font-bold tracking-widest">{salon.plan}</td>
-                             <td className="py-4 px-6 font-black">{inv.amount}€</td>
-                             <td className="py-4 px-8 text-right">
-                                <Badge className="bg-green-100 text-green-700 hover:bg-green-100 border-none rounded-full px-3 py-0.5 text-[9px] font-black uppercase tracking-widest">PAGO</Badge>
-                             </td>
-                          </tr>
-                       ))}
-                    </tbody>
-                 </table>
+              <CardContent className="p-10 text-center">
+                 <AlertTriangle className="h-12 w-12 text-amber-500 mx-auto mb-4 opacity-50" />
+                 <h3 className="font-bold text-lg mb-2">Faturas Automáticas em Breve</h3>
+                 <p className="text-muted-foreground text-sm max-w-md mx-auto">
+                   Atualmente, o sistema gere ativamente o acesso e o plano via webhook da Stripe, mas o histórico detalhado de faturas emitidas ainda não é sincronizado com a base de dados. <br/><br/>
+                   Salões criados manualmente através da Central Core (como este) <b>não</b> geram pagamentos automáticos na Stripe. Para gerir a sua assinatura, use o botão "Gerir Assinatura" acima.
+                 </p>
               </CardContent>
            </Card>
         </TabsContent>

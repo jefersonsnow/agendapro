@@ -184,7 +184,8 @@ export async function updateSalonSaaS(id: string, data: any) {
     where: { id },
     data: {
       plan: data.plan,
-      status: data.status
+      status: data.status,
+      trial_ends_at: data.trial_ends_at ? new Date(data.trial_ends_at) : null
     }
   })
 
