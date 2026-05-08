@@ -46,12 +46,13 @@ export async function getAgendaInitialData() {
   try {
     const salon = await prisma.salon.findUnique({
        where: { id: salonId },
-       select: { working_hours: true }
+       select: { working_hours: true, color_palette: true }
     })
 
     return {
       salonId,
       workingHours: salon?.working_hours ? (typeof salon.working_hours === 'string' ? JSON.parse(salon.working_hours) : salon.working_hours) : null,
+      colorPalette: salon?.color_palette || "default",
       staff,
       services: services.map((s: any) => ({
         ...s,

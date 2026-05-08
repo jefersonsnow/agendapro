@@ -91,11 +91,11 @@ interface Appointment {
 }
 
 const statusColors: Record<string, string> = {
-  pending: "bg-yellow-100 border-yellow-300 text-yellow-800",
-  confirmed: "bg-primary/10 border-primary/30 text-primary",
-  completed: "bg-green-100 border-green-300 text-green-800",
-  cancelled: "bg-red-100 border-red-300 text-red-800",
-  break: "bg-[#929292] border-[#7a7a7a] text-white opacity-100",
+  pending: "bg-yellow-500/20 border-yellow-500/30 text-slate-800 dark:text-slate-200",
+  confirmed: "bg-emerald-500/20 border-emerald-500/30 text-slate-800 dark:text-slate-200",
+  completed: "bg-emerald-700 text-white shadow-md",
+  cancelled: "bg-red-500/20 border-red-500/30 text-slate-800 dark:text-slate-200",
+  break: "bg-slate-500/20 border-slate-500/30 text-slate-800 dark:text-slate-200",
 }
 
 function MonthlyView({ currentDate, appointments, onDayClick }: { 
@@ -204,6 +204,7 @@ export default function AgendaPage() {
   const [userRole, setUserRole] = useState<string>("owner")
   const [salonId, setSalonId] = useState<string | null>(null)
   const [workingHours, setWorkingHours] = useState<any>(null)
+  const [colorPalette, setColorPalette] = useState<string>("default")
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedStaffFilter, setSelectedStaffFilter] = useState<string>("all")
   const [filteredStaffForModal, setFilteredStaffForModal] = useState<Staff[]>([])
@@ -259,6 +260,7 @@ export default function AgendaPage() {
       if (data) {
         setSalonId(data.salonId)
         setWorkingHours(data.workingHours)
+        setColorPalette(data.colorPalette || "default")
         setStaff(data.staff || [])
         setFilteredStaffForModal(data.staff || [])
         setServices(data.services || [])
@@ -639,7 +641,7 @@ export default function AgendaPage() {
   }
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-2 flex flex-col min-h-[calc(100vh-90px)]">
       <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div className="hidden sm:block">
            <div className="flex items-center gap-4">
@@ -773,29 +775,43 @@ export default function AgendaPage() {
          </div>
       </div>
 
-      <Card className="hidden sm:block">
-        <CardContent className="p-0 overflow-x-auto">
+      <Card className={cn(
+        "hidden sm:flex flex-col flex-1 overflow-hidden",
+        (colorPalette !== "default" && colorPalette !== "esmeralda") 
+          ? "relative border-none shadow-sm bg-primary/[0.03] rounded-3xl" 
+          : "shadow-sm border bg-card"
+      )}>
+        <CardContent className={cn(
+          "p-0 overflow-x-auto flex-1",
+          (colorPalette !== "default" && colorPalette !== "esmeralda") ? "relative z-10" : ""
+        )}>
           <div className="min-w-[800px]">
             {view === 'week' ? (
-              <div className="grid grid-cols-8 border-b">
-                <div className="p-3 border-r bg-muted/50"></div>
+              <div className={cn("grid grid-cols-[60px_repeat(7,minmax(0,1fr))] border-b", (colorPalette !== "default" && colorPalette !== "esmeralda") ? "border-primary/10" : "")}>
+                <div className={cn("p-3 border-r", (colorPalette !== "default" && colorPalette !== "esmeralda") ? "border-primary/10 bg-transparent" : "bg-muted/50")}></div>
                 {weekDays.map((date, i) => {
                   const isToday = date.toDateString() === new Date().toDateString()
+                  const isGlass = colorPalette !== "default" && colorPalette !== "esmeralda"
                   return (
                     <div
                       key={i}
                       className={cn(
-                        "p-3 text-center border-r last:border-r-0",
-                        isToday && "bg-primary/5"
+                        "p-3 text-center border-r last:border-r-0 transition-colors",
+                        isGlass ? "border-primary/10 backdrop-blur-sm" : "",
+                        isToday ? (isGlass ? "bg-primary/20" : "bg-primary/5") : (isGlass ? "bg-transparent hover:bg-primary/5" : "")
                       )}
                     >
-                      <p className="text-sm text-muted-foreground">
+                      <p className={cn(
+                        "text-sm", 
+                        isGlass ? "font-bold uppercase tracking-widest" : "text-muted-foreground",
+                        isToday && isGlass ? "text-primary" : (isGlass ? "text-muted-foreground/70" : "")
+                      )}>
                         {date.toLocaleDateString(locale === 'pt' ? 'pt-PT' : locale, { weekday: "short" })}
                       </p>
                       <p
                         className={cn(
-                          "text-lg font-semibold",
-                          isToday && "text-primary"
+                          isGlass ? "text-2xl font-black mt-1" : "text-lg font-semibold",
+                          isToday ? (isGlass ? "text-primary drop-shadow-md" : "text-primary") : "text-foreground"
                         )}
                       >
                         {date.getDate()}
@@ -816,22 +832,32 @@ export default function AgendaPage() {
             )}
             
             {view === 'week' && (
-              <div className="relative">
+              <div className="relative flex flex-col h-full min-h-max flex-1">
                 {/* Background Time Slots */}
-                {hours.map((hour) => (
-                  <div key={hour} className="grid grid-cols-8 border-b last:border-b-0 h-[80px]">
-                    <div className="p-2 text-sm text-muted-foreground border-r bg-muted/50 flex items-start justify-center">
-                      {hour.toString().padStart(2, "0")}:00
-                    </div>
-                    {weekDays.map((date, dayIndex) => {
+                <div className="flex flex-col flex-1">
+                  {hours.map((hour) => (
+                    <div key={hour} className={cn("grid grid-cols-[60px_repeat(7,minmax(0,1fr))] border-b last:border-b-0 h-[110px]", (colorPalette !== "default" && colorPalette !== "esmeralda") ? "border-primary/5" : "")}>
+                      <div className={cn(
+                        "p-2 text-sm border-r flex items-start justify-center",
+                        (colorPalette !== "default" && colorPalette !== "esmeralda") 
+                          ? "font-bold text-muted-foreground/60 border-primary/10 bg-transparent" 
+                          : "text-muted-foreground bg-muted/50"
+                      )}>
+                        {hour.toString().padStart(2, "0")}:00
+                      </div>
+                      {weekDays.map((date, dayIndex) => {
                       const isPastHour = new Date(date).setHours(hour, 0, 0, 0) < new Date().getTime()
+                      const isGlass = colorPalette !== "default" && colorPalette !== "esmeralda"
                       return (
                         <div
                           key={dayIndex}
                           className={cn(
                             "relative border-r last:border-r-0 group",
-                            date.toDateString() === new Date().toDateString() ? "bg-primary/[0.05]" : "bg-primary/[0.02]",
-                            isPastHour ? "bg-muted/40 cursor-not-allowed grayscale opacity-60 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utb3BhY2l0eT0iMC4wNSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0tMjAgMjBsNDAgLTQweiIvPjxwYXRoIGQ9Ik0wIDQwbDQwIC00MHoiLz48cGF0aCBkPSJNMjAgNjBsNDAgLTQweiIvPjwvZz48L3N2Zz4=')]" : "cursor-pointer hover:bg-primary/10 transition-colors"
+                            isGlass ? "border-primary/5 backdrop-blur-sm" : "",
+                            date.toDateString() === new Date().toDateString() ? (isGlass ? "bg-primary/[0.08]" : "bg-primary/[0.05]") : (isGlass ? "bg-transparent" : "bg-primary/[0.02]"),
+                            isPastHour 
+                              ? (isGlass ? "bg-muted/10 cursor-not-allowed grayscale opacity-60" : "bg-muted/40 cursor-not-allowed grayscale opacity-60 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAiIGhlaWdodD0iNDAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgc3Ryb2tlPSIjMDAwMDAwIiBzdHJva2Utb3BhY2l0eT0iMC4wNSIgc3Ryb2tlLXdpZHRoPSIyIiBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxwYXRoIGQ9Ik0tMjAgMjBsNDAgLTQweiIvPjxwYXRoIGQ9Ik0wIDQwbDQwIC00MHoiLz48cGF0aCBkPSJNMjAgNjBsNDAgLTQweiIvPjwvZz48L3N2Zz4=')]") 
+                              : (isGlass ? "cursor-pointer hover:bg-primary/10 transition-colors" : "cursor-pointer hover:bg-primary/10 transition-colors")
                           )}
                           onClick={() => !isPastHour && openCreateDialog(date, hour, 0)}
                         >
@@ -858,9 +884,10 @@ export default function AgendaPage() {
                     })}
                   </div>
                 ))}
+                </div>
 
                 {/* Overlapping Appointments Layer */}
-                <div className="absolute inset-0 pointer-events-none grid grid-cols-8 h-full">
+                <div className="absolute inset-0 pointer-events-none grid grid-cols-[60px_repeat(7,minmax(0,1fr))] h-full">
                   <div className="col-start-1" />
                   {weekDays.map((date, dayIdx) => (
                     <div key={dayIdx} className="relative h-full" style={{ gridColumnStart: dayIdx + 2 }}>
@@ -880,22 +907,25 @@ export default function AgendaPage() {
 
                           const startMinutes = (hourIndex * 60) + start.getUTCMinutes()
                           const durationMinutes = (end.getTime() - start.getTime()) / 60000
-                          const top = (startMinutes / 60) * 80
-                          const height = (durationMinutes / 60) * 80
+                          
+                          const percentPerMinute = 100 / (hours.length * 60)
+                          const top = startMinutes * percentPerMinute
+                          const height = durationMinutes * percentPerMinute
 
                           return (
                             <div
                               key={apt.id}
                               className={cn(
-                                "absolute z-20 rounded-xl border-l-[4px] overflow-hidden shadow-md transition-all cursor-pointer group hover:brightness-95 pointer-events-auto backdrop-blur-[2px] bg-opacity-95",
+                                "absolute z-20 rounded-md border border-border/40 overflow-hidden shadow-sm backdrop-blur-[2px] transition-all cursor-pointer group hover:scale-[1.02] pointer-events-auto",
                                 durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5",
                                 apt.is_break ? statusColors.break : (statusColors[apt.status] || statusColors.pending)
                               )}
                               style={{
-                                top: `${top}px`,
-                                height: `${height}px`,
+                                top: `${top}%`,
+                                height: `${height}%`,
                                 left: `${apt.left}%`,
                                 width: `${apt.width - 1}%`,
+                                borderLeftWidth: '6px',
                                 borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488"),
                               }}
                               onClick={(e) => {

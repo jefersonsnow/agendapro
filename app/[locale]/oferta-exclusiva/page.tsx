@@ -97,7 +97,7 @@ export default function SalesPage() {
   const headline = "QUER TER O DOBRO DOS RESULTADOS PAGANDO METADE DO PREÇO?"
   const subheadline = "Aproveite a nossa maior oferta de sempre. 50% de DESCONTO no primeiro mês do Plano Premium para os próximos subscritores. A sua agenda merece o melhor."
 
-  const videoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ" // Exemplo de VSL
+  const videoUrl = "https://www.youtube.com/embed/rrgi7JsGGjw"
 
   return (
     <div className="theme-magenta min-h-screen bg-[#050505] text-white selection:bg-primary/30 overflow-x-hidden font-sans">
