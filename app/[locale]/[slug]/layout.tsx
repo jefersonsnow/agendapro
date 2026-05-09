@@ -41,16 +41,21 @@ export async function generateMetadata({
     }
 
     return {
-      title: `${name} | Agendamento Online`,
-      description: description,
+      title: `${name} | Agendamento Online - AgendarPro`,
+      description: `${description.slice(0, 150)}${description.length > 150 ? '...' : ''} | AgendarPro: Sistema de agendamento online para salões e barbearias.`,
       openGraph: {
-        title: `${name} | Agendamento Online`,
+        title: `${name} | Agendamento Online - AgendarPro`,
         description: description,
         images: salon.cover_url ? [salon.cover_url] : (salon.logo_url ? [salon.logo_url] : []),
+      },
+      twitter: {
+        card: "summary_large_image",
+        title: `${name} | Agendamento Online - AgendarPro`,
+        description: description,
       }
     }
   } catch (error) {
-    return { title: 'AgendarPro' };
+    return { title: 'Agendamento Online | AgendarPro' };
   }
 }
 
