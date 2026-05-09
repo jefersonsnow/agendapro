@@ -42,6 +42,15 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     generator: 'v0.app',
     alternates: {
       canonical: '/',
+      languages: {
+        'pt': '/pt',
+        'en': '/en',
+        'es': '/es',
+        'fr': '/fr',
+        'it': '/it',
+        'de': '/de',
+        'x-default': '/pt',
+      },
     },
     openGraph: {
       title: seo.metaTitle || 'agendar.pro',
