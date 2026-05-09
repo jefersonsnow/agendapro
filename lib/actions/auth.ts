@@ -126,13 +126,19 @@ export async function signUpWithDetails(formData: any) {
      return { error: "Erro de configuração: ID do produto Stripe não encontrado para este plano." }
   }
 
-  // 6. Criar Sessão de Checkout
+  // 6. Criar Sessão de Checkout ou Redirecionar para Link Externo
   const headersList = await headers()
   const host = headersList.get("host")
   const protocol = host?.includes("localhost") ? "http" : "https"
   const baseUrl = `${protocol}://${host}`
   
   try {
+    // SE FOR PLANO PREMIUM E TIVERMOS O LINK COM DESCONTO
+    if (plan === "premium") {
+      const stripePromoUrl = `https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50&client_reference_id=${pending.id}&prefilled_email=${encodeURIComponent(email)}`
+      return { success: true, url: stripePromoUrl }
+    }
+
     const session = await stripe.checkout.sessions.create({
       payment_method_types: ["card"],
       line_items: [

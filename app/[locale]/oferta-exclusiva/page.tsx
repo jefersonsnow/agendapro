@@ -272,15 +272,13 @@ export default function SalesPage() {
                     </li>
                   ))}
                 </ul>
-                <a 
-                  href="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <TrialButton 
+                  plan="premium" 
                   className="w-full h-20 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/40 transition-all scale-110 flex items-center justify-center gap-2"
                 >
                   <Sparkles className="h-6 w-6" />
                   Garantir 50% de Desconto
-                </a>
+                </TrialButton>
                 <div className="mt-8 flex flex-col items-center gap-2">
                    <p className="text-[10px] text-center text-white/40 font-bold uppercase tracking-widest">Preço normal de 39€ após o primeiro mês.</p>
                    <div className="flex items-center gap-2 bg-white/5 px-4 py-1.5 rounded-full border border-white/10">
@@ -374,15 +372,13 @@ export default function SalesPage() {
             <p className="text-white/60 text-lg md:text-xl mb-12 max-w-2xl mx-auto">
               Clique abaixo, preencha os seus dados e garanta o Plano Premium pelo preço de um almoço. Oferta válida apenas para hoje.
             </p>
-            <a 
-              href="https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50"
-              target="_blank"
-              rel="noopener noreferrer"
+            <TrialButton 
+              plan="premium" 
               className="inline-flex items-center justify-center rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white"
             >
               Quero os meus 50% de Desconto
               <Sparkles className="ml-4 h-8 w-8" />
-            </a>
+            </TrialButton>
             <p className="mt-8 text-[10px] font-black uppercase tracking-[0.3em] text-white/30 italic">
               Sem Contratos de Fidelização • Sem Taxas de Saída • Liberdade Total
             </p>
