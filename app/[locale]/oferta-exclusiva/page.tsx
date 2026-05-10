@@ -273,7 +273,7 @@ export default function SalesPage() {
                   ))}
                 </ul>
                 <TrialButton 
-                  plan="premium" 
+                  plan="premium_offer" 
                   className="w-full h-20 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/40 transition-all scale-110 flex items-center justify-center gap-2"
                 >
                   <Sparkles className="h-6 w-6" />
@@ -373,7 +373,7 @@ export default function SalesPage() {
               Clique abaixo, preencha os seus dados e garanta o Plano Premium pelo preço de um almoço. Oferta válida apenas para hoje.
             </p>
             <TrialButton 
-              plan="premium" 
+              plan="premium_offer" 
               className="inline-flex items-center justify-center rounded-2xl h-24 px-16 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter bg-primary text-white"
             >
               Quero os meus 50% de Desconto

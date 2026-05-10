@@ -133,10 +133,16 @@ export async function signUpWithDetails(formData: any) {
   const baseUrl = `${protocol}://${host}`
   
   try {
-    // SE FOR PLANO PREMIUM E TIVERMOS O LINK COM DESCONTO
-    if (plan === "premium") {
+    // SE FOR PLANO PREMIUM DA OFERTA (COM DESCONTO)
+    if (plan === "premium_offer") {
       const stripePromoUrl = `https://buy.stripe.com/bJe4gy3ZY1gxfy66G6bwk05?prefilled_promo_code=LIMITADO50&client_reference_id=${pending.id}&prefilled_email=${encodeURIComponent(email)}`
       return { success: true, url: stripePromoUrl }
+    }
+
+    // SE FOR PLANO PREMIUM NORMAL DO SITE
+    if (plan === "premium") {
+      const stripeStandardUrl = `https://buy.stripe.com/6oUdR8gMK1gx3Po9Sibwk00?client_reference_id=${pending.id}&prefilled_email=${encodeURIComponent(email)}`
+      return { success: true, url: stripeStandardUrl }
     }
 
     const session = await stripe.checkout.sessions.create({
