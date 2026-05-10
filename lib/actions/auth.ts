@@ -116,11 +116,13 @@ export async function signUpWithDetails(formData: any) {
 
   const stripe = new Stripe(secretKey)
 
-  // 5. Determinar o Price ID
+  // 5. Determinar o Price ID (Apenas para planos que usam a API de Checkout direto)
   let priceId = ""
   if (plan === "minimo") priceId = stripeConfigs.productMinimoId
   else if (plan === "basic") priceId = stripeConfigs.productBasicId
-  else if (plan === "premium") priceId = stripeConfigs.productPremiumId
+  else if (plan === "premium" || plan === "premium_offer") {
+     priceId = "manual_link" // Marcador para passar na validação
+  }
 
   if (!priceId) {
      return { error: "Erro de configuração: ID do produto Stripe não encontrado para este plano." }
