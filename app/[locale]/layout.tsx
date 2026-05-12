@@ -1,5 +1,5 @@
 // <title> <meta name="description" content="SEO" /> <Head>
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Geist, Geist_Mono } from 'next/font/google'
 import '../globals.css'
 import {NextIntlClientProvider} from 'next-intl';
@@ -24,6 +24,14 @@ const geistMono = Geist_Mono({
 });
 
 import { Toaster } from 'sonner'
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  themeColor: '#0D9488',
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ locale: string }> | { locale: string } }): Promise<Metadata> {
   const resolvedParams = await Promise.resolve(params);
@@ -63,6 +71,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
       ],
       apple: '/favicon.png?v=3',
       shortcut: '/favicon.png?v=3',
+    },
+    appleWebApp: {
+      capable: true,
+      statusBarStyle: 'default',
+      title: 'AgendarPro',
     },
   }
 }
