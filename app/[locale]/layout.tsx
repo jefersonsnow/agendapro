@@ -39,7 +39,6 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     title: seo.metaTitle || 'agendar.pro - Sistema de Agendamento para Salões',
     description: seo.metaDescription || 'Plataforma completa de gestão e agendamento para salões de beleza e barbearias. Calendário inteligente, gestão de equipa e clientes.',
     keywords: seo.metaKeywords || 'agenda, salão, barbearia, gestão, marcações',
-    generator: 'v0.app',
     alternates: {
       canonical: '/',
       languages: {
@@ -59,9 +58,11 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     },
     icons: {
       icon: [
-        { url: '/favicon.png?v=2', type: 'image/png' },
+        { url: '/favicon.png?v=3', type: 'image/png', sizes: '32x32' },
+        { url: '/favicon.png?v=3', type: 'image/png', sizes: '192x192' },
       ],
-      apple: '/favicon.png?v=2',
+      apple: '/favicon.png?v=3',
+      shortcut: '/favicon.png?v=3',
     },
   }
 }
