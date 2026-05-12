@@ -5,7 +5,7 @@ export default function manifest(): MetadataRoute.Manifest {
     name: 'AgendarPro - Sistema de Agendamento',
     short_name: 'AgendarPro',
     description: 'Sistema profissional de agendamento online para salões e barbearias.',
-    start_url: '/',
+    start_url: '/dashboard',
     display: 'standalone',
     background_color: '#000000',
     theme_color: '#0D9488',
