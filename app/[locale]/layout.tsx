@@ -24,6 +24,7 @@ const geistMono = Geist_Mono({
 });
 
 import { Toaster } from 'sonner'
+import SEOStructuredData from '@/components/seo-structured-data'
 
 export const viewport: Viewport = {
   width: 'device-width',
@@ -44,9 +45,9 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
 
   return {
     metadataBase: new URL('https://agendar.napp.pt'),
-    title: seo.metaTitle || 'agendar.pro - Sistema de Agendamento para Salões',
-    description: seo.metaDescription || 'Plataforma completa de gestão e agendamento para salões de beleza e barbearias. Calendário inteligente, gestão de equipa e clientes.',
-    keywords: seo.metaKeywords || 'agenda, salão, barbearia, gestão, marcações',
+    title: seo.metaTitle || 'AgendarPro | Melhor Sistema para Salão e Barbearia',
+    description: seo.metaDescription || 'O mais completo sistema para salão e software de agendamento online. Controle a sua agenda, comissões e faturação num só lugar.',
+    keywords: seo.metaKeywords || 'sistema para salão, software agendamento, agenda online, gestão salão beleza, barbearia',
     alternates: {
       canonical: '/',
       languages: {
@@ -135,6 +136,7 @@ export default async function RootLayout({
             </Script>
           </>
         )}
+        <SEOStructuredData />
       </head>
       <body className="font-sans antialiased bg-background text-foreground">
         <NextIntlClientProvider messages={messages}>

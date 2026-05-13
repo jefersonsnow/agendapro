@@ -233,7 +233,7 @@ export default async function HomePage({
                 <div className="relative bg-card border-[8px] border-card rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
                   <img 
                     src="/official_dashboard_mockup.png" 
-                    alt="AgendarPro Official Dashboard" 
+                    alt="AgendarPro - O melhor sistema para salão de beleza e software de agendamento online" 
                     className="w-full h-auto object-cover"
                   />
                 </div>
