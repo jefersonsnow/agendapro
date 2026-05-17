@@ -12,6 +12,11 @@ export async function middleware(req: NextRequest) {
     return NextResponse.next()
   }
 
+  // CVE-2025-29927 Mitigation: Bloquear tentativas de Bypass do Middleware
+  if (req.headers.has('x-middleware-subrequest') || req.headers.has('x-invoke-path')) {
+    return new NextResponse('Bad Request', { status: 400 })
+  }
+
   // Obter o token
   const token = await getToken({ 
     req, 
