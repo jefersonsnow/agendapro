@@ -105,7 +105,6 @@ export default async function RootLayout({
   return (
     <html lang={locale} className={`${geistSans.variable} ${geistMono.variable}`} data-scroll-behavior="smooth">
       <head>
-        <title>AgendarPro</title>
 
         {seo.fbPixelId && (
           <Script id="fb-pixel" strategy="afterInteractive">
