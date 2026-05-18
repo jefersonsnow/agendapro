@@ -51,13 +51,13 @@ export async function generateMetadata({ params }: { params: Promise<{ locale: s
     alternates: {
       canonical: '/',
       languages: {
-        'pt': '/pt',
+        'pt': '/',
         'en': '/en',
         'es': '/es',
         'fr': '/fr',
         'it': '/it',
         'de': '/de',
-        'x-default': '/pt',
+        'x-default': '/',
       },
     },
     openGraph: {
