@@ -224,19 +224,21 @@ export default async function HomePage({
                   {dynamicHeroDesc} <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">{t("heroDescStrong")}</span>
                 </p>
 
-                <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000">
-                  <a 
-                    href="#planos"
-                    className="inline-flex items-center justify-center rounded-2xl h-16 px-10 text-xl w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all group font-black uppercase tracking-tighter cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
-                  >
-                    {t("heroCta")}
-                    <ChevronRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
-                  </a>
-                  <div className="flex items-center gap-2 px-6 h-16 rounded-2xl bg-muted/30 border border-border/50 text-muted-foreground font-bold text-sm">
-                    <ShieldCheck className="h-5 w-5 text-green-500" />
-                    {t("heroNoCc")}
+                {!promoConfig.enabled && (
+                  <div className="flex flex-col sm:flex-row items-center justify-center gap-4 w-full animate-in fade-in slide-in-from-bottom-6 duration-1000">
+                    <a 
+                      href="#planos"
+                      className="inline-flex items-center justify-center rounded-2xl h-16 px-10 text-xl w-full sm:w-auto shadow-2xl shadow-primary/20 hover:shadow-primary/40 hover:-translate-y-1 transition-all group font-black uppercase tracking-tighter cursor-pointer bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      {t("heroCta")}
+                      <ChevronRight className="ml-2 h-6 w-6 group-hover:translate-x-1 transition-transform" />
+                    </a>
+                    <div className="flex items-center gap-2 px-6 h-16 rounded-2xl bg-muted/30 border border-border/50 text-muted-foreground font-bold text-sm">
+                      <ShieldCheck className="h-5 w-5 text-green-500" />
+                      {t("heroNoCc")}
+                    </div>
                   </div>
-                </div>
+                )}
               </div>
 
               {/* Dashboard Mockup Display */}
