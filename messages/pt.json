@@ -283,7 +283,7 @@
       "title": "Criar Conta AgendarPro",
       "subtitle": "Após preencher os dados, será redirecionado para o pagamento seguro via Cartão de Crédito.",
       "successTitle": "Registo Efetuado!",
-      "success": "Os seus dados de acesso foram enviados para o e-mail cadastrado. Verifique também a sua caixa de SPAM.",
+      "success": "Enviámos um link de ativação para o seu e-mail. Por favor, clique no link para validar o seu e-mail e ativar a sua conta grátis. Verifique também a sua caixa de SPAM.",
       "error": "Ocorreu um erro ao criar a conta. Tente novamente.",
       "errors": {
         "min3": "Mínimo 3 caracteres",

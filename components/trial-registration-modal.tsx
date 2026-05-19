@@ -133,13 +133,17 @@ export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrat
         plan
       })
 
-      if (result.success && result.url) {
-        // Facebook Pixel Lead Event
-        if (typeof window !== "undefined" && (window as any).fbq) {
-          (window as any).fbq('track', 'Lead');
+      if (result.success) {
+        if (result.requiresVerification) {
+          setIsSuccess(true)
+        } else if (result.url) {
+          // Facebook Pixel Lead Event
+          if (typeof window !== "undefined" && (window as any).fbq) {
+            (window as any).fbq('track', 'Lead');
+          }
+          
+          window.location.assign(result.url)
         }
-        
-        window.location.assign(result.url)
       } else if (result.error) {
         if (typeof result.error === 'object') {
           Object.keys(result.error).forEach((key: any) => {
