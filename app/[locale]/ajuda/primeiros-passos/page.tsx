@@ -115,7 +115,7 @@ export default function PrimeirosPassosTutorial() {
                          </div>
                          <div>
                             <h4 className="font-bold text-sm">Slug Personalizado</h4>
-                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Defina o seu link único (ex: agendar.pro/oseu-salao) para partilhar nas redes sociais.</p>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">Defina o seu link único (ex: agendarpro.pt/oseu-salao) para partilhar nas redes sociais.</p>
                          </div>
                       </CardContent>
                    </Card>

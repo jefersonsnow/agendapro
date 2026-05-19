@@ -136,7 +136,7 @@ export default function FaturacaoTutorial() {
                    <h3 className="text-2xl font-bold tracking-tight">Comissões Automáticas</h3>
                 </div>
                 <p className="text-slate-600 dark:text-slate-400 leading-relaxed text-sm">
-                   Esqueça a calculadora. O AgendarPro calcula a comissão de cada colaborador com base no valor de cada serviço concluído.
+                   Esqueça a calculadora. O AgendarPro calcula a comissão de cada colaborador de forma flexível e automática com base no valor fixo configurado individualmente para cada serviço executado.
                 </p>
                 <div className="bg-slate-900 text-white p-10 rounded-[3rem] space-y-8">
                    <div className="flex flex-col md:flex-row gap-8 items-center">
@@ -153,7 +153,7 @@ export default function FaturacaoTutorial() {
                    <div className="pt-8 border-t border-white/10 grid grid-cols-1 md:grid-cols-3 gap-6">
                       <div className="space-y-2">
                          <div className="text-[10px] font-black uppercase tracking-widest text-blue-400">Dica Pro</div>
-                         <p className="text-xs text-slate-300">Defina a taxa de comissão individual no perfil de cada membro da equipa em <strong>Configurações &gt; Equipa</strong>.</p>
+                         <p className="text-xs text-slate-300">Defina o valor de comissão específico por profissional diretamente na ficha de cada serviço em <strong>Serviços</strong>, associando quem realiza o quê e com que remuneração.</p>
                       </div>
                       <div className="space-y-2">
                          <div className="text-[10px] font-black uppercase tracking-widest text-blue-400">Transparência</div>

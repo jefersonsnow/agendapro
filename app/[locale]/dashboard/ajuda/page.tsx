@@ -13,7 +13,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { 
   HelpCircle, MessageSquare, LifeBuoy, BookOpen, 
   ChevronRight, PlayCircle, Star, Send, Clock,
-  CheckCircle2, AlertCircle, Phone
+  CheckCircle2, AlertCircle, Phone, Youtube
 } from "lucide-react"
 import { toast } from "sonner"
 import { format } from "date-fns"
@@ -89,8 +89,8 @@ export default function HelpSupportPage() {
   const faqs = [
     { q: "Como altero o logótipo do meu salão?", a: "Vá a Configurações > Identidade Visual e faça o upload da sua imagem. Recomendamos o formato PNG ou JPG com fundo transparente." },
     { q: "Posso ter mais do que um profissional?", a: "Sim! Dependendo do seu plano (Basic ou Premium), pode gerir vários profissionais na aba Equipa." },
-    { q: "O AgendarPro tem período de experiência?", a: "Não, o AgendarPro funciona num modelo de subscrição direta. Pode começar com o plano Mínimo e fazer upgrade conforme o seu negócio cresce." },
-    { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendar.napp.pt/pt/seu-nome). Pode partilhar este link nas suas redes sociais ou via WhatsApp." }
+    { q: "O AgendarPro tem período de experiência?", a: "Sim! O AgendarPro oferece um período experimental gratuito de 30 dias para novos parceiros (quando ativo). Durante este trial, tem acesso total a todas as funcionalidades do sistema para configurar e testar o seu salão sem qualquer cobrança inicial." },
+    { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendarpro.pt/seu-salao). Pode partilhar este link diretamente no seu Instagram, nas redes sociais ou enviar via WhatsApp." }
   ]
 
   return (
@@ -264,18 +264,31 @@ export default function HelpSupportPage() {
               </div>
            </Card>
 
-           <Card className="border-none shadow-xl rounded-3xl bg-muted/50 p-6">
-              <div className="flex items-center gap-4">
-                 <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
-                    <Phone className="h-5 w-5 text-green-600" />
-                 </div>
-                 <div>
-                    <h4 className="font-bold text-sm italic">WhatsApp Central</h4>
-                    <p className="text-xs text-muted-foreground">+351 9XX XXX XXX</p>
-                 </div>
-              </div>
-           </Card>
-        </div>
+            <Card className="border-none shadow-xl rounded-3xl bg-muted/50 p-6">
+               <div className="flex items-center gap-4">
+                  <div className="h-10 w-10 rounded-xl bg-green-100 flex items-center justify-center">
+                     <Phone className="h-5 w-5 text-green-600" />
+                  </div>
+                  <div>
+                     <h4 className="font-bold text-sm italic">WhatsApp Central</h4>
+                     <p className="text-xs text-muted-foreground">+351 9XX XXX XXX</p>
+                  </div>
+               </div>
+            </Card>
+
+            <Card className="border-none shadow-xl rounded-3xl bg-muted/50 p-6 hover:bg-red-500/5 transition-all">
+               <a href="https://www.youtube.com/@nappsistemas" target="_blank" rel="noopener noreferrer" className="flex items-center gap-4 group">
+                  <div className="h-10 w-10 rounded-xl bg-red-100 dark:bg-red-950 flex items-center justify-center group-hover:scale-110 transition-transform">
+                     <Youtube className="h-5 w-5 text-red-600 dark:text-red-400" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                     <h4 className="font-bold text-sm italic group-hover:text-red-600 transition-colors">Canal do YouTube</h4>
+                     <p className="text-xs text-muted-foreground truncate">youtube.com/@nappsistemas</p>
+                  </div>
+                  <ChevronRight className="h-4 w-4 text-muted-foreground group-hover:translate-x-1 transition-transform shrink-0" />
+               </a>
+            </Card>
+         </div>
 
       </div>
     </div>

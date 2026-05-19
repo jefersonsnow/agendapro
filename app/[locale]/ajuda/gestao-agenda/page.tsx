@@ -145,26 +145,32 @@ export default function GestaoAgendaTutorial() {
                    Visualize rapidamente o estado do seu dia através das cores na agenda.
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                   <div className="space-y-4">
-                      <div className="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-l-4 border-yellow-400">
-                         <div className="flex-1">
-                            <span className="text-xs font-black uppercase tracking-widest opacity-50">Pendente</span>
-                            <p className="text-sm font-bold">Aguardando chegada do cliente</p>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-l-4 border-teal-500">
-                         <div className="flex-1">
-                            <span className="text-xs font-black uppercase tracking-widest opacity-50">Concluído</span>
-                            <p className="text-sm font-bold">Serviço finalizado e pago</p>
-                         </div>
-                      </div>
-                      <div className="flex items-center gap-4 bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border-l-4 border-red-500">
-                         <div className="flex-1">
-                            <span className="text-xs font-black uppercase tracking-widest opacity-50">Faltou</span>
-                            <p className="text-sm font-bold">Cliente não compareceu</p>
-                         </div>
-                      </div>
-                   </div>
+                    <div className="space-y-3">
+                       <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border-l-4 border-yellow-500">
+                          <div className="flex-1">
+                             <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Pendente</span>
+                             <p className="text-xs font-bold">Aguardando início do serviço</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border-l-4 border-blue-500">
+                          <div className="flex-1">
+                             <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Confirmado</span>
+                             <p className="text-xs font-bold">Marcação ativa e confirmada</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border-l-4 border-green-600">
+                          <div className="flex-1">
+                             <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Concluído</span>
+                             <p className="text-xs font-bold">Serviço finalizado e faturado</p>
+                          </div>
+                       </div>
+                       <div className="flex items-center gap-3 bg-white dark:bg-slate-900 p-3 rounded-2xl shadow-sm border-l-4 border-red-500">
+                          <div className="flex-1">
+                             <span className="text-[10px] font-black uppercase tracking-widest opacity-50">Cancelado</span>
+                             <p className="text-xs font-bold">Agendamento cancelado pelo salão ou cliente</p>
+                          </div>
+                       </div>
+                    </div>
                    <div className="bg-slate-900 text-white p-8 rounded-3xl flex flex-col justify-center">
                       <AlertCircle className="h-8 w-8 text-teal-400 mb-4" />
                       <h4 className="text-lg font-bold italic tracking-tight">Dica de Gestor:</h4>
