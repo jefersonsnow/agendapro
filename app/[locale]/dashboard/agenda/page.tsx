@@ -98,10 +98,11 @@ const statusColors: Record<string, string> = {
   break: "bg-slate-500/20 border-slate-500/30 text-slate-800 dark:text-slate-200",
 }
 
-function MonthlyView({ currentDate, appointments, onDayClick }: { 
+function MonthlyView({ currentDate, appointments, onDayClick, customStatusColors }: { 
   currentDate: Date, 
   appointments: Appointment[],
-  onDayClick: (date: Date) => void 
+  onDayClick: (date: Date) => void,
+  customStatusColors: any
 }) {
   const t = useTranslations("Agenda")
   const locale = useLocale()
@@ -115,7 +116,7 @@ function MonthlyView({ currentDate, appointments, onDayClick }: {
     const date = new Date(currentDate.getFullYear(), currentDate.getMonth(), day)
     return date
   })
-
+  
   const weekdayNames = Array.from({ length: 7 }, (_, i) => {
     const date = new Date(2024, 0, i + 1) // Jan 1st 2024 is a Monday
     return date.toLocaleDateString(locale === 'pt' ? 'pt-PT' : locale, { weekday: 'short' })
@@ -164,12 +165,13 @@ function MonthlyView({ currentDate, appointments, onDayClick }: {
                   {isCurrentMonth && dayAppointments.slice(0, 2).map(apt => (
                     <div 
                       key={apt.id} 
-                      className={cn(
-                        "text-[9px] font-bold uppercase truncate px-1 py-0.5 rounded border-l-2",
-                        apt.is_break 
-                          ? "bg-slate-900 border-slate-950 text-white" 
-                          : "bg-primary/10 border-primary/50 text-primary"
-                      )}
+                      className="text-[9px] font-bold uppercase truncate px-1 py-0.5 rounded border-l-2"
+                      style={{
+                        backgroundColor: apt.is_break ? customStatusColors.break.bg : (customStatusColors[apt.status]?.bg || customStatusColors.pending.bg),
+                        borderColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                        color: apt.is_break ? customStatusColors.break.text : (customStatusColors[apt.status]?.text || customStatusColors.pending.text),
+                        borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488")
+                      }}
                     >
                        {apt.is_break ? `PAUSA - ${apt.staff?.name || '?'}` : apt.client?.name}
                     </div>
@@ -205,6 +207,25 @@ export default function AgendaPage() {
   const [salonId, setSalonId] = useState<string | null>(null)
   const [workingHours, setWorkingHours] = useState<any>(null)
   const [colorPalette, setColorPalette] = useState<string>("default")
+  const [customStatusColors, setCustomStatusColors] = useState(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("agenda_status_colors")
+      if (saved) {
+        try {
+          return JSON.parse(saved)
+        } catch (e) {
+          console.error(e)
+        }
+      }
+    }
+    return {
+      pending: { bg: "rgba(234, 179, 8, 0.15)", border: "rgba(234, 179, 8, 0.4)", text: "#78350f" },
+      confirmed: { bg: "rgba(16, 185, 129, 0.15)", border: "rgba(16, 185, 129, 0.4)", text: "#065f46" },
+      completed: { bg: "#70a063", border: "#5a824e", text: "#ffffff" },
+      cancelled: { bg: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.4)", text: "#7f1d1d" },
+      break: { bg: "rgba(107, 114, 128, 0.15)", border: "rgba(107, 114, 128, 0.4)", text: "#374151" }
+    }
+  })
   const [isDialogOpen, setIsDialogOpen] = useState(false)
   const [selectedStaffFilter, setSelectedStaffFilter] = useState<string>("all")
   const [filteredStaffForModal, setFilteredStaffForModal] = useState<Staff[]>([])
@@ -828,6 +849,7 @@ export default function AgendaPage() {
                   setCurrentDate(date)
                   setView('week')
                 }}
+                customStatusColors={customStatusColors}
               />
             )}
             
@@ -917,8 +939,7 @@ export default function AgendaPage() {
                               key={apt.id}
                               className={cn(
                                 "absolute z-20 rounded-md border border-border/40 overflow-hidden shadow-sm backdrop-blur-[2px] transition-all cursor-pointer group hover:scale-[1.02] pointer-events-auto",
-                                durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5",
-                                apt.is_break ? statusColors.break : (statusColors[apt.status] || statusColors.pending)
+                                durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5"
                               )}
                               style={{
                                 top: `${top}%`,
@@ -927,6 +948,11 @@ export default function AgendaPage() {
                                 width: `${apt.width - 1}%`,
                                 borderLeftWidth: '6px',
                                 borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488"),
+                                backgroundColor: apt.is_break ? customStatusColors.break.bg : (customStatusColors[apt.status]?.bg || customStatusColors.pending.bg),
+                                borderTopColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                                borderRightColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                                borderBottomColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                                color: apt.is_break ? customStatusColors.break.text : (customStatusColors[apt.status]?.text || customStatusColors.pending.text),
                               }}
                               onClick={(e) => {
                                 e.stopPropagation()
@@ -1053,15 +1079,19 @@ export default function AgendaPage() {
                          }}
                          className={cn(
                             "absolute z-20 rounded-xl border-l-[4px] shadow-sm transition-all active:scale-[0.98] group overflow-hidden bg-opacity-95 backdrop-blur-[1px] pointer-events-auto cursor-pointer",
-                             durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5",
-                            aptClass
+                             durationMinutes <= 15 ? "p-0.5 pt-0.5" : "pt-1 px-1.5 pb-1.5"
                          )}
                          style={{ 
                             left: `${apt.left}%`,
                             width: `${apt.width}%`,
                             top: `${top + 4}px`, 
                             height: `${height - 8}px`, 
-                            borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488")
+                            borderLeftColor: apt.is_break ? "#929292" : (apt.staff?.color || "#0D9488"),
+                            backgroundColor: apt.is_break ? customStatusColors.break.bg : (customStatusColors[apt.status]?.bg || customStatusColors.pending.bg),
+                            borderTopColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                            borderRightColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                            borderBottomColor: apt.is_break ? customStatusColors.break.border : (customStatusColors[apt.status]?.border || customStatusColors.pending.border),
+                            color: apt.is_break ? customStatusColors.break.text : (customStatusColors[apt.status]?.text || customStatusColors.pending.text),
                          }}
                      >
                         <div className={cn(
@@ -1111,23 +1141,117 @@ export default function AgendaPage() {
       </div>
 
       {/* Legend */}
-      <div className="flex flex-wrap gap-4 text-sm mt-4">
-        <div className="flex items-center gap-2 font-medium">
-          <div className="w-3 h-3 rounded bg-yellow-200 border border-yellow-400" />
-          <span className="text-xs uppercase tracking-widest">{t("pending")}</span>
-        </div>
-        <div className="flex items-center gap-2 font-medium">
-          <div className="w-3 h-3 rounded bg-primary/20 border border-primary/40" />
-          <span className="text-xs uppercase tracking-widest">{t("confirmed")}</span>
-        </div>
-        <div className="flex items-center gap-2 font-medium">
-          <div className="w-3 h-3 rounded bg-green-200 border border-green-400" />
-          <span className="text-xs uppercase tracking-widest">{t("legendCompleted")}</span>
-        </div>
-        <div className="flex items-center gap-2 font-medium">
-          <div className="w-3 h-3 rounded bg-red-200 border border-red-400" />
-          <span className="text-xs uppercase tracking-widest">{t("cancelled")}</span>
-        </div>
+      <div className="flex flex-wrap gap-3 text-sm mt-4 items-center bg-muted/20 px-4 py-2.5 rounded-2xl border w-fit">
+        <span className="text-[10px] font-black uppercase tracking-widest opacity-60 mr-2">Cores da Agenda:</span>
+        {Object.entries(customStatusColors).map(([statusKey, config]: [string, any]) => (
+          <Popover key={statusKey}>
+            <PopoverTrigger asChild>
+              <button className="flex items-center gap-2 font-black uppercase text-[10px] tracking-widest hover:scale-105 transition-transform bg-background/50 hover:bg-background border px-3 py-1.5 rounded-xl shadow-sm">
+                <div 
+                  className="w-3.5 h-3.5 rounded-md border shadow-sm transition-all"
+                  style={{ 
+                    backgroundColor: config.bg, 
+                    borderColor: config.border 
+                  }} 
+                />
+                <span className="hover:text-primary transition-colors">{statusKey === 'completed' ? t('legendCompleted') : (statusKey === 'break' ? 'Pausa' : t(statusKey))}</span>
+              </button>
+            </PopoverTrigger>
+            <PopoverContent className="w-64 p-4 rounded-2xl shadow-xl z-50 border bg-card">
+              <div className="space-y-4">
+                <div className="text-xs font-black uppercase tracking-wider mb-2">Alterar Cor - {statusKey === 'completed' ? t('legendCompleted') : (statusKey === 'break' ? 'Pausa' : t(statusKey))}</div>
+                
+                {/* Predefined Beautiful Color Palettes */}
+                <div className="grid grid-cols-5 gap-2">
+                  {[
+                    // Emerald / Slate
+                    { bg: "rgba(16, 185, 129, 0.15)", border: "rgba(16, 185, 129, 0.4)", text: "#065f46" },
+                    // Amber / Yellow
+                    { bg: "rgba(245, 158, 11, 0.15)", border: "rgba(245, 158, 11, 0.4)", text: "#78350f" },
+                    // Red / Rose
+                    { bg: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.4)", text: "#7f1d1d" },
+                    // Blue / Cyan
+                    { bg: "rgba(59, 130, 246, 0.15)", border: "rgba(59, 130, 246, 0.4)", text: "#1e3a8a" },
+                    // Sky Blue / Cyan (Compliance with Purple Ban)
+                    { bg: "rgba(14, 165, 233, 0.15)", border: "rgba(14, 165, 233, 0.4)", text: "#0369a1" },
+                    // Pink / Fuchsia
+                    { bg: "rgba(236, 72, 153, 0.15)", border: "rgba(236, 72, 153, 0.4)", text: "#701a75" },
+                    // Teal
+                    { bg: "rgba(20, 184, 166, 0.15)", border: "rgba(20, 184, 166, 0.4)", text: "#115e59" },
+                    // Orange
+                    { bg: "rgba(249, 115, 22, 0.15)", border: "rgba(249, 115, 22, 0.4)", text: "#7c2d12" },
+                    // Gray / Slate
+                    { bg: "rgba(107, 114, 128, 0.15)", border: "rgba(107, 114, 128, 0.4)", text: "#374151" },
+                    // Green solid
+                    { bg: "#70a063", border: "#5a824e", text: "#ffffff" },
+
+                    // --- NEW 10 COLORS ---
+                    // Indigo Blue
+                    { bg: "rgba(79, 70, 229, 0.15)", border: "rgba(79, 70, 229, 0.4)", text: "#312e81" },
+                    // Lime Green
+                    { bg: "rgba(132, 204, 22, 0.15)", border: "rgba(132, 204, 22, 0.4)", text: "#3f6212" },
+                    // Rose / Ruby Red
+                    { bg: "rgba(225, 29, 72, 0.15)", border: "rgba(225, 29, 72, 0.4)", text: "#9f1239" },
+                    // Cyan / Ocean
+                    { bg: "rgba(6, 182, 212, 0.15)", border: "rgba(6, 182, 212, 0.4)", text: "#155e75" },
+                    // Bronze / Coffee Brown
+                    { bg: "rgba(120, 53, 4, 0.12)", border: "rgba(120, 53, 4, 0.35)", text: "#78350f" },
+                    // Muted Forest Green
+                    { bg: "rgba(21, 128, 61, 0.15)", border: "rgba(21, 128, 61, 0.4)", text: "#14532d" },
+                    // Gold / Warm Yellow
+                    { bg: "rgba(202, 138, 4, 0.15)", border: "rgba(202, 138, 4, 0.4)", text: "#713f12" },
+                    // Cool Gray / Silver
+                    { bg: "rgba(148, 163, 184, 0.15)", border: "rgba(148, 163, 184, 0.4)", text: "#1e293b" },
+                    // Solid Crimson Red
+                    { bg: "#d93838", border: "#b82828", text: "#ffffff" },
+                    // Solid Deep Teal
+                    { bg: "#0d9488", border: "#0f766e", text: "#ffffff" }
+                  ].map((colorOpt, i) => (
+                    <button
+                      key={i}
+                      className="w-8 h-8 rounded-lg border hover:scale-110 active:scale-95 transition-transform"
+                      style={{ backgroundColor: colorOpt.bg, borderColor: colorOpt.border }}
+                      onClick={() => {
+                        const newColors = {
+                          ...customStatusColors,
+                          [statusKey]: colorOpt
+                        }
+                        setCustomStatusColors(newColors)
+                        localStorage.setItem("agenda_status_colors", JSON.stringify(newColors))
+                      }}
+                    />
+                  ))}
+                </div>
+
+
+
+                {/* Reset button */}
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="w-full text-[10px] uppercase font-black tracking-widest h-8"
+                  onClick={() => {
+                    const defaults: any = {
+                      pending: { bg: "rgba(234, 179, 8, 0.15)", border: "rgba(234, 179, 8, 0.4)", text: "#78350f" },
+                      confirmed: { bg: "rgba(16, 185, 129, 0.15)", border: "rgba(16, 185, 129, 0.4)", text: "#065f46" },
+                      completed: { bg: "#70a063", border: "#5a824e", text: "#ffffff" },
+                      cancelled: { bg: "rgba(239, 68, 68, 0.15)", border: "rgba(239, 68, 68, 0.4)", text: "#7f1d1d" },
+                      break: { bg: "rgba(107, 114, 128, 0.15)", border: "rgba(107, 114, 128, 0.4)", text: "#374151" }
+                    }
+                    const newColors = {
+                      ...customStatusColors,
+                      [statusKey]: defaults[statusKey]
+                    }
+                    setCustomStatusColors(newColors)
+                    localStorage.setItem("agenda_status_colors", JSON.stringify(newColors))
+                  }}
+                >
+                  Restaurar Padrão
+                </Button>
+              </div>
+            </PopoverContent>
+          </Popover>
+        ))}
       </div>
 
 
