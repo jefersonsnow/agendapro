@@ -26,6 +26,7 @@ import { cn } from "@/lib/utils"
 import { getTranslations } from "next-intl/server"
 import { routing } from "@/i18n/routing"
 import prisma from "@/lib/prisma"
+import { getGlobalConfigCache } from "@/lib/dal"
 
 const LOCALES = [
   { code: "pt", label: "Português", flag: "pt" },
@@ -54,7 +55,9 @@ export default async function HomePage({
     }
 
     // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT (Safe Raw Query)
-    let landingPageData: any = {}
+    const config = await getGlobalConfigCache().catch(() => null)
+    const landingPageData = config?.landing_page ? JSON.parse(config.landing_page) : {}
+    const promoConfig = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
     const dynamicHeroTitle1 = landingPageData.heroTitle1 || t("heroTitle1")
     const dynamicHeroTitle2 = landingPageData.heroTitle2 || t("heroTitle2")
     const dynamicHeroDesc = landingPageData.heroDesc || t("heroDesc")
@@ -114,6 +117,15 @@ export default async function HomePage({
       <div className="theme-magenta min-h-screen bg-background text-foreground overflow-hidden selection:bg-primary/30">
         {/* Navbar com Banner Promocional */}
         <div className="flex flex-col">
+          {promoConfig.enabled && (
+            <div className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x text-primary-foreground py-2.5 px-4 text-center text-xs font-black uppercase tracking-[0.2em] relative z-50 flex items-center justify-center gap-2 shadow-md">
+              <Sparkles className="h-4 w-4 animate-pulse shrink-0" />
+              <span>{promoConfig.promo_text || `Campanha Especial: ${promoConfig.trial_days || 30} Dias de Premium TOTALMENTE GRÁTIS!`}</span>
+              <span className="hidden sm:inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-widest backdrop-blur-sm ml-2 animate-bounce">
+                Ativo Hoje
+              </span>
+            </div>
+          )}
 
           <header className="sticky top-0 z-50 w-full border-b border-border/40 bg-background/60 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
@@ -358,7 +370,7 @@ export default async function HomePage({
                     plan="minimo" 
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
-                    {t("planFreeBtn")}
+                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planFreeBtn")}
                   </TrialButton>
                 </div>
 
@@ -387,7 +399,7 @@ export default async function HomePage({
                     plan="basic" 
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
-                    {t("planBasicBtn")}
+                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planBasicBtn")}
                   </TrialButton>
                 </div>
 
@@ -418,7 +430,7 @@ export default async function HomePage({
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all"
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
-                    {t("planPremiumBtn")}
+                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planPremiumBtn")}
                   </TrialButton>
                 </div>
               </div>

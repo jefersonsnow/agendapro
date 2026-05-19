@@ -2,7 +2,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { Calendar, Building2, Users, LayoutDashboard, Settings, LogOut, ShieldCheck, MessageSquare } from "lucide-react"
+import { Calendar, Building2, Users, LayoutDashboard, Settings, LogOut, ShieldCheck, MessageSquare, Megaphone } from "lucide-react"
 import { AdminSidebarFooter } from "./sidebar-footer"
 
 export default async function AdminLayout({
@@ -42,6 +42,7 @@ export default async function AdminLayout({
             {[
               { icon: LayoutDashboard, label: "Dashboard", href: "/admin" },
               { icon: Building2, label: "Salões", href: "/admin/salons" },
+              { icon: Megaphone, label: "Comunicados", href: "/admin/announcements" },
               { icon: Settings, label: "Gestão de Configurações", href: "/admin/users" },
               { icon: MessageSquare, label: "Tickets Suporte", href: "/admin/tickets" },
             ].map((item) => (

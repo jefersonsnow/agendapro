@@ -20,6 +20,11 @@ export function SupportSeoSettings() {
   
   const [whatsappNumber, setWhatsappNumber] = useState("")
   
+  // Promotion State
+  const [isPromoActive, setIsPromoActive] = useState(false)
+  const [promoText, setPromoText] = useState("")
+  const [promoTrialDays, setPromoTrialDays] = useState(30)
+  
   // SEO State
   const [metaTitle, setMetaTitle] = useState("")
   const [metaDescription, setMetaDescription] = useState("")
@@ -38,14 +43,20 @@ export function SupportSeoSettings() {
         const support = data.support_config ? JSON.parse(data.support_config) : {}
         setWhatsappNumber(support.whatsappNumber || "")
 
+        // Parse promotion_config
+        const promo = data.promotion_config ? JSON.parse(data.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
+        setIsPromoActive(promo.enabled || false)
+        setPromoText(promo.promo_text || "")
+        setPromoTrialDays(promo.trial_days || 30)
+
         // Parse seo_config
-  const seo = data.seo_config ? JSON.parse(data.seo_config) : {}
-  setMetaTitle(seo.metaTitle || "")
-  setMetaDescription(seo.metaDescription || "")
-  setMetaKeywords(seo.metaKeywords || "")
-  setFbPixelId(seo.fbPixelId || "")
-  setGoogleAnalyticsId(seo.googleAnalyticsId || "")
-  setOgImageUrl(seo.ogImageUrl || "")
+        const seo = data.seo_config ? JSON.parse(data.seo_config) : {}
+        setMetaTitle(seo.metaTitle || "")
+        setMetaDescription(seo.metaDescription || "")
+        setMetaKeywords(seo.metaKeywords || "")
+        setFbPixelId(seo.fbPixelId || "")
+        setGoogleAnalyticsId(seo.googleAnalyticsId || "")
+        setOgImageUrl(seo.ogImageUrl || "")
 
       } catch (err) {
         toast.error("Erro ao carregar configurações")
@@ -63,6 +74,12 @@ export function SupportSeoSettings() {
         whatsappNumber: whatsappNumber.replace(/\s+/g, ""), // Limpar espaços
       }
 
+      const promotionConfigSet = {
+        enabled: isPromoActive,
+        promo_text: promoText,
+        trial_days: promoTrialDays
+      }
+
       const seoConfigSet = {
         metaTitle,
         metaDescription,
@@ -74,6 +91,7 @@ export function SupportSeoSettings() {
       
       await updateGlobalConfig({
          support_config: supportConfigSet,
+         promotion_config: promotionConfigSet,
          seo_config: seoConfigSet
       })
       
@@ -99,6 +117,7 @@ export function SupportSeoSettings() {
       <Tabs defaultValue="geral" className="w-full">
         <TabsList className="bg-muted p-1 rounded-xl mb-4">
           <TabsTrigger value="geral" className="rounded-lg text-[10px] font-black uppercase tracking-widest">Geral & Suporte</TabsTrigger>
+          <TabsTrigger value="marketing" className="rounded-lg text-[10px] font-black uppercase tracking-widest">Marketing & Promoção</TabsTrigger>
           <TabsTrigger value="seo" className="rounded-lg text-[10px] font-black uppercase tracking-widest">SEO & Tracking</TabsTrigger>
           <TabsTrigger value="infra" className="rounded-lg text-[10px] font-black uppercase tracking-widest">Saúde Core</TabsTrigger>
         </TabsList>
@@ -120,6 +139,49 @@ export function SupportSeoSettings() {
                         placeholder="Ex: 351912345678" 
                         className="h-10 rounded-xl"
                     />
+                </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="marketing" className="space-y-4">
+          <Card className="border-none shadow-sm rounded-2xl">
+            <CardHeader>
+                <CardTitle className="text-sm font-bold flex items-center gap-2 italic">
+                  <Gift className="h-4 w-4 text-orange-600" />
+                  Marketing & Promoção
+                </CardTitle>
+                <CardDescription className="text-xs">Gerencie campanhas de trial e promoções de lançamento.</CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+                <div className="flex items-center justify-between p-4 rounded-2xl bg-orange-600/5 border border-orange-600/10">
+                  <div className="space-y-0.5">
+                      <Label className="text-sm font-bold tracking-tight">Campanha "30 Dias Premium"</Label>
+                      <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Ativar campanha no site público</p>
+                  </div>
+                  <Switch checked={isPromoActive} onCheckedChange={setIsPromoActive} className="data-[state=checked]:bg-orange-600" />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase opacity-50 pl-1">Texto Destacado (Banner)</Label>
+                  <Input 
+                      value={promoText} 
+                      onChange={(e) => setPromoText(e.target.value)} 
+                      placeholder="Ex: 30 Dias de Premium GRÁTIS!" 
+                      disabled={!isPromoActive}
+                      className="h-10 rounded-xl"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label className="text-[10px] font-black uppercase opacity-50 pl-1">Duração do Trial (Dias)</Label>
+                  <Input 
+                      type="number"
+                      value={promoTrialDays} 
+                      onChange={(e) => setPromoTrialDays(parseInt(e.target.value) || 0)} 
+                      disabled={!isPromoActive}
+                      className="h-10 rounded-xl w-32"
+                  />
                 </div>
             </CardContent>
           </Card>

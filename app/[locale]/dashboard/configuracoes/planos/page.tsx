@@ -106,8 +106,12 @@ export default function PlansPage() {
     }
   ]
 
-  // Mostramos apenas as opções de UPGRADE.
+  // Mostramos apenas as opções de UPGRADE ou TODOS os planos se estiver em Trial.
   const upgradeOptions = PLANS.filter(p => {
+    if (isTrial) {
+      // Em Trial, permitimos assinar os planos pagos (basic e premium)
+      return p.id !== "minimo"
+    }
     if (currentPlan === "minimo") return p.id !== "minimo"
     if (currentPlan === "basic") return p.id === "premium"
     return false
@@ -144,9 +148,15 @@ export default function PlansPage() {
                   </div>
                )}
 
-               {currentPlan === plan.id && (
+               {currentPlan === plan.id && !isTrial && (
                   <div className="absolute top-4 right-4 animate-bounce">
                      <span className="px-3 py-1 rounded-full bg-primary text-white text-[10px] font-black uppercase tracking-widest shadow-lg">Plano Atual</span>
+                  </div>
+               )}
+
+               {currentPlan === plan.id && isTrial && (
+                  <div className="absolute top-4 right-4 animate-bounce">
+                     <span className="px-3 py-1 rounded-full bg-orange-500 text-white text-[10px] font-black uppercase tracking-widest shadow-lg animate-pulse">Teste Ativo</span>
                   </div>
                )}
 
@@ -177,7 +187,7 @@ export default function PlansPage() {
                   </div>
 
                   <div className="mt-12">
-                     {plan.id === currentPlan ? (
+                     {plan.id === currentPlan && !isTrial ? (
                         <Button disabled variant="outline" className="w-full h-14 rounded-2xl border-2 font-bold text-muted-foreground opacity-50">
                            Aproveite o seu plano
                         </Button>

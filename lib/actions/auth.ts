@@ -89,6 +89,128 @@ export async function signUpWithDetails(formData: any) {
   // 2. Hash da password
   const hashedPassword = await bcrypt.hash(password, 10)
 
+  // 3. Criar Registo Pendente (Apenas se o trial NÃO estiver ativo, para evitar registos fantasmas)
+  const config = await getGlobalConfigCache()
+  const promo = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
+
+  if (promo.enabled) {
+    // BYPASS STRIPE - CRIAÇÃO DIRETA EM MODO TRIAL
+    try {
+      const trialDays = promo.trial_days || 30
+      const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000)
+
+      // Gerar slug limpo baseado no nome do salão
+      const baseSlug = salonName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")
+      let slug = baseSlug
+      const existingSalon = await prisma.salon.findUnique({ where: { slug } })
+      if (existingSalon) {
+        slug = `${baseSlug}-${Math.floor(Math.random() * 1000)}`
+      }
+
+      await prisma.$transaction(async (tx) => {
+        // A. Criar Usuário (Dono)
+        const user = await tx.user.create({
+          data: {
+            name,
+            email,
+            password: hashedPassword,
+            role: "owner",
+          }
+        })
+
+        // B. Criar Salão
+        const salon = await tx.salon.create({
+          data: {
+            name: salonName,
+            slug,
+            email,
+            phone,
+            address,
+            nif,
+            owner_id: user.id,
+            plan,
+            status: "trial",
+            trial_ends_at: trialEndsAt
+          }
+        })
+
+        // C. Vincular usuário ao salão
+        await tx.user.update({
+          where: { id: user.id },
+          data: { salon_id: salon.id }
+        })
+
+        // D. Criar Perfil de Staff para o Proprietário
+        await tx.staff.create({
+          data: {
+            salon_id: salon.id,
+            user_id: user.id,
+            name: name || "Proprietário",
+            email: email,
+            phone: phone,
+            role: "owner",
+            is_active: true
+          }
+        })
+      })
+
+      // E. Enviar E-mail de Boas-vindas para o Trial
+      try {
+        const welcomeConfig = config?.welcome_email_config ? JSON.parse(config.welcome_email_config) : {}
+        const extraContent = welcomeConfig.enableExtraContent ? (welcomeConfig.extraHtmlContent || "") : ""
+
+        await sendMail({
+          to: email,
+          subject: `Bem-vindo ao AgendarPro! O seu período de teste grátis de ${trialDays} dias começou`,
+          html: `
+            <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 40px; border-radius: 10px;">
+              <h1 style="color: #333;">Olá, ${name}!</h1>
+              <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                Parabéns! O seu salão <strong>${salonName}</strong> já está configurado na nossa plataforma no período de teste gratuito de <strong>${trialDays} dias</strong>.
+              </p>
+              <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <p style="margin: 0; font-weight: bold; color: #333;">Seus dados de acesso:</p>
+                <p style="margin: 10px 0 0 0; color: #666;">Painel de Gestão: <a href="https://agendar.napp.pt/${slug}/login" style="color: #0d9488; text-decoration: none; font-weight: bold;">Entrar no Painel</a></p>
+                <p style="margin: 5px 0 0 0; color: #666;">E-mail: ${email}</p>
+              </div>
+              <p style="font-size: 16px; color: #555; line-height: 1.6;">
+                O seu link público para agendamentos de clientes é: <br/>
+                <a href="https://agendar.napp.pt/${slug}" style="font-weight: bold; color: #0d9488; text-decoration: none;">agendar.napp.pt/${slug}</a>
+              </p>
+              ${extraContent ? `<hr style="border: 0; border-top: 1px solid #eee; margin: 30px 0;"> ${extraContent}` : ""}
+              <p style="font-size: 14px; color: #888; margin-top: 40px;">
+                Se precisar de qualquer ajuda durante o seu período de teste, responda a este e-mail ou fale com o nosso suporte. <br/>
+                Equipa AgendarPro
+              </p>
+            </div>
+          `
+        })
+      } catch (err) {
+        console.error("Erro ao enviar e-mail de boas-vindas do trial:", err)
+      }
+
+      // F. Login automático
+      try {
+        await signIn("credentials", {
+          email,
+          password,
+          slug,
+          redirectTo: "/dashboard",
+        })
+      } catch (error) {
+        if (error instanceof Error && error.message === 'NEXT_REDIRECT') {
+          throw error;
+        }
+        return { success: true, url: `/auth/login?registered=true&email=${encodeURIComponent(email)}` }
+      }
+
+      return { success: true, url: "/dashboard" }
+    } catch (dbError: any) {
+      console.error("Erro ao criar salão em modo trial:", dbError)
+      return { error: "Erro interno ao processar o registo: " + dbError.message }
+    }
+  }
+
   // 3. Criar Registo Pendente
   const pending = await prisma.pendingRegistration.create({
     data: {
@@ -106,7 +228,6 @@ export async function signUpWithDetails(formData: any) {
 
 
   // 4. Obter Configurações do Stripe
-  const config = await getGlobalConfigCache()
   const stripeConfigs = config?.stripe_configs ? JSON.parse(config.stripe_configs) : {}
   const secretKey = stripeConfigs.secretKey || process.env.STRIPE_SECRET_KEY
 
