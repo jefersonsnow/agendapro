@@ -370,6 +370,7 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="minimo" 
+                    isTrialActive={promoConfig.enabled}
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
                     {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planFreeBtn")}
@@ -399,6 +400,7 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="basic" 
+                    isTrialActive={promoConfig.enabled}
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
                     {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planBasicBtn")}
@@ -429,6 +431,7 @@ export default async function HomePage({
                   </ul>
                   <TrialButton 
                     plan="premium" 
+                    isTrialActive={promoConfig.enabled}
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all"
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
@@ -449,7 +452,7 @@ export default async function HomePage({
                 <p className="text-2xl md:text-3xl text-muted-foreground font-medium mb-12 max-w-4xl mx-auto">
                    {t("ctaDesc")} <span className="text-foreground font-black underline decoration-primary decoration-4 underline-offset-8">{t("ctaDescStrong")}</span>
                 </p>
-                <TrialButton size="lg" className="rounded-2xl h-20 px-12 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter">
+                <TrialButton size="lg" isTrialActive={promoConfig.enabled} className="rounded-2xl h-20 px-12 text-2xl shadow-[0_20px_50px_rgba(13,148,136,0.3)] hover:shadow-primary/50 hover:-translate-y-2 transition-all font-black uppercase tracking-tighter">
                   {t("ctaBtn")}
                   <Sparkles className="ml-4 h-8 w-8" />
                 </TrialButton>

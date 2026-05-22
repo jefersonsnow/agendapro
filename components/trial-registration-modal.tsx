@@ -79,9 +79,10 @@ interface TrialRegistrationModalProps {
   isOpen: boolean
   onClose: () => void
   plan: string
+  isTrialActive?: boolean
 }
 
-export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrationModalProps) {
+export function TrialRegistrationModal({ isOpen, onClose, plan, isTrialActive = false }: TrialRegistrationModalProps) {
   const t = useTranslations("Modal.trial")
   const [isLoading, setIsLoading] = useState(false)
   const [isSuccess, setIsSuccess] = useState(false)
@@ -91,14 +92,17 @@ export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrat
     salonName: z.string().min(2, t("errors.min2")),
     email: z.string().email(t("errors.email")),
     password: z.string().min(6, t("errors.min6")),
-    country: z.string(),
-    street: z.string().min(3, t("errors.street")),
-    number: z.string().min(1, t("errors.number")),
-    zipCode: z.string().min(4, t("errors.zip")),
-    nif: z.string().min(9, t("errors.nifMin")),
+    country: z.string().optional(),
+    street: isTrialActive ? z.string().optional() : z.string().min(3, t("errors.street")),
+    number: isTrialActive ? z.string().optional() : z.string().min(1, t("errors.number")),
+    zipCode: isTrialActive ? z.string().optional() : z.string().min(4, t("errors.zip")),
+    nif: isTrialActive ? z.string().optional() : z.string().min(9, t("errors.nifMin")),
     phone: z.string().min(9, t("errors.phone")),
   }).refine((data) => {
-    if (data.country === "PT") {
+    if (!isTrialActive && data.country === "PT") {
+      return validatePortugalNIF(data.nif || "")
+    }
+    if (isTrialActive && data.country === "PT" && data.nif) {
       return validatePortugalNIF(data.nif)
     }
     return true 
@@ -126,7 +130,10 @@ export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrat
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true)
     try {
-      const fullAddress = `${values.country}, ${values.street}, ${values.number}, ${values.zipCode}`
+      const fullAddress = isTrialActive 
+        ? "" 
+        : `${values.country || "PT"}, ${values.street || ""}, ${values.number || ""}, ${values.zipCode || ""}`
+        
       const result = await signUpWithDetails({
         ...values,
         address: fullAddress,
@@ -268,66 +275,70 @@ export function TrialRegistrationModal({ isOpen, onClose, plan }: TrialRegistrat
                   )}
                 />
 
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                  <div className="md:col-span-2">
-                    <FormField
-                      control={form.control}
-                      name="street"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t("form.street")}</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Rua das Flores" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="number"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("form.number")}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="123" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                {!isTrialActive && (
+                  <>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="md:col-span-2">
+                        <FormField
+                          control={form.control}
+                          name="street"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>{t("form.street")}</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Rua das Flores" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      </div>
+                      <FormField
+                        control={form.control}
+                        name="number"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("form.number")}</FormLabel>
+                            <FormControl>
+                              <Input placeholder="123" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="zipCode"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("form.zip")}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="4000-000" {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={form.control}
-                    name="nif"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>{t("form.nif")}</FormLabel>
-                        <FormControl>
-                          <Input placeholder="213..." {...field} />
-                        </FormControl>
-                        <FormDescription>{t("form.nifDesc")}</FormDescription>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="zipCode"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("form.zip")}</FormLabel>
+                            <FormControl>
+                              <Input placeholder="4000-000" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="nif"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t("form.nif")}</FormLabel>
+                            <FormControl>
+                              <Input placeholder="213..." {...field} />
+                            </FormControl>
+                            <FormDescription>{t("form.nifDesc")}</FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </>
+                )}
 
                 <FormField
                   control={form.control}

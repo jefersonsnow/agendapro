@@ -228,7 +228,7 @@ export async function POST(request: Request) {
              
              // Identificar plano pelo priceId
              let planCharged = salon.plan
-             const priceId = invoice.lines?.data?.[0]?.price?.id
+             const priceId = (invoice.lines?.data?.[0] as any)?.price?.id
              if (priceId === stripeConfigs.productBasicId) planCharged = "basic"
              else if (priceId === stripeConfigs.productMinimoId) planCharged = "minimo"
              // Caso existam outros planos, manterá o do salão atual
