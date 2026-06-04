@@ -612,7 +612,7 @@ export default function ConfiguracoesPage() {
                  </div>
               </div>
            </div>
-        </CardContent>
+         </CardContent>
       </Card>
 
       <Card className="bg-primary/5 border-primary/20">
