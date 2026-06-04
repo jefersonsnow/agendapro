@@ -206,7 +206,7 @@
     "heroTitle2": "Domina il tuo Mercato.",
     "heroDesc": "La soluzione definitiva per orchestrare la tua agenda 24/7, garantire una precisione assoluta nei calcoli delle commissioni e assumere il comando totale del tuo flusso di cassa.",
     "heroDescStrong": "Più tempo per la tua arte, gestione impeccabile per il tuo successo.",
-    "heroCta": "Inizia 30 Giorni Gratis",
+    "heroCta": "Inizia 60 Giorni Gratis",
     "heroNoCc": "Nessuna carta di credito richiesta",
     "statSalons": "+500 Saloni",
     "statBookings": "+1M Prenotazioni",
@@ -258,7 +258,7 @@
   },
   "Modal": {
     "trial": {
-      "title": "Inizia Gratis per 30 Giorni",
+      "title": "Inizia Gratis per 60 Giorni",
       "subtitle": "Accesso totale alla piattaforma, senza restrizioni. Nessuna carta richiesta.",
       "success": "Account registrato! Ora puoi accedere e configurare i tuoi servizi.",
       "error": "Errore durante la creazione dell'account. Riprova.",

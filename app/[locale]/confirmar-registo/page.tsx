@@ -53,7 +53,7 @@ export default function ConfirmarRegistoPage() {
           </CardTitle>
           <CardDescription className="text-slate-500 font-medium px-4">
             {status === "loading" && "Estamos a validar os seus dados e a criar o seu espaço de trabalho."}
-            {status === "success" && `Parabéns! O seu salão ${salonInfo?.name} foi ativado no período gratuito de 30 dias.`}
+            {status === "success" && `Parabéns! O seu salão ${salonInfo?.name} foi ativado no período gratuito de 60 dias.`}
             {status === "error" && errorMsg}
           </CardDescription>
         </CardHeader>
@@ -63,7 +63,7 @@ export default function ConfirmarRegistoPage() {
               <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-100 flex items-start gap-3 text-left">
                 <Sparkles className="h-5 w-5 text-emerald-600 shrink-0 mt-0.5" />
                 <p className="text-xs text-emerald-900 leading-relaxed font-medium">
-                  A sua conta de teste de 30 dias está ativa e totalmente configurada! Enviámos as suas credenciais e link de acesso único por e-mail.
+                  A sua conta de teste de 60 dias está ativa e totalmente configurada! Enviámos as suas credenciais e link de acesso único por e-mail.
                 </p>
               </div>
               <Button 

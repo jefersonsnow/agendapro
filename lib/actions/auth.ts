@@ -118,13 +118,13 @@ export async function signUpWithDetails(formData: any) {
 
       await sendMail({
         to: email,
-        subject: `Confirme o seu e-mail para ativar os 30 dias grátis no AgendarPro`,
+        subject: `Confirme o seu e-mail para ativar os 60 dias grátis no AgendarPro`,
         html: `
           <div style="font-family: sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eee; padding: 40px; border-radius: 10px;">
             <h1 style="color: #0d9488; text-align: center;">Ative a sua Conta Grátis!</h1>
             <p style="font-size: 16px; color: #555; line-height: 1.6;">
               Olá, <strong>${name}</strong>!<br/><br/>
-              Obrigado por se registar no AgendarPro! Para ativar o seu período de teste gratuito de <strong>${promo.trial_days || 30} dias</strong> para o salão <strong>${salonName}</strong>, por favor clique no botão de ativação abaixo:
+              Obrigado por se registar no AgendarPro! Para ativar o seu período de teste gratuito de <strong>${promo.trial_days || 60} dias</strong> para o salão <strong>${salonName}</strong>, por favor clique no botão de ativação abaixo:
             </p>
             <div style="text-align: center; margin: 35px 0;">
               <a href="${confirmLink}" style="background: #0d9488; color: white; padding: 16px 32px; text-decoration: none; border-radius: 12px; font-weight: bold; font-size: 16px; display: inline-block; box-shadow: 0 4px 12px rgba(13, 148, 136, 0.2);">ACTIVER CONTA AGORA</a>
@@ -405,8 +405,8 @@ export async function confirmRegistrationByToken(token: string) {
     }
 
     const config = await getGlobalConfigCache()
-    const promo = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 30 }
-    const trialDays = promo.trial_days || 30
+    const promo = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 60 }
+    const trialDays = promo.trial_days || 60
     const trialEndsAt = new Date(Date.now() + trialDays * 24 * 60 * 60 * 1000)
 
     const baseSlug = pending.salon_name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9]/g, "-").replace(/-+/g, "-").replace(/^-|-$/g, "")

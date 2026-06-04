@@ -35,7 +35,7 @@ export default function TrialStatusBanner({ trialEndsAt, plan }: TrialStatusBann
         <div className="flex-1 text-center md:text-left z-10">
           <h3 className="text-xl font-black text-destructive uppercase tracking-tight">O seu período de teste expirou! ⚡</h3>
           <p className="text-muted-foreground font-medium mt-1">
-            Os seus 30 dias grátis chegaram ao fim. Escolha um plano para continuar a usar todas as funcionalidades sem interrupções.
+            Os seus 60 dias grátis chegaram ao fim. Escolha um plano para continuar a usar todas as funcionalidades sem interrupções.
           </p>
         </div>
         <Link href="/dashboard/configuracoes/planos" className="z-10 w-full md:w-auto">

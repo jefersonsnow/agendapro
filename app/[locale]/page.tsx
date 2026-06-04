@@ -57,7 +57,7 @@ export default async function HomePage({
     // FETCH GLOBAL CONFIG FOR DYNAMIC CONTENT (Safe Raw Query)
     const config = await getGlobalConfigCache().catch(() => null)
     const landingPageData = config?.landing_page ? JSON.parse(config.landing_page) : {}
-    const promoConfig = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
+    const promoConfig = config?.promotion_config ? JSON.parse(config.promotion_config) : { enabled: false, trial_days: 60, promo_text: "" }
     const dynamicHeroTitle1 = landingPageData.heroTitle1 || t("heroTitle1")
     const dynamicHeroTitle2 = landingPageData.heroTitle2 || t("heroTitle2")
     const dynamicHeroDesc = landingPageData.heroDesc || t("heroDesc")
@@ -120,7 +120,7 @@ export default async function HomePage({
           {promoConfig.enabled && (
             <div className="bg-gradient-to-r from-primary via-secondary to-primary bg-[length:200%_auto] animate-gradient-x text-primary-foreground py-2.5 px-4 text-center text-xs font-black uppercase tracking-[0.2em] relative z-50 flex items-center justify-center gap-2 shadow-md">
               <Sparkles className="h-4 w-4 animate-pulse shrink-0" />
-              <span>{promoConfig.promo_text || `Campanha Especial: ${promoConfig.trial_days || 30} Dias de Premium TOTALMENTE GRÁTIS!`}</span>
+              <span>{promoConfig.promo_text || `Campanha Especial: ${promoConfig.trial_days || 60} Dias de Premium TOTALMENTE GRÁTIS!`}</span>
               <span className="hidden sm:inline-flex items-center rounded-full bg-white/20 px-2 py-0.5 text-[9px] font-bold text-white uppercase tracking-widest backdrop-blur-sm ml-2 animate-bounce">
                 Ativo Hoje
               </span>
@@ -373,7 +373,7 @@ export default async function HomePage({
                     isTrialActive={promoConfig.enabled}
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
-                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planFreeBtn")}
+                    {promoConfig.enabled ? "Testar 60 Dias Grátis" : t("planFreeBtn")}
                   </TrialButton>
                 </div>
 
@@ -403,7 +403,7 @@ export default async function HomePage({
                     isTrialActive={promoConfig.enabled}
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-primary hover:bg-primary/80 text-white shadow-xl shadow-primary/20 transition-all"
                   >
-                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planBasicBtn")}
+                    {promoConfig.enabled ? "Testar 60 Dias Grátis" : t("planBasicBtn")}
                   </TrialButton>
                 </div>
 
@@ -435,7 +435,7 @@ export default async function HomePage({
                     className="w-full h-14 rounded-2xl font-black uppercase tracking-widest bg-gradient-to-r from-cyan-600 to-primary hover:from-cyan-500 hover:to-primary/80 text-white shadow-xl shadow-cyan-500/20 transition-all"
                   >
                     <Sparkles className="mr-2 h-5 w-5" />
-                    {promoConfig.enabled ? "Testar 30 Dias Grátis" : t("planPremiumBtn")}
+                    {promoConfig.enabled ? "Testar 60 Dias Grátis" : t("planPremiumBtn")}
                   </TrialButton>
                 </div>
               </div>

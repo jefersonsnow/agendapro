@@ -206,7 +206,7 @@
     "heroTitle2": "Dominieren Sie Ihren Markt.",
     "heroDesc": "Die ultimative Lösung, um Ihren Zeitplan rund um die Uhr zu orchestrieren, absolute Präzision bei der Provisionsberechnung zu gewährleisten und die volle Kontrolle über Ihren Cashflow zu übernehmen.",
     "heroDescStrong": "Mehr Zeit für Ihr Handwerk, tadelloses Management für Ihren Erfolg.",
-    "heroCta": "30 Tage kostenlos starten",
+    "heroCta": "60 Tage kostenlos starten",
     "heroNoCc": "Keine Kreditkarte erforderlich",
     "statSalons": "+500 Salons",
     "statBookings": "+1M Buchungen",
@@ -258,7 +258,7 @@
   },
   "Modal": {
     "trial": {
-      "title": "Starten Sie 30 Tage Kostenlos",
+      "title": "Starten Sie 60 Tage Kostenlos",
       "subtitle": "Vollständiger Zugriff auf die Plattform, keine Einschränkungen. Keine Kreditkarte erforderlich.",
       "success": "Konto registriert! Sie können sich jetzt anmelden und Ihre Dienste konfigurieren.",
       "error": "Fehler beim Erstellen des Kontos. Bitte versuchen Sie es erneut.",

@@ -227,7 +227,7 @@
     "heroTitle2": "Dominate Your Market.",
     "heroDesc": "The ultimate solution to orchestrate your schedule 24/7, ensure absolute precision in commission calculations, and assume total command of your cash flow.",
     "heroDescStrong": "More time for your craft, impeccable management for your success.",
-    "heroCta": "Start 30 Days Free",
+    "heroCta": "Start 60 Days Free",
     "heroNoCc": "No credit card required",
     "statSalons": "+500 Salons",
     "statBookings": "+1M Bookings",
@@ -279,7 +279,7 @@
   },
   "Modal": {
     "trial": {
-      "title": "Start 30 Days Free",
+      "title": "Start 60 Days Free",
       "subtitle": "Full access to the platform, no restrictions. No credit card required.",
       "success": "Account registered! You can now log in and configure your services.",
       "error": "Error creating account. Please try again.",

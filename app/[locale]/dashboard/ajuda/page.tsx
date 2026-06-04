@@ -89,7 +89,7 @@ export default function HelpSupportPage() {
   const faqs = [
     { q: "Como altero o logótipo do meu salão?", a: "Vá a Configurações > Identidade Visual e faça o upload da sua imagem. Recomendamos o formato PNG ou JPG com fundo transparente." },
     { q: "Posso ter mais do que um profissional?", a: "Sim! Dependendo do seu plano (Basic ou Premium), pode gerir vários profissionais na aba Equipa." },
-    { q: "O AgendarPro tem período de experiência?", a: "Sim! O AgendarPro oferece um período experimental gratuito de 30 dias para novos parceiros (quando ativo). Durante este trial, tem acesso total a todas as funcionalidades do sistema para configurar e testar o seu salão sem qualquer cobrança inicial." },
+    { q: "O AgendarPro tem período de experiência?", a: "Sim! O AgendarPro oferece um período experimental gratuito de 60 dias para novos parceiros (quando ativo). Durante este trial, tem acesso total a todas as funcionalidades do sistema para configurar e testar o seu salão sem qualquer cobrança inicial." },
     { q: "Como os clientes fazem as reservas?", a: "Cada salão tem um link exclusivo (ex: agendarpro.pt/seu-salao). Pode partilhar este link diretamente no seu Instagram, nas redes sociais ou enviar via WhatsApp." }
   ]
 

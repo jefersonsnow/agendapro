@@ -24,7 +24,7 @@ export default function AdminSystemPage() {
   // Promotion State
   const [isPromoActive, setIsPromoActive] = useState(false)
   const [promoText, setPromoText] = useState("")
-  const [promoTrialDays, setPromoTrialDays] = useState(30)
+  const [promoTrialDays, setPromoTrialDays] = useState(60)
 
   // SEO State
   const [metaTitle, setMetaTitle] = useState("")
@@ -45,10 +45,10 @@ export default function AdminSystemPage() {
         setWhatsappNumber(support.whatsappNumber || "")
 
         // Parse promotion_config
-        const promo = data.promotion_config ? JSON.parse(data.promotion_config) : { enabled: false, trial_days: 30, promo_text: "" }
+        const promo = data.promotion_config ? JSON.parse(data.promotion_config) : { enabled: false, trial_days: 60, promo_text: "" }
         setIsPromoActive(promo.enabled || false)
         setPromoText(promo.promo_text || "")
-        setPromoTrialDays(promo.trial_days || 30)
+        setPromoTrialDays(promo.trial_days || 60)
 
         // Parse seo_config
         const seo = data.seo_config ? JSON.parse(data.seo_config) : {}
@@ -188,7 +188,7 @@ export default function AdminSystemPage() {
             <CardContent className="p-8 space-y-6">
                 <div className="flex items-center justify-between p-4 rounded-2xl bg-primary/5 border border-primary/10">
                   <div className="space-y-0.5">
-                      <Label className="text-sm font-bold tracking-tight">Campanha "30 Dias Premium"</Label>
+                      <Label className="text-sm font-bold tracking-tight">Campanha "60 Dias Premium"</Label>
                       <p className="text-[10px] text-muted-foreground uppercase font-black tracking-widest">Ativar campanha no site público</p>
                   </div>
                   <Switch checked={isPromoActive} onCheckedChange={setIsPromoActive} className="data-[state=checked]:bg-primary" />
@@ -199,7 +199,7 @@ export default function AdminSystemPage() {
                   <Input 
                       value={promoText} 
                       onChange={(e) => setPromoText(e.target.value)} 
-                      placeholder="Ex: 30 Dias de Premium GRÁTIS!" 
+                      placeholder="Ex: 60 Dias de Premium GRÁTIS!" 
                       disabled={!isPromoActive}
                       className="h-12 rounded-xl border-2 border-muted focus:border-primary text-sm font-medium"
                   />
