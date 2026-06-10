@@ -170,7 +170,7 @@ export default function DashboardLayout({
             <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden shadow-md">
               <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
             </div>
-            <span className="font-bold text-lg tracking-tight uppercase">AgendarPro</span>
+            <span className="font-bold text-lg tracking-tight uppercase text-foreground">AgendarPro</span>
           </Link>
           <Button
             variant="ghost"
@@ -217,7 +217,7 @@ export default function DashboardLayout({
                 )}
              </div>
              <div className="flex-1 min-w-0">
-                <p className="text-sm font-black truncate">{user.name}</p>
+                <p className="text-sm font-black truncate text-foreground">{user.name}</p>
                 <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{user.role}</p>
              </div>
           </button>
@@ -246,7 +246,7 @@ export default function DashboardLayout({
             <div className="h-8 w-8 shrink-0 rounded-lg overflow-hidden shadow-md">
               <img src="/favicon.png" alt="AgendarPro" className="w-full h-full object-cover" />
             </div>
-            {!collapsed && <span className="font-bold text-lg tracking-tight uppercase whitespace-nowrap">AgendarPro</span>}
+            {!collapsed && <span className="font-bold text-lg tracking-tight uppercase whitespace-nowrap text-foreground">AgendarPro</span>}
           </Link>
           <Button
             variant="ghost"
@@ -300,7 +300,7 @@ export default function DashboardLayout({
              </div>
              {!collapsed && (
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-black truncate">{user.name}</p>
+                  <p className="text-sm font-black truncate text-foreground">{user.name}</p>
                   <p className="text-[10px] uppercase tracking-widest text-muted-foreground font-bold">{user.role}</p>
                 </div>
              )}
@@ -338,6 +338,7 @@ export default function DashboardLayout({
             variant="ghost"
             size="icon"
             onClick={() => setSidebarOpen(true)}
+            className="text-foreground"
           >
             <Menu className="h-5 w-5" />
           </Button>
