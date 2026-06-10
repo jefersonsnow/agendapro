@@ -54,7 +54,7 @@ export default function DashboardFilters() {
 
       <Button 
         onClick={handleApply} 
-        className="rounded-2xl md:mt-auto h-[48px] bg-[#008766] hover:bg-[#007055] text-white font-bold px-8 shadow-lg shadow-emerald-900/10 transition-all hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto"
+        className="rounded-2xl md:mt-auto h-[48px] bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-8 shadow-lg transition-all hover:scale-[1.02] active:scale-[0.98] w-full md:w-auto"
       >
         Aplicar Filtros
       </Button>
