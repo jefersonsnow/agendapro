@@ -958,19 +958,24 @@ export default function ConfiguracoesPage() {
           </CardHeader>
           <CardContent className="space-y-6">
             <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                {AMENITIES.map((am) => (
-                  <button
-                    key={am.id}
-                    onClick={() => toggleAmenity(am.id)}
-                    className={cn(
-                      "flex flex-col items-center p-3 rounded-xl border-2 transition-all gap-1",
-                      selectedAmenities.includes(am.id) ? "border-primary bg-primary/10 shadow-md" : "border-muted bg-white opacity-50"
-                    )}
-                  >
-                    <am.icon className={cn("h-5 w-5", selectedAmenities.includes(am.id) ? "text-primary" : "text-muted")} />
-                    <span className="text-[9px] font-black uppercase text-center leading-none">{tAm(am.id)}</span>
-                  </button>
-                ))}
+                {AMENITIES.map((am) => {
+                  const isSelected = selectedAmenities.includes(am.id)
+                  return (
+                    <button
+                      key={am.id}
+                      onClick={() => toggleAmenity(am.id)}
+                      className={cn(
+                        "flex flex-col items-center p-3 rounded-xl border-2 transition-all gap-1",
+                        isSelected 
+                          ? "border-primary bg-primary/10 shadow-md text-primary" 
+                          : "border-muted bg-muted/40 text-muted-foreground hover:bg-muted/60"
+                      )}
+                    >
+                      <am.icon className={cn("h-5 w-5", isSelected ? "text-primary" : "text-muted-foreground")} />
+                      <span className="text-[9px] font-black uppercase text-center leading-none">{tAm(am.id)}</span>
+                    </button>
+                  )
+                })}
             </div>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t">
