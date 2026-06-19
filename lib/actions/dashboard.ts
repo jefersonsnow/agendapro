@@ -578,9 +578,28 @@ export async function getSalon() {
       }
     }
     if (salonData.settings && typeof salonData.settings === "string") {
-      try { (salonData as any).settings = JSON.parse(salonData.settings) } catch(e) {
-         console.error("Erro parse settings:", e)
+      try {
+        const parsed = JSON.parse(salonData.settings);
+        if (parsed && typeof parsed === "object") {
+          if (!parsed.categories || !Array.isArray(parsed.categories)) {
+            parsed.categories = ["Cabelo", "Barba", "Unhas", "Estética", "Massagem", "Maquilhagem", "Depilação", "Outro"];
+          }
+          (salonData as any).settings = parsed;
+        } else {
+          (salonData as any).settings = {
+            categories: ["Cabelo", "Barba", "Unhas", "Estética", "Massagem", "Maquilhagem", "Depilação", "Outro"]
+          };
+        }
+      } catch(e) {
+         console.error("Erro parse settings:", e);
+         (salonData as any).settings = {
+           categories: ["Cabelo", "Barba", "Unhas", "Estética", "Massagem", "Maquilhagem", "Depilação", "Outro"]
+         };
       }
+    } else {
+      (salonData as any).settings = {
+        categories: ["Cabelo", "Barba", "Unhas", "Estética", "Massagem", "Maquilhagem", "Depilação", "Outro"]
+      };
     }
 
     // Processar dynamic plans
@@ -654,6 +673,77 @@ export async function updateSalonSettings(data: any) {
   revalidatePath("/[locale]/[slug]/agendar")
   revalidatePath("/[locale]/[slug]")
 }
+
+export async function updateSalonCategories(newCategories: string[]) {
+  const salonId = await getSalonId()
+  if (!salonId) throw new Error("Não autorizado")
+
+  const salon = await prisma.salon.findUnique({
+    where: { id: salonId },
+    select: { settings: true }
+  })
+
+  if (!salon) throw new Error("Salão não encontrado")
+
+  let settings: any = {}
+  let oldCategories: string[] = ["Cabelo", "Barba", "Unhas", "Estética", "Massagem", "Maquilhagem", "Depilação", "Outro"]
+
+  if (salon.settings) {
+    try {
+      settings = JSON.parse(salon.settings)
+      if (settings && typeof settings === "object" && Array.isArray(settings.categories)) {
+        oldCategories = settings.categories
+      }
+    } catch (e) {
+      console.error("Erro ao fazer parse dos settings existentes:", e)
+    }
+  }
+
+  // Identificar categorias removidas
+  const removedCategories = oldCategories.filter(cat => !newCategories.includes(cat))
+
+  // Atualizar a lista de categorias nos settings
+  settings.categories = newCategories
+
+  if (removedCategories.length > 0) {
+    // Escolher uma categoria padrão para reatribuição (primeira disponível ou "Outro")
+    const fallbackCategory = newCategories.length > 0 ? newCategories[0] : "Outro"
+
+    // Executar a reatribuição e a atualização de settings em transação
+    await prisma.$transaction([
+      prisma.service.updateMany({
+        where: {
+          salon_id: salonId,
+          category: { in: removedCategories }
+        },
+        data: {
+          category: fallbackCategory
+        }
+      }),
+      prisma.salon.update({
+        where: { id: salonId },
+        data: {
+          settings: JSON.stringify(settings)
+        }
+      })
+    ])
+  } else {
+    // Apenas guardar definições atualizadas
+    await prisma.salon.update({
+      where: { id: salonId },
+      data: {
+        settings: JSON.stringify(settings)
+      }
+    })
+  }
+
+  await logAction({ action: "update_salon_categories", entity: "salon", entityId: salonId, salonId })
+
+  revalidatePath("/[locale]/[slug]/agendar")
+  revalidatePath("/[locale]/[slug]")
+  revalidatePath("/dashboard/servicos")
+}
+
 export const getUserRole = cache(async function getUserRole() {
   const session = await auth()
   if (!session?.user?.id) {

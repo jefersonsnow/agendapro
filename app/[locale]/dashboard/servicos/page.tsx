@@ -3,7 +3,7 @@
 
 import { useState, useEffect } from "react"
 import { 
-  getServices, upsertService, deleteService, getStaff
+  getServices, upsertService, deleteService, getStaff, getSalon, updateSalonCategories
 } from "@/lib/actions/dashboard"
 import { checkServiceLimit } from "@/lib/actions/plan-guard"
 import PlanLimitBanner from "@/components/plan-limit-banner"
@@ -71,6 +71,11 @@ export default function ServicosPage() {
   const [editingService, setEditingService] = useState<Service | null>(null)
   const [saving, setSaving] = useState(false)
 
+  const [categories, setCategories] = useState<string[]>(serviceCategories)
+  const [isCategoryDialogOpen, setIsCategoryDialogOpen] = useState(false)
+  const [newCategoryName, setNewCategoryName] = useState("")
+  const [savingCategories, setSavingCategories] = useState(false)
+
   const [serviceForm, setServiceForm] = useState({
     name: "", description: "", duration_minutes: 30, price: 0, category: "Cabelo", is_active: true,
   })
@@ -87,14 +92,18 @@ export default function ServicosPage() {
 
   async function fetchData() {
     setLoading(true)
-    const [svs, staff, limit] = await Promise.all([
+    const [svs, staff, limit, salon] = await Promise.all([
       getServices(),
       getStaff(),
-      checkServiceLimit()
+      checkServiceLimit(),
+      getSalon()
     ])
     setServices((svs || []) as Service[])
     setAllStaff((staff || []).filter((s: any) => s.is_active && s.role !== "receptionist") as StaffMember[])
     setPlanCheck(limit)
+    if (salon?.settings?.categories && Array.isArray(salon.settings.categories)) {
+      setCategories(salon.settings.categories)
+    }
     setLoading(false)
   }
 
@@ -111,16 +120,62 @@ export default function ServicosPage() {
 
   function openCreateService() {
     setEditingService(null)
-    setServiceForm({ name: "", description: "", duration_minutes: 30, price: 0, category: "Cabelo", is_active: true })
+    const defaultCat = categories.length > 0 ? categories[0] : "Cabelo"
+    setServiceForm({ name: "", description: "", duration_minutes: 30, price: 0, category: defaultCat, is_active: true })
     setStaffAssignments(buildAssignmentsState([]))
     setIsServiceDialogOpen(true)
   }
   
   function openEditService(svc: Service) {
     setEditingService(svc)
-    setServiceForm({ ...svc, description: svc.description || "" })
+    const defaultCat = categories.length > 0 ? categories[0] : "Cabelo"
+    setServiceForm({ ...svc, description: svc.description || "", category: svc.category || defaultCat })
     setStaffAssignments(buildAssignmentsState(svc.staffAssignments || []))
     setIsServiceDialogOpen(true)
+  }
+
+  async function handleAddCategory(e: React.FormEvent) {
+    e.preventDefault()
+    const trimmed = newCategoryName.trim()
+    if (!trimmed) return
+    if (categories.includes(trimmed)) {
+      alert("Esta categoria já existe.")
+      return
+    }
+    const updated = [...categories, trimmed]
+    setSavingCategories(true)
+    try {
+      await updateSalonCategories(updated)
+      setCategories(updated)
+      setNewCategoryName("")
+      fetchData()
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setSavingCategories(false)
+    }
+  }
+
+  async function handleDeleteCategory(catToDelete: string) {
+    if (categories.length <= 1) {
+      alert("O salão deve ter pelo menos uma categoria.")
+      return
+    }
+    const fallbackCategory = categories.find(c => c !== catToDelete) || "Outro"
+    const msg = `Tem a certeza que deseja eliminar a categoria "${catToDelete}"? Todos os serviços associados a esta categoria serão reatribuídos para "${fallbackCategory}".`
+    if (!confirm(msg)) return
+
+    const updated = categories.filter(c => c !== catToDelete)
+    setSavingCategories(true)
+    try {
+      await updateSalonCategories(updated)
+      setCategories(updated)
+      fetchData()
+    } catch (err: any) {
+      alert(err.message)
+    } finally {
+      setSavingCategories(false)
+    }
   }
   
   async function handleServiceSubmit(e: React.FormEvent) {
@@ -175,9 +230,14 @@ export default function ServicosPage() {
             </h1>
             <p className="text-muted-foreground text-sm font-medium">Gerencie os serviços e a equipa que os realiza</p>
           </div>
-          <Button onClick={openCreateService} className="rounded-xl shadow-lg shadow-primary/20" disabled={!planCheck.allowed && !editingService}>
-            <Plus className="h-4 w-4 mr-2" /> Novo Serviço
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button variant="outline" onClick={() => setIsCategoryDialogOpen(true)} className="rounded-xl border-2">
+              <Tags className="h-4 w-4 mr-2" /> Gerir Categorias
+            </Button>
+            <Button onClick={openCreateService} className="rounded-xl shadow-lg shadow-primary/20" disabled={!planCheck.allowed && !editingService}>
+              <Plus className="h-4 w-4 mr-2" /> Novo Serviço
+            </Button>
+          </div>
         </div>
 
         {Object.keys(groupedServices).length === 0 && (
@@ -306,7 +366,7 @@ export default function ServicosPage() {
                 <Label htmlFor="service-category">Categoria</Label>
                 <Select value={serviceForm.category} onValueChange={v => setServiceForm({...serviceForm, category: v})}>
                    <SelectTrigger id="service-category"><SelectValue /></SelectTrigger>
-                   <SelectContent>{serviceCategories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
+                   <SelectContent>{categories.map(c => <SelectItem key={c} value={c}>{c}</SelectItem>)}</SelectContent>
                 </Select>
              </div>
 
@@ -377,6 +437,51 @@ export default function ServicosPage() {
                {saving ? "A guardar..." : (editingService ? "Guardar Alterações" : "Criar Serviço")}
              </Button>
           </form>
+        </DialogContent>
+      </Dialog>
+
+      {/* Modal de Gestão de Categorias */}
+      <Dialog open={isCategoryDialogOpen} onOpenChange={setIsCategoryDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Gerir Categorias</DialogTitle>
+            <DialogDescription>
+              Adicione novas categorias ou remova as existentes. Serviços em categorias eliminadas serão reatribuídos automaticamente.
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-4 pt-2">
+            <form onSubmit={handleAddCategory} className="flex gap-2">
+              <Input
+                placeholder="Nome da nova categoria"
+                value={newCategoryName}
+                onChange={e => setNewCategoryName(e.target.value)}
+                required
+                className="rounded-xl h-11"
+              />
+              <Button type="submit" disabled={savingCategories} className="rounded-xl h-11 px-4">
+                <Plus className="h-4 w-4 mr-1" /> Adicionar
+              </Button>
+            </form>
+
+            <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+              {categories.map(c => (
+                <div key={c} className="flex items-center justify-between p-3 bg-muted/20 border rounded-xl">
+                  <span className="font-semibold text-sm">{c}</span>
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => handleDeleteCategory(c)}
+                    disabled={savingCategories}
+                    className="h-8 w-8 text-destructive hover:bg-destructive/10 hover:text-destructive rounded-lg transition-colors"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              ))}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
