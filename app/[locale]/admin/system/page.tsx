@@ -11,7 +11,8 @@ import { Switch } from "@/components/ui/switch"
 import { Textarea } from "@/components/ui/textarea"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { getGlobalConfig, updateGlobalConfig } from "@/lib/actions/admin"
-import { Settings, Save, MessageCircle, Phone, Globe, ShieldCheck, Zap, Loader2, Sparkles, Gift, Search, Facebook, Activity } from "lucide-react"
+import { importLeadsFromCsv, getLeadsStats } from "@/lib/actions/admin-leads"
+import { Settings, Save, MessageCircle, Phone, Globe, ShieldCheck, Zap, Loader2, Sparkles, Gift, Search, Facebook, Activity, Upload, Database, AlertTriangle, CheckCircle, FileSpreadsheet, Users } from "lucide-react"
 import { toast } from "sonner"
 
 export default function AdminSystemPage() {
@@ -33,6 +34,12 @@ export default function AdminSystemPage() {
   const [fbPixelId, setFbPixelId] = useState("")
   const [googleAnalyticsId, setGoogleAnalyticsId] = useState("")
   const [ogImageUrl, setOgImageUrl] = useState("")
+
+  // Leads & CSV State
+  const [leadsStats, setLeadsStats] = useState<any>(null)
+  const [csvFile, setCsvFile] = useState<File | null>(null)
+  const [importing, setImporting] = useState(false)
+  const [importResult, setImportResult] = useState<any>(null)
 
   useEffect(() => {
     async function fetchData() {
@@ -59,6 +66,14 @@ export default function AdminSystemPage() {
         setGoogleAnalyticsId(seo.googleAnalyticsId || "")
         setOgImageUrl(seo.ogImageUrl || "")
 
+        // Fetch leads stats
+        try {
+          const stats = await getLeadsStats()
+          setLeadsStats(stats)
+        } catch (e) {
+          console.error("Erro ao carregar estatísticas de leads:", e)
+        }
+
       } catch (err) {
         toast.error("Erro ao carregar configurações")
       } finally {
@@ -67,6 +82,36 @@ export default function AdminSystemPage() {
     }
     fetchData()
   }, [])
+
+  const handleCsvUpload = async (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!csvFile) return
+    setImporting(true)
+    setImportResult(null)
+    
+    try {
+      const reader = new FileReader()
+      reader.onload = async (event) => {
+        const text = event.target?.result as string
+        try {
+          const res = await importLeadsFromCsv(text)
+          setImportResult(res)
+          toast.success("CSV importado com sucesso!")
+          // Atualizar estatísticas
+          const stats = await getLeadsStats()
+          setLeadsStats(stats)
+        } catch (err: any) {
+          toast.error(err.message || "Erro ao importar leads")
+        } finally {
+          setImporting(false)
+        }
+      }
+      reader.readAsText(csvFile)
+    } catch (err: any) {
+      toast.error("Erro ao ler arquivo")
+      setImporting(false)
+    }
+  }
 
   async function handleSave() {
     setSaving(true)
@@ -133,6 +178,9 @@ export default function AdminSystemPage() {
           </TabsTrigger>
           <TabsTrigger value="seo" className="rounded-xl px-6 py-3 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all flex items-center gap-2">
             <Search className="h-4 w-4" /> Configuração SEO
+          </TabsTrigger>
+          <TabsTrigger value="leads" className="rounded-xl px-6 py-3 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all flex items-center gap-2">
+            <Users className="h-4 w-4" /> Diretório & Leads
           </TabsTrigger>
           <TabsTrigger value="infra" className="rounded-xl px-6 py-3 font-bold text-xs uppercase tracking-widest data-[state=active]:bg-white data-[state=active]:shadow-sm transition-all flex items-center gap-2">
             <Activity className="h-4 w-4" /> Infraestrutura
@@ -314,6 +362,186 @@ export default function AdminSystemPage() {
                       placeholder="https://sua-url.com/poster.jpg" 
                       className="h-12 rounded-xl border-2 border-muted"
                     />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="leads" className="space-y-6">
+          <div className="grid gap-6 md:grid-cols-3">
+            <Card className="border-none shadow-xl bg-background/60 backdrop-blur-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-2xl p-4 bg-orange-100/50 text-orange-600">
+                    <Database className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Total de Leads</p>
+                    <p className="text-2xl font-black tracking-tighter">{leadsStats?.total ?? 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-xl bg-background/60 backdrop-blur-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-2xl p-4 bg-green-100/50 text-green-600">
+                    <CheckCircle className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Leads Ativos</p>
+                    <p className="text-2xl font-black tracking-tighter">{leadsStats?.active ?? 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card className="border-none shadow-xl bg-background/60 backdrop-blur-xl rounded-3xl overflow-hidden hover:scale-[1.02] transition-transform">
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4">
+                  <div className="rounded-2xl p-4 bg-blue-100/50 text-blue-600">
+                    <Sparkles className="h-6 w-6" />
+                  </div>
+                  <div>
+                    <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-0.5">Reivindicados (Novos Clientes)</p>
+                    <p className="text-2xl font-black tracking-tighter">{leadsStats?.claimed ?? 0}</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="grid gap-6 lg:grid-cols-3">
+            <Card className="lg:col-span-2 border-none shadow-2xl rounded-[2.5rem] bg-background/60 backdrop-blur-xl">
+              <CardHeader className="p-8">
+                <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
+                  <div className="h-10 w-10 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600">
+                    <Upload className="h-5 w-5" />
+                  </div>
+                  Importar CSV de Salões
+                </CardTitle>
+                <CardDescription>
+                  Carregue o arquivo CSV gerado pelo seu scraper para criar as páginas públicas automaticamente.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="p-8 pt-0 space-y-6">
+                <form onSubmit={handleCsvUpload} className="space-y-6">
+                  <div className="border-2 border-dashed border-muted hover:border-orange-600/40 rounded-[2rem] p-8 transition-colors flex flex-col items-center justify-center gap-4 bg-muted/5 group">
+                    <div className="h-12 w-12 rounded-2xl bg-orange-100/30 text-orange-600 flex items-center justify-center group-hover:scale-110 transition-transform">
+                      <FileSpreadsheet className="h-6 w-6" />
+                    </div>
+                    <div className="text-center">
+                      <p className="text-sm font-bold text-foreground">
+                        {csvFile ? csvFile.name : "Arraste ou escolha o arquivo CSV"}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">Formatos suportados: .csv (máx. 10MB)</p>
+                    </div>
+                    <Input 
+                      type="file" 
+                      accept=".csv" 
+                      onChange={(e) => setCsvFile(e.target.files?.[0] || null)}
+                      className="hidden" 
+                      id="csv-file-picker" 
+                    />
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      className="rounded-xl border-muted-foreground/20 text-xs font-black uppercase tracking-widest"
+                      onClick={() => document.getElementById("csv-file-picker")?.click()}
+                    >
+                      Selecionar Arquivo
+                    </Button>
+                  </div>
+
+                  <Button 
+                    type="submit" 
+                    disabled={importing || !csvFile} 
+                    className="w-full h-14 bg-orange-600 hover:bg-orange-700 text-white font-black text-xs uppercase tracking-widest shadow-xl shadow-orange-600/20 rounded-2xl transition-all"
+                  >
+                    {importing ? (
+                      <>
+                        <Loader2 className="h-5 w-5 animate-spin mr-3" />
+                        A Processar leads...
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-5 w-5 mr-3" />
+                        Importar {csvFile ? "Arquivo" : "Leads"}
+                      </>
+                    )}
+                  </Button>
+                </form>
+
+                {importResult && (
+                  <div className="rounded-[1.5rem] bg-orange-50/5 border border-orange-500/10 p-6 space-y-4">
+                    <h3 className="text-sm font-black uppercase tracking-widest text-orange-600 flex items-center gap-2">
+                      <CheckCircle className="h-4 w-4" /> Relatório da Importação
+                    </h3>
+                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-bold uppercase tracking-widest">
+                      <div className="bg-background/40 p-4 rounded-xl border">
+                        <span className="block text-muted-foreground text-[10px] mb-1">Processados</span>
+                        <span className="text-lg font-black text-foreground">{importResult.totalParsed}</span>
+                      </div>
+                      <div className="bg-background/40 p-4 rounded-xl border border-green-500/10 text-green-600">
+                        <span className="block text-muted-foreground text-[10px] mb-1">Inseridos</span>
+                        <span className="text-lg font-black">{importResult.inserted}</span>
+                      </div>
+                      <div className="bg-background/40 p-4 rounded-xl border border-orange-500/10 text-orange-600">
+                        <span className="block text-muted-foreground text-[10px] mb-1">Atualizados</span>
+                        <span className="text-lg font-black">{importResult.updated}</span>
+                      </div>
+                      <div className="bg-background/40 p-4 rounded-xl border border-muted text-muted-foreground">
+                        <span className="block text-muted-foreground text-[10px] mb-1">Ignorados</span>
+                        <span className="text-lg font-black">{importResult.skipped}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+
+            <div className="space-y-6">
+              <Card className="border-none shadow-2xl rounded-[2.5rem] bg-background/60 backdrop-blur-xl">
+                <CardHeader className="p-8">
+                  <CardTitle className="text-xl font-black uppercase tracking-tighter flex items-center gap-3 italic">
+                    <div className="h-10 w-10 rounded-xl bg-orange-600/10 flex items-center justify-center text-orange-600">
+                      <AlertTriangle className="h-5 w-5" />
+                    </div>
+                    Regras de Limpeza
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="p-8 pt-0 space-y-4 text-xs leading-relaxed text-muted-foreground font-medium">
+                  <p>O importador executa de forma automática e silenciosa:</p>
+                  <ul className="list-disc list-inside space-y-2 text-foreground/80 pl-1">
+                    <li><strong className="text-orange-600">Filtro de Concorrentes:</strong> Remove links de sites como Fresha, Noona, Zappy, Treatwell do campo de website.</li>
+                    <li><strong className="text-orange-600">Redirecionamento de Links:</strong> Move links de WhatsApp ou redes sociais salvos na coluna Website para o local correto.</li>
+                    <li><strong className="text-orange-600">Higienização de Telefones:</strong> Remove espaços e formata os números para ligações móveis diretas.</li>
+                    <li><strong className="text-orange-600">Desduplicação Inteligente:</strong> Se o lead já existe (por slug ou telefone), atualiza os dados, a menos que ele já seja um parceiro reivindicado.</li>
+                  </ul>
+                </CardContent>
+              </Card>
+
+              <Card className="border-none shadow-2xl rounded-[2.5rem] bg-background/60 backdrop-blur-xl">
+                <CardHeader className="p-8 pb-4">
+                  <CardTitle className="text-xs font-black uppercase tracking-widest text-muted-foreground">Top Cidades (Leads)</CardTitle>
+                </CardHeader>
+                <CardContent className="px-8 pb-8">
+                  <div className="space-y-4">
+                    {leadsStats?.leadsByCity && leadsStats.leadsByCity.length > 0 ? (
+                      leadsStats.leadsByCity.map((c: any, index: number) => (
+                        <div key={c.city} className="flex justify-between items-center border-b pb-2 last:border-b-0 last:pb-0">
+                          <span className="text-sm font-bold">{c.city}</span>
+                          <Badge variant="secondary" className="rounded-lg font-black text-xs px-2.5 py-0.5">
+                            {c.count} leads
+                          </Badge>
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-xs text-muted-foreground italic">Nenhum dado de cidade disponível.</p>
+                    )}
                   </div>
                 </CardContent>
               </Card>

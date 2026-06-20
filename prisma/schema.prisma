@@ -47,6 +47,7 @@ model Salon {
   support_tickets  SupportTicket[]
   related_users    User[]        @relation("UserToSalon")
   saas_invoices    SaaSInvoice[]
+  lead             Lead?
 
   @@index([owner_id])
   @@map("salons")
@@ -389,3 +390,42 @@ model SaaSInvoice {
   @@index([salon_id])
   @@map("saas_invoices")
 }
+
+model Lead {
+  id                  String   @id @default(uuid())
+  name                String
+  slug                String   @unique
+  description         String?  @db.Text
+  address             String?
+  phone               String?
+  email               String?
+  website             String?
+  whatsapp            String?
+  facebook            String?
+  instagram           String?
+  latitude            Float?
+  longitude           Float?
+  city                String?
+  postal_code         String?
+  category            String?
+  cover_url           String?
+  logo_url            String?
+  status              String   @default("active")
+  created_at          DateTime @default(now())
+  updated_at          DateTime @updatedAt
+  salon_id            String?  @unique
+  salon               Salon?   @relation(fields: [salon_id], references: [id], onDelete: SetNull)
+
+  @@index([city])
+  @@index([category])
+  @@map("leads")
+}
+
+model CompetitorFilter {
+  id         String   @id @default(uuid())
+  domain     String   @unique
+  created_at DateTime @default(now())
+
+  @@map("competitor_filters")
+}
+

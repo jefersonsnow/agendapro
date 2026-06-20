@@ -141,6 +141,12 @@ export default async function HomePage({
                 <Link href="#planos" className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
                   {t("navPlans") || "Planos"}
                 </Link>
+                <Link href={`/${locale}/parceiros`} className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
+                  Parceiros
+                </Link>
+                <Link href={`/${locale}/loja`} className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
+                  Loja
+                </Link>
                 <Link href="./contacto" className="text-sm font-black uppercase tracking-[0.2em] text-primary hover:opacity-70 transition-opacity">
                   {t("navContact") || "Contacto"}
                 </Link>
@@ -198,13 +204,13 @@ export default async function HomePage({
         </div>
 
         <main className="relative">
-          <section id="inicio" className="relative pt-20 pb-20 lg:pt-32 lg:pb-32">
+          <section id="inicio" className="relative pt-8 pb-8 lg:pt-12 lg:pb-32">
             <div className="absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
             <div className="absolute top-[-10%] left-[-10%] -z-10 w-[50%] h-[50%] bg-primary/10 rounded-full blur-[120px] opacity-40"></div>
             <div className="absolute bottom-0 right-[-5%] -z-10 w-[30%] h-[30%] bg-cyan-500/10 rounded-full blur-[100px] opacity-30"></div>
 
             <div className="container mx-auto px-4">
-              <div className="flex flex-col items-center text-center mb-16">
+              <div className="flex flex-col items-center text-center mb-8">
                 <div className="inline-flex items-center rounded-full border border-primary/20 bg-primary/5 px-4 py-1.5 text-xs font-bold text-primary mb-8 backdrop-blur-sm uppercase tracking-widest animate-in fade-in slide-in-from-bottom-3 duration-700">
                   <Sparkles className="h-4 w-4 mr-2" />
                   <span>{t("badge")}</span>
@@ -220,7 +226,7 @@ export default async function HomePage({
                   </span>
                 </h1>
 
-                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-10 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu">
+                <p className="text-xl md:text-2xl text-muted-foreground max-w-3xl mx-auto mb-5 leading-relaxed font-medium animate-in fade-in slide-in-from-bottom-5 duration-1000 transform-gpu">
                   {dynamicHeroDesc} <span className="text-foreground font-bold underline decoration-primary/30 underline-offset-4">{t("heroDescStrong")}</span>
                 </p>
 
@@ -242,7 +248,7 @@ export default async function HomePage({
               </div>
 
               {/* Dashboard Mockup Display */}
-              <div className="relative max-w-6xl mx-auto mt-12 animate-in fade-in zoom-in-95 duration-1000 delay-300">
+              <div className="relative max-w-6xl mx-auto mt-6 animate-in fade-in zoom-in-95 duration-1000 delay-300">
                 <div className="absolute -inset-1 bg-gradient-to-r from-primary/30 to-secondary/30 rounded-[2.5rem] blur-2xl opacity-50"></div>
                 <div className="relative bg-card border-[8px] border-card rounded-[2.5rem] overflow-hidden shadow-2xl shadow-black/20">
                   <img 
@@ -253,7 +259,7 @@ export default async function HomePage({
                 </div>
               </div>
                  
-              <div className="hidden lg:grid grid-cols-3 gap-6 absolute -bottom-10 left-1/2 -translate-x-1/2 w-full max-w-4xl z-10">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-6 mt-8 lg:mt-0 lg:absolute lg:-bottom-10 lg:left-1/2 lg:-translate-x-1/2 w-full lg:max-w-4xl z-10">
                 <div className="bg-background/80 backdrop-blur-xl p-6 rounded-3xl border shadow-xl flex items-center gap-4 transition-transform hover:-translate-y-1">
                   <div className="h-12 w-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary">
                     <Users className="h-6 w-6" />
@@ -286,7 +292,7 @@ export default async function HomePage({
           </section>
 
           {/* Benefits Section */}
-          <section id="como-funciona" className="py-32 bg-muted/20 relative">
+          <section id="como-funciona" className="py-16 lg:py-32 bg-muted/20 relative">
             <div className="container mx-auto px-4">
               <div className="max-w-4xl mx-auto text-center mb-20">
                 <h2 className="text-4xl md:text-6xl font-black tracking-tighter mb-8">{t("painTitle")}</h2>
