@@ -21,11 +21,34 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
   })
 
+  // Busca todos os leads ativos (não reivindicados) para gerar URLs dinâmicas
+  const leads = await prisma.lead.findMany({
+    where: {
+      status: 'active',
+      NOT: {
+        slug: {
+          in: reservedSlugs
+        }
+      }
+    },
+    select: {
+      slug: true,
+      updated_at: true,
+    },
+  })
+
   const salonEntries: MetadataRoute.Sitemap = salons.map((salon) => ({
     url: `${baseUrl}/${salon.slug}`,
     lastModified: salon.updated_at,
     changeFrequency: 'weekly',
     priority: 0.7,
+  }))
+
+  const leadEntries: MetadataRoute.Sitemap = leads.map((lead) => ({
+    url: `${baseUrl}/locais/${lead.slug}`,
+    lastModified: lead.updated_at,
+    changeFrequency: 'weekly',
+    priority: 0.6,
   }))
 
   return [
@@ -36,5 +59,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1.0,
     },
     ...salonEntries,
+    ...leadEntries,
   ]
 }
