@@ -191,6 +191,7 @@ export async function updateSalonSaaS(id: string, data: any) {
 
   revalidatePath("/admin")
   revalidatePath("/admin/salons")
+  revalidatePath("/", "layout")
 }
 
 export async function createAnnouncement(data: { title: string, content: string, type: string }) {
