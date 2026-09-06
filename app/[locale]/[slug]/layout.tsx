@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import prisma from "@/lib/prisma"
 import { routing } from '@/i18n/routing'
+import { redirect } from 'next/navigation'
 
 export async function generateMetadata({ 
   params 
@@ -22,10 +23,14 @@ export async function generateMetadata({
   try {
     const salon = await prisma.salon.findUnique({
       where: { slug },
-      select: { name: true, description: true, logo_url: true, cover_url: true, translations: true }
+      select: { name: true, description: true, logo_url: true, cover_url: true, translations: true, status: true }
     })
 
     if (!salon) return { title: 'Salão não encontrado | AgendarPro' };
+
+    if (salon.status === 'cancelled') {
+      redirect('https://agendar.napp.pt/parceiros')
+    }
 
     let name = salon.name
     let description = salon.description || `Agende o seu horário no ${salon.name}.`
@@ -67,6 +72,21 @@ export default async function SalonLayout({
   params: Promise<{ slug: string, locale: string }> | { slug: string, locale: string }
 }) {
   // Apenas aguardamos para garantir conformidade com o Next.js 15+
-  await Promise.resolve(params);
+  const resolvedParams = await Promise.resolve(params);
+  const slug = resolvedParams?.slug;
+  
+  if (slug) {
+     const reservedSlugs = ['admin', 'dashboard', 'auth', 'api', 'login', 'register', 'oferta-exclusiva', 'contacto', 'termos', 'privacidade', 'ajuda']
+     if (!reservedSlugs.includes(slug)) {
+       const salon = await prisma.salon.findUnique({
+         where: { slug },
+         select: { status: true }
+       })
+       if (salon?.status === 'cancelled') {
+         redirect('https://agendar.napp.pt/parceiros')
+       }
+     }
+  }
+
   return <>{children}</>
 }

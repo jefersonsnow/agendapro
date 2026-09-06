@@ -117,6 +117,13 @@ export default function DashboardLayout({
     signOut({ callbackUrl })
   }
 
+  if (user.status === "cancelled") {
+    if (typeof window !== 'undefined') {
+      window.location.href = "https://agendar.napp.pt/parceiros";
+    }
+    return null;
+  }
+
   if (user.status === "suspended") {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-6 relative overflow-hidden">

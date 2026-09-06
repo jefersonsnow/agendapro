@@ -137,10 +137,14 @@ export async function createBooking(data: any) {
     // 1. Validar Salon e Quota
     const salon = await prisma.salon.findUnique({ 
       where: { id: salonId }, 
-      select: { name: true, plan: true, working_hours: true, timezone: true, requires_email_confirmation: true } 
+      select: { name: true, plan: true, working_hours: true, timezone: true, requires_email_confirmation: true, status: true } 
     })
     
     if (!salon) return { error: "Salão não encontrado." }
+
+    if (salon.status === 'cancelled') {
+      return { error: "Este salão não está a aceitar novos agendamentos." }
+    }
 
     // Técnica Wall Clock: Forçamos a data a ser guardada com os dígitos da hora local
     // para que o Dashboard (getUTCHours) mostre exatamente o que o cliente viu.
